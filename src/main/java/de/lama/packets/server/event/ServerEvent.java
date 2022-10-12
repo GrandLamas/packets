@@ -1,4 +1,4 @@
 package de.lama.packets.server.event;
 
-public interface ClientEvent {
+public interface ServerEvent {
 }

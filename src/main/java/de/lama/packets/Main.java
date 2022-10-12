@@ -1,25 +1,28 @@
 package de.lama.packets;
 
-import de.lama.packets.server.GameServer;
-import de.lama.packets.server.event.ClientConnectEvent;
-import de.lama.packets.server.event.ClientDisconnectEvent;
+import de.lama.packets.server.PacketServer;
+import de.lama.packets.server.ServerBuilder;
+import de.lama.packets.server.event.ServerClientConnectEvent;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.function.Consumer;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        System.out.println("Hello world!");
+        PacketServer server = new ServerBuilder().exceptionHandler(Throwable::printStackTrace).build();
+        server.register(ServerClientConnectEvent.class, (connectEvent) -> System.out.println("Connected!"));
 
-        ServerSocket serverSocket = new ServerSocket(4999);
-        serverSocket.close();
-        Socket s = serverSocket.accept();
+        server.open().queue();
 
-        Socket socket = new Socket("localhost", 4999);
+        new Thread(() -> {
+            try {
+                new Socket("localhost", server.getPort());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
 
-        GameServer server = null;
+//        server.close();
     }
 }

@@ -2,7 +2,10 @@ package de.lama.packets;
 
 import com.google.gson.annotations.SerializedName;
 
-public interface GamePacket {
+/**
+ * Immutable
+ */
+public interface Packet extends Cloneable {
 
     @SerializedName("id")
     long getId();

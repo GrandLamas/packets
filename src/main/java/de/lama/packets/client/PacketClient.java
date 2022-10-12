@@ -1,8 +1,6 @@
 package de.lama.packets.client;
 
-import java.util.Objects;
-
-public interface GameClient {
+public interface PacketClient {
 
 //    sendToServer(Object p);
 
