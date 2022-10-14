@@ -1,5 +1,4 @@
-# Packets
-A packet library
+# Packets - A packet library
 
 ## Quickstart - General
 Every operation in this API uses the <code>Operation</code> interface.
