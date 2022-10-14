@@ -10,12 +10,12 @@ There is also an event system. You can find more details <a href='#Events'>here<
 
 ## Quickstart - Server
 First of all you need a <code>ServerBuilder</code> to create a new <code>PacketServer</code> Instance.
-With this builder, you are able to configurate (tickrate, encryption, ...) your server. A <code>ExceptionHandler</code> is the only thing you need to provide.
+With this builder, you are able to configurate (tickrate, encryption, ...) your server. A <code>ExceptionHandler</code> is the only thing you need to provide.<br>
 
-Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!
+Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!<br>
 <code>PacketServer server = new ServerBuilder().exceptionHandler(Throwable::printStackTrace).build();</code>
 
-You may now open the server to new clients using <code>PacketServer#open</code>.
+You may now open the server to new clients using <code>PacketServer#open</code>.<br>
 Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in closing the socket of this new client.
 
 You are also able to prevent the server from accepting new clients using <code>PacketServer#clode</code> or shut it down entirely by using <code>PacketServer#shutdown</code>
@@ -23,8 +23,9 @@ You are also able to prevent the server from accepting new clients using <code>P
 ## Events
 Almost every central API object is an <code>EventHandlerContainer</code>, which means you can use its EventHandler to subscribe to the events of the API object.
 
-For example the <code>PacketServer</code> will notify you about every incoming connection if you've subscribe using the <code>ServerClientConnectEvent</code>.
-Code: <code>server.getEventHandler().subscribe(ServerClientConnectEvent.class, (connectEvent) -> System.out.println("Connected client " + connectEvent.client().getAddress().toString()));
+For example the <code>PacketServer</code> will notify you about every incoming connection if you've subscribe using the <code>ServerClientConnectEvent</code>.<br>
+Code:<br>
+<code>server.getEventHandler().subscribe(ServerClientConnectEvent.class, (connectEvent) -> System.out.println("Connected client " + connectEvent.client().getAddress().toString()));
 </code>
 
 Some of the events implement <code>Cancellable</code>. Those events can be cancelled using <code>Cancellable#setCancelled</code>.
