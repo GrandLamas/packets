@@ -4,8 +4,8 @@ import de.lama.packets.Packet;
 import de.lama.packets.AbstractPacketComponent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.server.PacketServer;
-import de.lama.packets.server.client.event.ClientPacketReceiveEvent;
-import de.lama.packets.server.client.event.ClientPacketSendEvent;
+import de.lama.packets.server.client.event.ServerClientPacketReceiveEvent;
+import de.lama.packets.server.client.event.ServerClientPacketSendEvent;
 import de.lama.packets.server.client.event.ServerClientEvent;
 import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.util.ExceptionUtils;
@@ -78,7 +78,7 @@ public class ServerGsonClient extends AbstractPacketComponent<ServerClientEvent>
 
     @Override
     public Operation send(Packet packet) {
-        if (this.eventHandler.isCancelled(new ClientPacketSendEvent(this, packet))) return null;
+        if (this.eventHandler.isCancelled(new ServerClientPacketSendEvent(this, packet))) return null;
         return new ServerClientPacketSendOperation(this, packet);
     }
 
@@ -91,7 +91,7 @@ public class ServerGsonClient extends AbstractPacketComponent<ServerClientEvent>
     @Override
     public Packet awaitPacket(long timeoutInMs) {
         AtomicReference<Packet> packet = new AtomicReference<>();
-        UUID listenerId = this.eventHandler.subscribe(ClientPacketReceiveEvent.class, (event) -> packet.set(event.packet()));
+        UUID listenerId = this.eventHandler.subscribe(ServerClientPacketReceiveEvent.class, (event) -> packet.set(event.packet()));
         long over = System.currentTimeMillis() + timeoutInMs;
         while (packet.get() == null) {
             ExceptionUtils.operate(this.exceptionHandler, () -> Thread.sleep(this.getTicksInMs()), "Could not sleep");

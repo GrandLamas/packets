@@ -14,12 +14,14 @@ public class ServerClientPacketSendOperation implements Operation {
     }
 
     @Override
-    public void queue() {
+    public Operation queue() {
         this.transmitter.queue(this.packet);
+        return this;
     }
 
     @Override
-    public void complete() {
+    public Operation complete() {
         this.transmitter.complete(this.packet);
+        return this;
     }
 }

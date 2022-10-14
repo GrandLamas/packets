@@ -1,6 +1,7 @@
 package de.lama.packets.server.client;
 
 import de.lama.packets.operation.AbstractSimpleThreadedOperation;
+import de.lama.packets.operation.Operation;
 import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.util.ExceptionUtils;
 
@@ -17,7 +18,8 @@ public class ServerClientCloseOperation extends AbstractSimpleThreadedOperation 
     }
 
     @Override
-    public void complete() {
+    public Operation complete() {
         ExceptionUtils.operate(this.exceptionHandler, this.socket::close, "Could not close socket");
+        return this;
     }
 }

@@ -1,6 +1,7 @@
 package de.lama.packets.server;
 
 import de.lama.packets.operation.AbstractSimpleThreadedOperation;
+import de.lama.packets.operation.Operation;
 import de.lama.packets.server.client.ServerClient;
 
 import java.util.function.Consumer;
@@ -16,8 +17,9 @@ public class ClientCloseOperation extends AbstractSimpleThreadedOperation {
     }
 
     @Override
-    public void complete() {
+    public Operation complete() {
         this.client.close().complete();
         this.onFinish.accept(this.client);
+        return this;
     }
 }

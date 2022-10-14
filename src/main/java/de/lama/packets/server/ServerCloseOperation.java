@@ -1,6 +1,7 @@
 package de.lama.packets.server;
 
 import de.lama.packets.operation.AbstractSimpleThreadedOperation;
+import de.lama.packets.operation.Operation;
 
 public class ServerCloseOperation extends AbstractSimpleThreadedOperation {
 
@@ -11,7 +12,8 @@ public class ServerCloseOperation extends AbstractSimpleThreadedOperation {
     }
 
     @Override
-    public void complete() {
+    public Operation complete() {
         this.server.setOpen(false);
+        return this;
     }
 }

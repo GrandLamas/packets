@@ -1,6 +1,7 @@
 package de.lama.packets.server;
 
 import de.lama.packets.operation.AbstractSimpleThreadedOperation;
+import de.lama.packets.operation.Operation;
 import de.lama.packets.server.exception.ServerException;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ class ServerOpenOperation extends AbstractSimpleThreadedOperation {
     }
 
     @Override
-    public void complete() {
+    public Operation complete() {
         try {
             this.server.setOpen(true);
             while (this.server.isOpen()) {
@@ -34,5 +35,6 @@ class ServerOpenOperation extends AbstractSimpleThreadedOperation {
             }
         }
         this.server.setOpen(false);
+        return this;
     }
 }

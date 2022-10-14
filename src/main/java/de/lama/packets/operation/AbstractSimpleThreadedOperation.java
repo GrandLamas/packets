@@ -8,7 +8,8 @@ public abstract class AbstractSimpleThreadedOperation implements Operation {
     private static final ExecutorService POOL = Executors.newCachedThreadPool();
 
     @Override
-    public void queue() {
+    public Operation queue() {
         POOL.submit(this::complete);
+        return this;
     }
 }

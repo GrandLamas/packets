@@ -20,12 +20,14 @@ class BroadcastOperation implements Operation {
     }
 
     @Override
-    public void queue() {
+    public Operation queue() {
         this.sendToAll(Operation::queue);
+        return this;
     }
 
     @Override
-    public void complete() {
+    public Operation complete() {
         this.sendToAll(Operation::complete);
+        return this;
     }
 }

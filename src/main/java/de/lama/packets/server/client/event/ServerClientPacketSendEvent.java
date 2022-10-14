@@ -5,9 +5,9 @@ import de.lama.packets.event.CancelContainer;
 import de.lama.packets.event.Cancellable;
 import de.lama.packets.server.client.ServerClient;
 
-public record ClientPacketSendEvent(ServerClient client, Packet packet, CancelContainer cancelContainer) implements ServerClientEvent, Cancellable {
+public record ServerClientPacketSendEvent(ServerClient client, Packet packet, CancelContainer cancelContainer) implements ServerClientEvent, Cancellable {
 
-    public ClientPacketSendEvent(ServerClient client, Packet packet) {
+    public ServerClientPacketSendEvent(ServerClient client, Packet packet) {
         this(client, packet, new CancelContainer());
     }
 

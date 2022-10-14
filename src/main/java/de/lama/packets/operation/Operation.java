@@ -2,8 +2,8 @@ package de.lama.packets.operation;
 
 public interface Operation {
 
-    void queue();
+    Operation queue();
 
-    void complete();
+    Operation complete();
 
 }
