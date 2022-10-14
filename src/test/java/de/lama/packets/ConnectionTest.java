@@ -6,7 +6,7 @@ import de.lama.packets.server.event.ServerClientConnectEvent;
 
 import java.io.IOException;
 
-public class Main {
+public class ConnectionTest {
 
     public static void main(String[] args) throws IOException {
         PacketServer server = new ServerBuilder().exceptionHandler(Throwable::printStackTrace).build();
