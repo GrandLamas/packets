@@ -1,16 +1,20 @@
 package de.lama.packets.server;
 
-import de.lama.packets.action.AbstractSimpleThreadedOperation;
+import de.lama.packets.operation.AbstractSimpleThreadedOperation;
 import de.lama.packets.server.exception.ServerException;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class ServerOpenAction extends AbstractSimpleThreadedOperation {
+class ServerOpenOperation extends AbstractSimpleThreadedOperation {
 
-    private final PacketServerImpl server;
+    private static final ExecutorService REGISTRATIONS = Executors.newCachedThreadPool();
 
-    public ServerOpenAction(PacketServerImpl server) {
+    private final LinkedClientServer server;
+
+    ServerOpenOperation(LinkedClientServer server) {
         this.server = server;
     }
 
@@ -20,8 +24,8 @@ public class ServerOpenAction extends AbstractSimpleThreadedOperation {
             this.server.setOpen(true);
             while (this.server.isOpen()) {
                 Socket accepted;
-                if ((accepted = this.server.getSocket().accept()) != null) {
-                    this.server.register(accepted);
+                if ((accepted = this.server.getSocket().accept()) != null && this.server.isOpen()) {
+                    REGISTRATIONS.submit(() -> this.server.register(accepted));
                 }
             }
         } catch (IOException e) {

@@ -2,6 +2,6 @@ package de.lama.packets.client;
 
 public interface PacketClient {
 
-//    sendToServer(Object p);
+//    Operation send(Packet packet);
 
 }

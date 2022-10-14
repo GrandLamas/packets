@@ -1,4 +1,4 @@
-package de.lama.packets.action;
+package de.lama.packets.operation;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

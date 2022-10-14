@@ -1,4 +1,4 @@
-package de.lama.packets.action;
+package de.lama.packets.operation;
 
 public interface Operation {
 

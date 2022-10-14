@@ -1,4 +1,7 @@
 package de.lama.packets.server.event;
 
-public interface ServerEvent {
+import de.lama.packets.event.Cancellable;
+
+public interface ServerEvent extends Cancellable {
+
 }

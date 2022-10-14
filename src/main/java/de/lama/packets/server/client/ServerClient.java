@@ -1,20 +1,23 @@
 package de.lama.packets.server.client;
 
 import de.lama.packets.Packet;
-import de.lama.packets.action.Operation;
+import de.lama.packets.event.EventHandlerContainer;
+import de.lama.packets.operation.Operation;
+import de.lama.packets.server.ServerContainer;
 import de.lama.packets.server.client.event.ServerClientEvent;
 
-import java.net.Socket;
-import java.util.function.Consumer;
+import java.net.InetAddress;
 
-public interface ServerClient {
-
-    Socket getSocket();
+public interface ServerClient extends ServerContainer, PacketTransmitter, EventHandlerContainer<ServerClientEvent> {
 
     Operation send(Packet packet);
 
-    Operation queue(Packet packet);
+    Operation close();
 
-    <T extends ServerClientEvent> void hook(Class<T> hookClass, Consumer<T> consumer);
+    Packet awaitPacket(long timeoutInMs);
+
+    InetAddress getAddress();
+
+    int getPort();
 
 }

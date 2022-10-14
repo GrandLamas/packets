@@ -1,8 +1,6 @@
 package de.lama.packets.client;
 
-import de.lama.packets.server.PacketServer;
-
-import java.net.ServerSocket;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -11,9 +9,8 @@ public class ConnectionBuilder {
     private String address;
     private int port;
 
-    private Socket createSocket() {
-//        return new ServerSocket(this.port, Objects.requireNonNull(this.address));
-        return null;
+    private Socket createSocket() throws IOException {
+        return new Socket(Objects.requireNonNull(this.address), this.port);
     }
 
     public ConnectionBuilder localhost() {
@@ -31,8 +28,7 @@ public class ConnectionBuilder {
         return this;
     }
 
-    public PacketServer build() {
-//        return new PacketClientImpl(this.createSocket());
-        return null;
+    public PacketClient build() throws IOException {
+        return new GsonPacketClient(this.createSocket());
     }
 }
