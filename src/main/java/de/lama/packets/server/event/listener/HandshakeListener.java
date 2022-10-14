@@ -9,10 +9,12 @@ import java.util.function.Consumer;
 
 public class HandshakeListener implements Consumer<ServerClientConnectEvent> {
 
+    private static final long HANDSHAKE_TIMEOUT = 5000;
+
     @Override
     public void accept(ServerClientConnectEvent event) {
         event.client().send(new HandshakePacket(Packet.VERSION)).complete();
-        Packet packet = event.client().awaitPacket(5000);
+        Packet packet = event.client().awaitPacket(HANDSHAKE_TIMEOUT);
         if (!(packet instanceof HandshakePacket handshake)) {
             event.setCancelled(true);
             throw new ServerException("Failed handshake");
