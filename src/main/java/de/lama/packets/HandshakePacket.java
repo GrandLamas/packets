@@ -2,7 +2,7 @@ package de.lama.packets;
 
 public class HandshakePacket extends Packet {
 
-    public static final long ID = 1;
+    public static final long ID = 0;
 
     private final String version;
 
