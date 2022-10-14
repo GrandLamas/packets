@@ -4,13 +4,14 @@
 Every operation in this API uses the <code>Operation</code> interface.
 For example <code>server.send(packet)</code> returns such an operation.
 Using this operation you may execute <code>Operatoin#complete</code> (synchronized) or <code>Operation#queue</code> (async).
-Almost all asynchronous operations use a centralized ThreadPool, they may also use a local thread pool depenending on the operation.
+Operations are immutable and the methods mentioned above will return itself for example executing it multiple times. 
+Almost all asynchronous operations use a centralized ThreadPool, they may also use a local thread pool depending on the operation.
 
 There is also an event system. You can find more details <a href='#Events'>here</a>.
 
 ## Quickstart - Server
 First of all you need a <code>ServerBuilder</code> to create a new <code>PacketServer</code> Instance.
-With this builder, you are able to configurate (tickrate, encryption, ...) your server. A <code>ExceptionHandler</code> is the only thing you need to provide.<br>
+With this builder, you are able to configure (tickrate, encryption, ...) your server. A <code>ExceptionHandler</code> is the only thing you need to provide.<br>
 
 Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!<br>
 <code>PacketServer server = new ServerBuilder().exceptionHandler(Throwable::printStackTrace).build();</code>
@@ -18,7 +19,7 @@ Using <code>ServerBuilder#build</code> you build your configurated server. Congr
 You may now open the server to new clients using <code>PacketServer#open</code>.<br>
 Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in closing the socket of this new client.
 
-You are also able to prevent the server from accepting new clients using <code>PacketServer#clode</code> or shut it down entirely by using <code>PacketServer#shutdown</code>
+You are also able to prevent the server from accepting new clients using <code>PacketServer#close</code> or shut it down entirely by using <code>PacketServer#shutdown</code>
 
 ## Events
 Almost every central API object is an <code>EventHandlerContainer</code>, which means you can use its EventHandler to subscribe to the events of the API object.
