@@ -10,6 +10,8 @@ import java.util.Objects;
 
 public class ClientBuilder extends AbstractPacketComponentBuilder {
 
+    private static final String LOCALHOST = "localhost";
+
     private String address;
 
     private Socket createSocket() throws IOException {
@@ -17,7 +19,7 @@ public class ClientBuilder extends AbstractPacketComponentBuilder {
     }
 
     public ClientBuilder localhost() {
-        return this.address("localhost");
+        return this.address(LOCALHOST);
     }
 
     public ClientBuilder address(String address) {
