@@ -23,9 +23,9 @@ public class PacketInputStream extends InputStream {
         int length = this.in.readInt();
         byte[] buffer = new byte[length];
 
-        int totalBytesRead = 0;
-        while (totalBytesRead < length) {
-            totalBytesRead += this.in.read(buffer, totalBytesRead, buffer.length - totalBytesRead);
+        int read = 0;
+        while (read < length) {
+            read += this.in.read(buffer, read, buffer.length - read);
         }
 
         return this.wrapper.unwrap(buffer);

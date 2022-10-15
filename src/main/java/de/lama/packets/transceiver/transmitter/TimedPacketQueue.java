@@ -4,7 +4,6 @@ import de.lama.packets.Packet;
 import de.lama.packets.io.PacketOutputStream;
 import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.util.ExceptionHandler;
-import de.lama.packets.util.ExceptionUtils;
 import de.lama.packets.wrapper.PacketWrapper;
 
 import java.io.BufferedOutputStream;
@@ -28,11 +27,11 @@ class TimedPacketQueue extends AbstractScheduledTransceiver implements PacketTra
     }
 
     private void flush() {
-        ExceptionUtils.operate(this.exceptionHandler, this.out::flush, "Could not flush output");
+        this.exceptionHandler.operate(this.out::flush, "Could not flush output");
     }
 
     private void write(Packet packet) {
-        ExceptionUtils.operate(this.exceptionHandler, () -> this.out.write(packet),"Could not write data");
+        this.exceptionHandler.operate(() -> this.out.write(packet),"Could not write data");
     }
 
     @Override

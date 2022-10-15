@@ -4,7 +4,6 @@ import de.lama.packets.Packet;
 import de.lama.packets.io.PacketInputStream;
 import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.util.ExceptionHandler;
-import de.lama.packets.util.ExceptionUtils;
 import de.lama.packets.wrapper.PacketWrapper;
 
 import java.io.BufferedInputStream;
@@ -42,7 +41,7 @@ public class DefaultPacketReceiver extends AbstractScheduledTransceiver implemen
         long over = System.currentTimeMillis() + timeoutInMillis;
         Packet last = this.last;
         while (this.last == last) {
-            ExceptionUtils.operate(this.exceptionHandler, () -> Thread.sleep(this.getTickrate()), "Could not sleep");
+            this.exceptionHandler.operate(() -> Thread.sleep(this.getTickrate()), "Could not sleep");
             if (over <= System.currentTimeMillis()) return null;
         }
 
