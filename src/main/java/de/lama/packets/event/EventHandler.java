@@ -3,14 +3,14 @@ package de.lama.packets.event;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public interface EventHandler<T> {
+public interface EventHandler {
 
-    <R extends T> UUID subscribe(Class<R> type, Consumer<R> eventConsumer);
+    <R extends Event> UUID subscribe(Class<R> type, Consumer<R> eventConsumer);
 
     void unsubscribe(UUID listenerId);
 
-    boolean isCancelled(T event);
+    boolean isCancelled(Event event);
 
-    void notify(T event);
+    void notify(Event event);
 
 }

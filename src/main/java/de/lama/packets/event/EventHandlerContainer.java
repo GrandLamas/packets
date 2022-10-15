@@ -1,7 +1,7 @@
 package de.lama.packets.event;
 
-public interface EventHandlerContainer<T> {
+public interface EventHandlerContainer {
 
-    EventHandler<T> getEventHandler();
+    EventHandler getEventHandler();
 
 }
