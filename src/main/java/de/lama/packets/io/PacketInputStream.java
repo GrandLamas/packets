@@ -32,6 +32,11 @@ public class PacketInputStream extends InputStream {
     }
 
     @Override
+    public int available() throws IOException {
+        return this.in.available();
+    }
+
+    @Override
     public int read() throws IOException {
         return this.in.read();
     }
