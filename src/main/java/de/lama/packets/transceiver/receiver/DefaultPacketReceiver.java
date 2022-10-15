@@ -1,57 +1,60 @@
 package de.lama.packets.transceiver.receiver;
 
 import de.lama.packets.Packet;
+import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.util.ExceptionUtils;
+import de.lama.packets.wrapper.PacketWrapper;
 
-import java.net.Socket;
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
+import java.util.concurrent.ScheduledExecutorService;
 
-public class DefaultPacketReceiver implements PacketReceiver {
+public class DefaultPacketReceiver extends AbstractScheduledTransceiver implements PacketReceiver {
 
-    private static final int BYTE_BUFFER = 2048;
-
-    private final Socket socket;
-    private final long tickrateInMillis;
+    private final DataInputStream in;
+    private final PacketWrapper wrapper;
     private final ExceptionHandler exceptionHandler;
+    private Packet last;
 
-    public DefaultPacketReceiver(Socket socket, int tickrate, ExceptionHandler exceptionHandler) {
-        this.socket = socket;
-        this.tickrateInMillis = this.calculateTickrate(tickrate);
+    public DefaultPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, PacketWrapper wrapper, ExceptionHandler exceptionHandler) {
+        super(pool, tickrate);
+        this.in = new DataInputStream(new BufferedInputStream(inputStream));
         this.exceptionHandler = exceptionHandler;
+        this.wrapper = wrapper;
     }
 
     @Override
-    public void start() {
-//        char[] buffer = new char[2048];
-//        int charsRead;
-//        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//        while ((charsRead = in.read(buffer)) != -1) {
-//            String message = new String(buffer).substring(0, charsRead);
-//            Packet packet = new GsonWrapper(server.getRegistry()).unwrapString(message);
-//            System.out.println(((HandshakePacket) packet).getVersion());
-//        }
-    }
+    protected void tick() {
+        try {
+            char type = this.in.readChar();
+            if (type != PACKET_DATA_TYPE) return;
+            int length = this.in.readInt();
+            byte[] buffer = new byte[length];
 
-    @Override
-    public void stop() {
+            int totalBytesRead = 0;
+            while (totalBytesRead < length) {
+                totalBytesRead += this.in.read(buffer, totalBytesRead, buffer.length - totalBytesRead);
+            }
 
-    }
-
-    @Override
-    public boolean isRunning() {
-        return false;
+            // TODO: Push packet to event
+            this.last = this.wrapper.unwrap(buffer);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            // TODO
+        }
     }
 
     @Override
     public Packet awaitPacket(long timeoutInMillis) {
-        AtomicReference<Packet> packet = new AtomicReference<>();
         long over = System.currentTimeMillis() + timeoutInMillis;
-        while (packet.get() == null) {
-            ExceptionUtils.operate(this.exceptionHandler, () -> Thread.sleep(this.tickrateInMillis), "Could not sleep");
+        Packet last = this.last;
+        while (this.last == last) {
+            ExceptionUtils.operate(this.exceptionHandler, () -> Thread.sleep(this.getTickrate()), "Could not sleep");
             if (over <= System.currentTimeMillis()) return null;
         }
 
-        return packet.get();
+        return this.last;
     }
 }

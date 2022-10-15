@@ -2,14 +2,14 @@ package de.lama.packets.transceiver;
 
 public interface PacketTransceiver {
 
-    default long calculateTickrate(int tickrate) {
-        return 1000L / tickrate;
-    }
+    char PACKET_DATA_TYPE = 's';
 
     void start();
 
     void stop();
 
     boolean isRunning();
+
+    long getTickrate();
 
 }

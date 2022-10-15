@@ -3,6 +3,7 @@ package de.lama.packets.transceiver.transmitter;
 import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.wrapper.PacketWrapper;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -38,7 +39,12 @@ public class PacketTransmitterBuilder {
     }
 
     public PacketTransmitter build(Socket socket) {
-        return new TimedPacketQueue(Objects.requireNonNull(socket), this.tickrate, Objects.requireNonNull(this.pool),
-                Objects.requireNonNull(this.exceptionHandler), Objects.requireNonNull(this.packetWrapper));
+        try {
+            // TODO
+            return new TimedPacketQueue(Objects.requireNonNull(socket).getOutputStream(), this.tickrate, Objects.requireNonNull(this.pool),
+                    Objects.requireNonNull(this.exceptionHandler), Objects.requireNonNull(this.packetWrapper));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -13,6 +13,7 @@ import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.wrapper.GsonWrapper;
 import de.lama.packets.wrapper.PacketWrapper;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Executors;
@@ -24,7 +25,6 @@ public class ServerGsonClient extends AbstractPacketComponent implements ServerC
 
     private final PacketServer server;
     private final Socket socket;
-    private final PacketWrapper packetWrapper;
     private final PacketTransmitter transmitter;
     private final PacketReceiver receiver;
 
@@ -32,10 +32,15 @@ public class ServerGsonClient extends AbstractPacketComponent implements ServerC
         super(exceptionHandler, server.getRegistry());
         this.server = server;
         this.socket = socket;
-        this.packetWrapper = new GsonWrapper(server.getRegistry());
-        this.transmitter = new PacketTransmitterBuilder().packetWrapper(this.packetWrapper)
+        PacketWrapper packetWrapper = new GsonWrapper(server.getRegistry());
+        this.transmitter = new PacketTransmitterBuilder().packetWrapper(packetWrapper)
                 .threadPool(SERVICE).tickrate(server.getTickrate()).exceptionHandler(exceptionHandler).build(socket);
-        this.receiver = new DefaultPacketReceiver(socket, server.getTickrate(), exceptionHandler);
+        try {
+            this.receiver = new DefaultPacketReceiver(socket.getInputStream(), server.getTickrate(), SERVICE, packetWrapper, exceptionHandler);
+        } catch (IOException e) {
+            // TODO
+            throw new RuntimeException(e);
+        }
 
         this.transmitter.start();
         this.receiver.start();

@@ -1,74 +1,52 @@
 package de.lama.packets.transceiver.transmitter;
 
 import de.lama.packets.Packet;
+import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.util.ExceptionUtils;
 import de.lama.packets.wrapper.PacketWrapper;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-class TimedPacketQueue implements PacketTransmitter {
+class TimedPacketQueue extends AbstractScheduledTransceiver implements PacketTransmitter {
 
-    private final Socket socket;
-    private final long tickDelayMs;
-    private final ScheduledExecutorService pool;
+    private final DataOutputStream out;
     private final ExceptionHandler exceptionHandler;
     private final PacketWrapper packetWrapper;
     private final Queue<Packet> packetQueue;
-    private ScheduledFuture<?> queue;
 
-    TimedPacketQueue(Socket socket, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketWrapper packetWrapper) {
-        this.socket = socket;
-        this.tickDelayMs = this.calculateTickrate(tickrate);
-        this.pool = pool;
+    TimedPacketQueue(OutputStream outputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketWrapper packetWrapper) {
+        super(pool, tickrate);
         this.exceptionHandler = exceptionHandler;
         this.packetWrapper = packetWrapper;
         this.packetQueue = new ConcurrentLinkedQueue<>();
+        this.out = new DataOutputStream(new BufferedOutputStream(outputStream));
     }
 
-    private OutputStream getOutput() {
-        return ExceptionUtils.operate(this.exceptionHandler, this.socket::getOutputStream, "No outputstream defined");
+    private void flush() {
+        ExceptionUtils.operate(this.exceptionHandler, this.out::flush, "Could not flush output");
     }
 
-    private void flushOutput(OutputStream outputStream) {
-        ExceptionUtils.operate(this.exceptionHandler, outputStream::flush, "Could not flush output");
-    }
-
-    private OutputStream write(Packet packet) {
-        OutputStream stream = this.getOutput();
-        if (stream == null) return null;
+    private void write(Packet packet) {
         byte[] data = this.packetWrapper.wrap(packet);
-        if (!ExceptionUtils.operate(this.exceptionHandler, () -> stream.write(data),"Could not write data")) return null;
-        return stream;
+        ExceptionUtils.operate(this.exceptionHandler, () -> {
+            this.out.writeChar(PACKET_DATA_TYPE);
+            this.out.writeInt(data.length);
+            this.out.write(data);
+        },"Could not write data");
     }
 
-    private void pushPackets() {
+    @Override
+    protected void tick() {
         Packet send;
         while ((send = this.packetQueue.poll()) != null) {
             this.complete(send);
         }
-    }
-
-    @Override
-    public void start() {
-        this.queue = this.pool.scheduleAtFixedRate(this::pushPackets, this.tickDelayMs, this.tickDelayMs, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void stop() {
-        this.queue.cancel(true);
-        this.queue = null;
-    }
-
-    @Override
-    public boolean isRunning() {
-        return this.queue != null;
     }
 
     @Override
@@ -78,8 +56,7 @@ class TimedPacketQueue implements PacketTransmitter {
 
     @Override
     public void complete(Packet packet) {
-        OutputStream stream = this.write(packet);
-        if (stream == null) return;
-        this.flushOutput(stream);
+        this.write(packet);
+        this.flush();
     }
 }
