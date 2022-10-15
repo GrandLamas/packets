@@ -15,19 +15,19 @@ class BroadcastOperation implements Operation {
         this.packet = packet;
     }
 
-    private void sendToAll(Consumer<Operation> todo) {
+    private void broadcast(Consumer<Operation> todo) {
         this.server.getClients().forEach(c -> todo.accept(c.send(this.packet)));
     }
 
     @Override
     public Operation queue() {
-        this.sendToAll(Operation::queue);
+        this.broadcast(Operation::queue);
         return this;
     }
 
     @Override
     public Operation complete() {
-        this.sendToAll(Operation::complete);
+        this.broadcast(Operation::complete);
         return this;
     }
 }

@@ -2,6 +2,7 @@ package de.lama.packets.server.client;
 
 import de.lama.packets.Packet;
 import de.lama.packets.operation.Operation;
+import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 
 public class ServerClientPacketSendOperation implements Operation {
 

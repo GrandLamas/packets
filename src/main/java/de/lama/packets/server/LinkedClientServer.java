@@ -9,7 +9,6 @@ import de.lama.packets.server.client.ServerClient;
 import de.lama.packets.server.client.ServerClientBuilder;
 import de.lama.packets.server.event.ServerClientConnectEvent;
 import de.lama.packets.server.event.ServerClientDisconnectEvent;
-import de.lama.packets.server.event.ServerEvent;
 import de.lama.packets.server.event.listener.HandshakeListener;
 import de.lama.packets.util.ExceptionHandler;
 
@@ -19,7 +18,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-class LinkedClientServer extends AbstractPacketComponent<ServerEvent> implements PacketServer {
+class LinkedClientServer extends AbstractPacketComponent implements PacketServer {
 
     private final ServerSocket socket;
     private final int tickrate;

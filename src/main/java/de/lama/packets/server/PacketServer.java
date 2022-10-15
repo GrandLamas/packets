@@ -5,11 +5,10 @@ import de.lama.packets.event.EventHandlerContainer;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.RegistryContainer;
 import de.lama.packets.server.client.ServerClient;
-import de.lama.packets.server.event.ServerEvent;
 
 import java.util.stream.Stream;
 
-public interface PacketServer extends RegistryContainer, EventHandlerContainer<ServerEvent> {
+public interface PacketServer extends RegistryContainer, EventHandlerContainer {
 
     Operation open();
 
