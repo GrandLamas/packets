@@ -1,17 +1,15 @@
-package de.lama.packets.server.client;
+package de.lama.packets.operation;
 
-import de.lama.packets.operation.AbstractSimpleThreadedOperation;
-import de.lama.packets.operation.Operation;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.net.Socket;
 
-public class ServerClientCloseOperation extends AbstractSimpleThreadedOperation {
+public class SocketCloseOperation extends AbstractSimpleThreadedOperation {
 
     private final Socket socket;
     private final ExceptionHandler exceptionHandler;
 
-    public ServerClientCloseOperation(Socket socket, ExceptionHandler exceptionHandler) {
+    public SocketCloseOperation(Socket socket, ExceptionHandler exceptionHandler) {
         this.socket = socket;
         this.exceptionHandler = exceptionHandler;
     }

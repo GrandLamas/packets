@@ -1,17 +1,17 @@
 package de.lama.packets.server;
 
+import de.lama.packets.client.Client;
 import de.lama.packets.operation.AbstractSimpleThreadedOperation;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.server.client.ServerClient;
 
 import java.util.function.Consumer;
 
 public class ClientCloseOperation extends AbstractSimpleThreadedOperation {
 
-    private final ServerClient client;
-    private final Consumer<ServerClient> onFinish;
+    private final Client client;
+    private final Consumer<Client> onFinish;
 
-    public ClientCloseOperation(ServerClient client, Consumer<ServerClient> onFinish) {
+    public ClientCloseOperation(Client client, Consumer<Client> onFinish) {
         this.client = client;
         this.onFinish = onFinish;
     }

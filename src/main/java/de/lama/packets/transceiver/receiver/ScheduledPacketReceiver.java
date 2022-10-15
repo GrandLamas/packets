@@ -11,29 +11,30 @@ import java.io.DataInputStream;
 import java.io.InputStream;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class DefaultPacketReceiver extends AbstractScheduledTransceiver implements PacketReceiver {
+// TODO: Builder with merged tickrate on transmitter
+public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implements PacketReceiver {
 
     private final PacketInputStream in;
     private final ExceptionHandler exceptionHandler;
+    private final PacketConsumer consumer;
     private Packet last;
 
-    public DefaultPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, PacketWrapper wrapper, ExceptionHandler exceptionHandler) {
+    public ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, PacketWrapper wrapper, ExceptionHandler exceptionHandler, PacketConsumer consumer) {
         super(pool, tickrate);
+        this.consumer = consumer;
         this.in = new PacketInputStream(new DataInputStream(new BufferedInputStream(inputStream)), wrapper);
         this.exceptionHandler = exceptionHandler;
     }
 
     @Override
     protected void tick() {
-        try {
-            Packet packet;
-            while ((packet = this.in.readPacket()) != null) {
+        this.exceptionHandler.operate(() -> {
+            while (this.in.available() > 0) {
+                Packet packet = this.in.readPacket();
                 this.last = packet;
+                this.consumer.accept(packet);
             }
-        } catch (Throwable e) {
-            e.printStackTrace();
-            // TODO
-        }
+        }, "Failed to read packet");
     }
 
     @Override

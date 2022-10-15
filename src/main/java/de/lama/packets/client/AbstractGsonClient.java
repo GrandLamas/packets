@@ -1,11 +1,14 @@
-package de.lama.packets.server.client;
+package de.lama.packets.client;
 
 import de.lama.packets.AbstractPacketComponent;
 import de.lama.packets.Packet;
+import de.lama.packets.event.PacketReceiveEvent;
 import de.lama.packets.event.PacketSendEvent;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.server.PacketServer;
-import de.lama.packets.transceiver.receiver.DefaultPacketReceiver;
+import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.operation.PacketSendOperation;
+import de.lama.packets.operation.SocketCloseOperation;
+import de.lama.packets.transceiver.receiver.ScheduledPacketReceiver;
 import de.lama.packets.transceiver.receiver.PacketReceiver;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.transceiver.transmitter.PacketTransmitterBuilder;
@@ -13,34 +16,30 @@ import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.wrapper.GsonWrapper;
 import de.lama.packets.wrapper.PacketWrapper;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class ServerGsonClient extends AbstractPacketComponent implements ServerClient {
+public abstract class AbstractGsonClient extends AbstractPacketComponent implements Client {
 
     private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(10);
 
-    private final PacketServer server;
-    private final Socket socket;
-    private final PacketTransmitter transmitter;
-    private final PacketReceiver receiver;
+    protected final Socket socket;
+    protected final PacketTransmitter transmitter;
+    protected final PacketReceiver receiver;
 
-    ServerGsonClient(PacketServer server, Socket socket, ExceptionHandler exceptionHandler) {
-        super(exceptionHandler, server.getRegistry());
-        this.server = server;
+    public AbstractGsonClient(Socket socket, PacketRegistry registry, int tickrate, ExceptionHandler exceptionHandler) {
+        super(exceptionHandler, registry);
         this.socket = socket;
-        PacketWrapper packetWrapper = new GsonWrapper(server.getRegistry());
+
+        PacketWrapper packetWrapper = new GsonWrapper(registry);
         this.transmitter = new PacketTransmitterBuilder().packetWrapper(packetWrapper)
-                .threadPool(SERVICE).tickrate(server.getTickrate()).exceptionHandler(exceptionHandler).build(socket);
-        try {
-            this.receiver = new DefaultPacketReceiver(socket.getInputStream(), server.getTickrate(), SERVICE, packetWrapper, exceptionHandler);
-        } catch (IOException e) {
-            // TODO
-            throw new RuntimeException(e);
-        }
+                .threadPool(SERVICE).tickrate(tickrate)
+                .exceptionHandler(exceptionHandler).build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
+
+        this.receiver = new ScheduledPacketReceiver(exceptionHandler.operate(socket::getInputStream, "Could not get input"),
+                tickrate, SERVICE, packetWrapper, exceptionHandler, packet -> this.eventHandler.notify(new PacketReceiveEvent(packet)));
 
         this.transmitter.start();
         this.receiver.start();
@@ -54,7 +53,7 @@ public class ServerGsonClient extends AbstractPacketComponent implements ServerC
     @Override
     public Operation send(Packet packet) {
         if (this.eventHandler.isCancelled(new PacketSendEvent(packet))) return null;
-        return new ServerClientPacketSendOperation(this.transmitter, packet);
+        return new PacketSendOperation(this.transmitter, packet);
     }
 
     @Override
@@ -63,12 +62,12 @@ public class ServerGsonClient extends AbstractPacketComponent implements ServerC
         this.transmitter.stop();
         this.receiver.stop();
         // TODO: Stop packet transmitter
-        return new ServerClientCloseOperation(this.socket, this.exceptionHandler);
+        return new SocketCloseOperation(this.socket, this.exceptionHandler);
     }
 
     @Override
-    public Packet awaitPacket(long timeoutInMs) {
-        return this.receiver.awaitPacket(timeoutInMs);
+    public Packet awaitPacket(long timeoutInMillis) {
+        return this.receiver.awaitPacket(timeoutInMillis);
     }
 
     @Override
@@ -81,8 +80,4 @@ public class ServerGsonClient extends AbstractPacketComponent implements ServerC
         return this.socket.getPort();
     }
 
-    @Override
-    public PacketServer getServer() {
-        return this.server;
-    }
 }

@@ -1,10 +1,10 @@
 package de.lama.packets.server;
 
+import de.lama.packets.client.Client;
 import de.lama.packets.Packet;
 import de.lama.packets.event.EventHandlerContainer;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.RegistryContainer;
-import de.lama.packets.server.client.ServerClient;
 
 import java.util.stream.Stream;
 
@@ -14,7 +14,7 @@ public interface PacketServer extends RegistryContainer, EventHandlerContainer {
 
     Operation close();
 
-    Operation close(ServerClient client);
+    Operation close(Client client);
 
     Operation shutdown();
 
@@ -26,6 +26,6 @@ public interface PacketServer extends RegistryContainer, EventHandlerContainer {
 
     int getPort();
 
-    Stream<ServerClient> getClients();
+    Stream<Client> getClients();
 
 }

@@ -1,15 +1,14 @@
 package de.lama.packets.server;
 
 import de.lama.packets.AbstractPacketComponent;
+import de.lama.packets.client.Client;
 import de.lama.packets.Packet;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.server.client.ServerClient;
-import de.lama.packets.server.client.ServerClientBuilder;
-import de.lama.packets.server.event.ServerClientConnectEvent;
-import de.lama.packets.server.event.ServerClientDisconnectEvent;
-import de.lama.packets.server.event.listener.HandshakeListener;
+import de.lama.packets.client.server.ServerClientBuilder;
+import de.lama.packets.server.event.ClientConnectEvent;
+import de.lama.packets.server.event.ClientDisconnectEvent;
+import de.lama.packets.server.event.ServerHandshakeListener;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.net.ServerSocket;
@@ -22,12 +21,12 @@ class LinkedClientServer extends AbstractPacketComponent implements PacketServer
 
     private final ServerSocket socket;
     private final int tickrate;
-    private final Collection<ServerClient> clients;
+    private final Collection<Client> clients;
     private final ServerClientBuilder clientBuilder;
     private boolean open;
 
-    LinkedClientServer(ServerSocket socket, int tickrate, ExceptionHandler exceptionHandler) {
-        super(exceptionHandler, new HashedPacketRegistry());
+    LinkedClientServer(ServerSocket socket, int tickrate, PacketRegistry registry, ExceptionHandler exceptionHandler) {
+        super(exceptionHandler, registry);
         this.socket = socket;
         this.tickrate = tickrate;
         this.clients = new ConcurrentLinkedQueue<>();
@@ -37,12 +36,12 @@ class LinkedClientServer extends AbstractPacketComponent implements PacketServer
     }
 
     private void registerDefaultListener() {
-        this.eventHandler.subscribe(ServerClientConnectEvent.class, new HandshakeListener());
+        this.eventHandler.subscribe(ClientConnectEvent.class, new ServerHandshakeListener());
     }
 
     protected void register(Socket socket) {
-        ServerClient client = this.clientBuilder.server(this).exceptionHandler(this.exceptionHandler).build(socket);
-        if (this.eventHandler.isCancelled(new ServerClientConnectEvent(this, client))) {
+        Client client = this.clientBuilder.server(this).exceptionHandler(this.exceptionHandler).build(socket);
+        if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
             return;
         }
@@ -77,8 +76,8 @@ class LinkedClientServer extends AbstractPacketComponent implements PacketServer
     }
 
     @Override
-    public Operation close(ServerClient client) {
-        if (this.eventHandler.isCancelled(new ServerClientDisconnectEvent(this, client))) return null;
+    public Operation close(Client client) {
+        if (this.eventHandler.isCancelled(new ClientDisconnectEvent(this, client))) return null;
         return new ClientCloseOperation(client, this.clients::remove);
     }
 
@@ -109,7 +108,7 @@ class LinkedClientServer extends AbstractPacketComponent implements PacketServer
     }
 
     @Override
-    public Stream<ServerClient> getClients() {
+    public Stream<Client> getClients() {
         return this.clients.stream();
     }
 

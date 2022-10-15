@@ -13,13 +13,13 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 
-class TimedPacketQueue extends AbstractScheduledTransceiver implements PacketTransmitter {
+class ScheduledPacketQueue extends AbstractScheduledTransceiver implements PacketTransmitter {
 
     private final PacketOutputStream out;
     private final ExceptionHandler exceptionHandler;
     private final Queue<Packet> packetQueue;
 
-    TimedPacketQueue(OutputStream outputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketWrapper packetWrapper) {
+    ScheduledPacketQueue(OutputStream outputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketWrapper packetWrapper) {
         super(pool, tickrate);
         this.exceptionHandler = exceptionHandler;
         this.packetQueue = new ConcurrentLinkedQueue<>();

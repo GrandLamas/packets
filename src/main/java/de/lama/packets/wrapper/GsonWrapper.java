@@ -21,6 +21,8 @@ public class GsonWrapper extends AbstractPacketWrapper implements PacketStringWr
     @Override
     public Packet unwrapString(String from) {
         Packet packet = this.gson.fromJson(from, Packet.class);
-        return this.gson.fromJson(from, this.parse(packet.getId()));
+        Class<? extends Packet> parsed = this.parse(packet.getId());
+        if (parsed == null) throw new NullPointerException("Invalid packet id");
+        return this.gson.fromJson(from, parsed);
     }
 }

@@ -1,19 +1,18 @@
-package de.lama.packets.server.client;
+package de.lama.packets.client;
 
 import de.lama.packets.Packet;
 import de.lama.packets.event.EventHandlerContainer;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.server.ServerContainer;
 
 import java.net.InetAddress;
 
-public interface ServerClient extends ServerContainer, EventHandlerContainer {
+public interface Client extends EventHandlerContainer {
 
     Operation send(Packet packet);
 
     Operation close();
 
-    Packet awaitPacket(long timeoutInMs);
+    Packet awaitPacket(long timeoutInMillis);
 
     InetAddress getAddress();
 

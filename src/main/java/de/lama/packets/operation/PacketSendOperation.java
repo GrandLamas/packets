@@ -1,15 +1,14 @@
-package de.lama.packets.server.client;
+package de.lama.packets.operation;
 
 import de.lama.packets.Packet;
-import de.lama.packets.operation.Operation;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 
-public class ServerClientPacketSendOperation implements Operation {
+public class PacketSendOperation implements Operation {
 
     private final PacketTransmitter transmitter;
     private final Packet packet;
 
-    public ServerClientPacketSendOperation(PacketTransmitter transmitter, Packet packet) {
+    public PacketSendOperation(PacketTransmitter transmitter, Packet packet) {
         this.transmitter = transmitter;
         this.packet = packet;
     }
