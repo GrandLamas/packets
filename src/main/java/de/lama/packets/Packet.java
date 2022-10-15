@@ -6,6 +6,7 @@ package de.lama.packets;
 public class Packet implements Cloneable {
 
     public static final String VERSION = "v0.1";
+    public static final char TYPE = 's';
 
     private long id;
 
