@@ -37,8 +37,8 @@ public class ServerBuilder {
         return this;
     }
 
-    public PacketServer build() throws IOException {
-        return new LinkedClientServer(this.createSocket(), Objects.requireNonNullElseGet(this.clientBuilder, ClientBuilder::new),
+    public Server build() throws IOException {
+        return new UniqueSocketServer(this.createSocket(), Objects.requireNonNullElseGet(this.clientBuilder, ClientBuilder::new),
                 Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
     }
 }

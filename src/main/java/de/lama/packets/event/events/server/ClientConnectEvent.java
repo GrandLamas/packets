@@ -2,11 +2,11 @@ package de.lama.packets.event.events.server;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.event.CancelContainer;
-import de.lama.packets.server.PacketServer;
+import de.lama.packets.server.Server;
 
-public record ClientConnectEvent(PacketServer server, Client client, CancelContainer cancelContainer) implements ServerEvent {
+public record ClientConnectEvent(Server server, Client client, CancelContainer cancelContainer) implements ServerEvent {
 
-    public ClientConnectEvent(PacketServer server, Client client) {
+    public ClientConnectEvent(Server server, Client client) {
         this(server, client, new CancelContainer());
     }
 

@@ -7,7 +7,7 @@ import de.lama.packets.operation.Operation;
 
 import java.util.stream.Stream;
 
-public interface PacketServer extends EventHandlerContainer {
+public interface Server extends EventHandlerContainer {
 
     Operation open();
 

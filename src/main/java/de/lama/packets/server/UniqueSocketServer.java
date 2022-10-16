@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-class LinkedClientServer extends AbstractPacketIOComponent implements PacketServer {
+class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
 
     private final ServerSocket socket;
     private final ExceptionHandler exceptionHandler;
@@ -28,7 +28,7 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
     private final ClientBuilder clientFactory;
     private boolean closed;
 
-    LinkedClientServer(ServerSocket socket, ClientBuilder builder, ExceptionHandler exceptionHandler) {
+    UniqueSocketServer(ServerSocket socket, ClientBuilder builder, ExceptionHandler exceptionHandler) {
         super(exceptionHandler);
         this.exceptionHandler = exceptionHandler;
         this.socket = socket;

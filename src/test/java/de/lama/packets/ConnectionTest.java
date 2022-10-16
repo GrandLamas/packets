@@ -6,7 +6,7 @@ import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.server.PacketServer;
+import de.lama.packets.server.Server;
 import de.lama.packets.server.ServerBuilder;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class ConnectionTest {
     }
 
     private static void startServer(ClientBuilder builder) throws IOException {
-        PacketServer server = new ServerBuilder().clientBuilder(builder).build();
+        Server server = new ServerBuilder().clientBuilder(builder).build();
 
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
