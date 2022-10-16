@@ -21,7 +21,7 @@ public class ClientBuilder implements Cloneable {
     static final int TICKRATE_LIMIT = 1000;
     static final int PORT = Packet.PORT;
     static final String LOCALHOST = "localhost";
-    static final Supplier<PacketRegistry> GLOBAL_REGISTRY = HashedPacketRegistry::new;
+    static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
     static final WrapperFactory DEFAULT_WRAPPER = new GsonFactory();
 
     private ExceptionHandler exceptionHandler;
@@ -55,7 +55,7 @@ public class ClientBuilder implements Cloneable {
     }
 
     public Client buildVirtual(Socket socket) {
-        PacketRegistry registry = Objects.requireNonNullElseGet(this.registry, GLOBAL_REGISTRY);
+        PacketRegistry registry = Objects.requireNonNullElseGet(this.registry, DEFAULT_REGISTRY);
         PacketWrapper wrapper = Objects.requireNonNullElse(this.wrapperFactory, DEFAULT_WRAPPER).create(registry);
         return new ThreadedClient(socket, registry, wrapper,
                 this.tickrate, Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
