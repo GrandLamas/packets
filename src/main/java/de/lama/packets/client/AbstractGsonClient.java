@@ -28,10 +28,10 @@ public abstract class AbstractGsonClient extends AbstractPacketIOComponent imple
 
     private static final ScheduledExecutorService TRANSCEIVER_POOL = Executors.newScheduledThreadPool(10);
 
-    protected final Socket socket;
-    protected final PacketTransmitter transmitter;
-    protected final PacketReceiver receiver;
-    protected final PacketWrapper wrapper;
+    private final Socket socket;
+    private final PacketTransmitter transmitter;
+    private final PacketReceiver receiver;
+    private final PacketWrapper wrapper;
 
     public AbstractGsonClient(Socket socket, PacketRegistry registry, int tickrate, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
@@ -39,7 +39,8 @@ public abstract class AbstractGsonClient extends AbstractPacketIOComponent imple
         this.wrapper = new GsonWrapper(registry);
 
         this.transmitter = new PacketTransmitterBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
-                .exceptionHandler(exceptionHandler).build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
+                .exceptionHandler(exceptionHandler)
+                .build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
 
         this.receiver = new PacketReceiverBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
                 .exceptionHandler(exceptionHandler).packetConsumer(this::packetReceived)
