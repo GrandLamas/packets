@@ -1,6 +1,6 @@
 package de.lama.packets.transceiver.receiver;
 
-import de.lama.packets.io.PacketInputStream;
+import de.lama.packets.io.DirectPacketInputStream;
 import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.transceiver.IoTransceivablePacket;
 import de.lama.packets.transceiver.TransceivablePacket;
@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 // TODO: Builder with merged tickrate on transmitter
 public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implements PacketReceiver {
 
-    private final PacketInputStream in;
+    private final DirectPacketInputStream in;
     private final ExceptionHandler exceptionHandler;
     private final PacketConsumer consumer;
     private TransceivablePacket last;
@@ -22,7 +22,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     public ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketConsumer consumer) {
         super(pool, tickrate);
         this.consumer = consumer;
-        this.in = new PacketInputStream(new DataInputStream(new BufferedInputStream(inputStream)));
+        this.in = new DirectPacketInputStream(new DataInputStream(new BufferedInputStream(inputStream)));
         this.exceptionHandler = exceptionHandler;
     }
 

@@ -1,6 +1,6 @@
 package de.lama.packets.transceiver.transmitter;
 
-import de.lama.packets.io.PacketOutputStream;
+import de.lama.packets.io.DirectPacketOutputStream;
 import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.util.ExceptionHandler;
@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 class ScheduledPacketTransmitter extends AbstractScheduledTransceiver implements PacketTransmitter {
 
-    private final PacketOutputStream out;
+    private final DirectPacketOutputStream out;
     private final ExceptionHandler exceptionHandler;
     private final Queue<TransceivablePacket> packetQueue;
 
@@ -22,7 +22,7 @@ class ScheduledPacketTransmitter extends AbstractScheduledTransceiver implements
         super(pool, tickrate);
         this.exceptionHandler = exceptionHandler;
         this.packetQueue = new ConcurrentLinkedQueue<>();
-        this.out = new PacketOutputStream(new DataOutputStream(new BufferedOutputStream(outputStream)));
+        this.out = new DirectPacketOutputStream(new DataOutputStream(new BufferedOutputStream(outputStream)));
     }
 
     private void flush() {

@@ -40,7 +40,7 @@ public class ConnectionTest {
     private static void connectClient(PacketRegistry registry) {
         try {
             PacketClient client = new ClientBuilder().registry(registry).localhost().build();
-            Thread.sleep(100);
+            Thread.sleep(1000);
             client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
