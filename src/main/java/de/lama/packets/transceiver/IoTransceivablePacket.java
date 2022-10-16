@@ -1,8 +1,8 @@
 package de.lama.packets.transceiver;
 
-import de.lama.packets.io.IOPacket;
+import de.lama.packets.io.IoPacket;
 
-public record IoTransceivablePacket(IOPacket packet) implements TransceivablePacket {
+public record IoTransceivablePacket(IoPacket packet) implements TransceivablePacket {
 
     @Override
     public char type() {

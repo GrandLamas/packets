@@ -13,7 +13,7 @@ public class DirectPacketOutputStream extends OutputStream implements PacketOutp
     }
 
     @Override
-    public void write(IOPacket packet) throws IOException {
+    public void write(IoPacket packet) throws IOException {
         this.out.writeChar(packet.type());
         this.out.writeLong(packet.id());
         this.out.writeInt(packet.size());

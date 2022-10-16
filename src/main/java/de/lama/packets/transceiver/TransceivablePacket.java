@@ -1,6 +1,6 @@
 package de.lama.packets.transceiver;
 
-import de.lama.packets.io.IOPacket;
+import de.lama.packets.io.IoPacket;
 
-public interface TransceivablePacket extends IOPacket {
+public interface TransceivablePacket extends IoPacket {
 }

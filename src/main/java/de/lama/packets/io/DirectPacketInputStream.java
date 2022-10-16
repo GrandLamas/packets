@@ -15,7 +15,7 @@ public class DirectPacketInputStream extends InputStream implements PacketInputS
     }
 
     @Override
-    public IOPacket readPacket() throws IOException {
+    public IoPacket readPacket() throws IOException {
         char type = this.in.readChar();
         if (type != Packet.TYPE) return null;
         long packetId = this.in.readLong();
@@ -27,7 +27,7 @@ public class DirectPacketInputStream extends InputStream implements PacketInputS
             read += this.in.read(buffer, read, buffer.length - read);
         }
 
-        return new CachedIOPacket(type, packetId, length, buffer);
+        return new CachedIoPacket(type, packetId, length, buffer);
     }
 
     @Override

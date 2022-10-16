@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-public final class IPUtils {
+public final class IpUtils {
 
     private static final String IP_CHECK = "http://checkip.amazonaws.com/";
 
-    private IPUtils() {
+    private IpUtils() {
     }
 
     public static String getSystemPublicIp() throws IOException {

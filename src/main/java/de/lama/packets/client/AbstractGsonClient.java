@@ -4,7 +4,7 @@ import de.lama.packets.AbstractPacketIOComponent;
 import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.PacketSendEvent;
-import de.lama.packets.io.CachedIOPacket;
+import de.lama.packets.io.CachedIoPacket;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.operations.PacketSendOperation;
 import de.lama.packets.operation.operations.SocketCloseOperation;
@@ -60,7 +60,7 @@ public abstract class AbstractGsonClient extends AbstractPacketIOComponent imple
     }
 
     private TransceivablePacket parsePacket(long packetId, Packet packet) {
-        return new IoTransceivablePacket(new CachedIOPacket(packetId, this.wrapper.wrap(packet)));
+        return new IoTransceivablePacket(new CachedIoPacket(packetId, this.wrapper.wrap(packet)));
     }
 
     private Packet parsePacket(TransceivablePacket packet) {

@@ -1,6 +1,6 @@
 package de.lama.packets.io;
 
-public interface IOPacket {
+public interface IoPacket {
 
     char type();
 
