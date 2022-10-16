@@ -1,4 +1,4 @@
-package de.lama.packets.server;
+package de.lama.packets.operation.operations.server;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.operation.AbstractThreadedOperation;

@@ -1,13 +1,14 @@
 package de.lama.packets.transceiver;
 
+import de.lama.packets.operation.AbstractThreadedOperation;
+import de.lama.packets.operation.Operation;
+
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractScheduledTransceiver implements PacketTransceiver {
+public abstract class AbstractScheduledTransceiver extends AbstractThreadedOperation implements PacketTransceiver {
 
     private final ScheduledExecutorService pool;
-    private ScheduledFuture<?> task;
     private final long tickrate;
 
     protected AbstractScheduledTransceiver(ScheduledExecutorService pool, int tickrate) {
@@ -22,19 +23,15 @@ public abstract class AbstractScheduledTransceiver implements PacketTransceiver 
     protected abstract void tick();
 
     @Override
-    public void start() {
+    public Operation complete() {
+        this.tick();
+        return this;
+    }
+
+    @Override
+    public Operation queue() {
         this.task = this.pool.scheduleAtFixedRate(this::tick, this.tickrate, this.tickrate, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void stop() {
-        this.task.cancel(true);
-        this.task = null;
-    }
-
-    @Override
-    public boolean isRunning() {
-        return this.task != null;
+        return this;
     }
 
     @Override

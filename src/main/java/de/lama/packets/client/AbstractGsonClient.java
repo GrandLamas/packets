@@ -1,8 +1,12 @@
 package de.lama.packets.client;
 
 import de.lama.packets.*;
+import de.lama.packets.event.events.PacketReceiveEvent;
+import de.lama.packets.event.events.PacketSendEvent;
 import de.lama.packets.io.CachedIOPacket;
 import de.lama.packets.operation.Operation;
+import de.lama.packets.operation.operations.PacketSendOperation;
+import de.lama.packets.operation.operations.SocketCloseOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.transceiver.IoTransceivablePacket;
 import de.lama.packets.transceiver.TransceivablePacket;
@@ -19,9 +23,9 @@ import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public abstract class AbstractGsonClient extends AbstractPacketComponent implements Client {
+public abstract class AbstractGsonClient extends AbstractPacketIOComponent implements Client {
 
-    private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(10);
+    private static final ScheduledExecutorService TRANSCEIVER_POOL = Executors.newScheduledThreadPool(10);
 
     protected final Socket socket;
     protected final PacketTransmitter transmitter;
@@ -33,14 +37,15 @@ public abstract class AbstractGsonClient extends AbstractPacketComponent impleme
         this.socket = socket;
         this.wrapper = new GsonWrapper(registry);
 
-        this.transmitter = new PacketTransmitterBuilder().threadPool(SERVICE).tickrate(tickrate)
+        this.transmitter = new PacketTransmitterBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
                 .exceptionHandler(exceptionHandler).build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
 
         this.receiver = new ScheduledPacketReceiver(exceptionHandler.operate(socket::getInputStream, "Could not get input"),
-                tickrate, SERVICE, exceptionHandler, this::packetReceived);
+                tickrate, TRANSCEIVER_POOL, exceptionHandler, this::packetReceived);
 
-        this.transmitter.start();
-        this.receiver.start();
+        this.registerOperation(transmitter);
+        this.registerOperation(receiver);
+        this.queueOperations();
     }
 
     private PacketReceiveEvent wrapEvent(TransceivablePacket transceivablePacket) {
@@ -74,10 +79,12 @@ public abstract class AbstractGsonClient extends AbstractPacketComponent impleme
     @Override
     public Operation close() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already closed");
-        this.transmitter.stop();
-        this.receiver.stop();
-        // TODO: Move to operation?
-        return new SocketCloseOperation(this.socket, this.exceptionHandler);
+        return new SocketCloseOperation(this.socket, this.threadedOperations, this.exceptionHandler);
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.socket.isClosed();
     }
 
     @Override

@@ -1,7 +1,7 @@
 package de.lama.packets.client;
 
 import de.lama.packets.Packet;
-import de.lama.packets.PacketReceiveEvent;
+import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.EventHandlerContainer;
 import de.lama.packets.operation.Operation;
 

@@ -1,8 +1,8 @@
-package de.lama.packets.server.event;
+package de.lama.packets.event.events.server;
 
 import de.lama.packets.HandshakePacket;
 import de.lama.packets.Packet;
-import de.lama.packets.PacketReceiveEvent;
+import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.server.exception.ServerException;
 
 import java.util.function.Consumer;

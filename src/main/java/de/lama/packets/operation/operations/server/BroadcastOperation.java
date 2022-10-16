@@ -1,22 +1,16 @@
-package de.lama.packets.server;
+package de.lama.packets.operation.operations.server;
 
 import de.lama.packets.Packet;
+import de.lama.packets.client.Client;
 import de.lama.packets.operation.Operation;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
-class BroadcastOperation implements Operation {
-
-    private final PacketServer server;
-    private final Packet packet;
-
-    BroadcastOperation(PacketServer server, Packet packet) {
-        this.server = server;
-        this.packet = packet;
-    }
+public record BroadcastOperation(Collection<Client> clients, Packet packet) implements Operation {
 
     private void broadcast(Consumer<Operation> todo) {
-        this.server.getClients().forEach(c -> todo.accept(c.send(this.packet)));
+        this.clients.forEach(c -> todo.accept(c.send(this.packet)));
     }
 
     @Override

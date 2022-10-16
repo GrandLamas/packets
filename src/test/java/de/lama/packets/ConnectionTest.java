@@ -1,12 +1,13 @@
 package de.lama.packets;
 
-import de.lama.packets.client.launchable.ClientBuilder;
-import de.lama.packets.client.launchable.PacketClient;
+import de.lama.packets.client.packet.ClientBuilder;
+import de.lama.packets.client.packet.PacketClient;
+import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.PacketServer;
 import de.lama.packets.server.ServerBuilder;
-import de.lama.packets.server.event.ClientConnectEvent;
+import de.lama.packets.event.events.server.ClientConnectEvent;
 
 import java.io.IOException;
 
@@ -41,7 +42,10 @@ public class ConnectionTest {
         try {
             PacketClient client = new ClientBuilder().registry(registry).localhost().build();
             Thread.sleep(1000);
-            client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
+            for (int i = 1; i <= 1000; i++) {
+                client.send(new MessagePacket("sussy amogus balls obama burger " + i)).queue(); // very political
+                Thread.sleep(1000);
+            }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }

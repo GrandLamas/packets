@@ -1,4 +1,4 @@
-package de.lama.packets.server.event;
+package de.lama.packets.event.events.server;
 
 import de.lama.packets.event.Cancellable;
 import de.lama.packets.event.Event;

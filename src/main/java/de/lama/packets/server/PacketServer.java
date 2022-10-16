@@ -20,7 +20,7 @@ public interface PacketServer extends RegistryContainer, EventHandlerContainer {
 
     Operation broadcast(Packet packet);
 
-    boolean isOpen();
+    boolean isClosed();
 
     int getTickrate();
 

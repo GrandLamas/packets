@@ -1,14 +1,8 @@
 package de.lama.packets.transceiver;
 
-public interface PacketTransceiver {
+import de.lama.packets.operation.ThreadedOperation;
 
-    char PACKET_DATA_TYPE = 's';
-
-    void start();
-
-    void stop();
-
-    boolean isRunning();
+public interface PacketTransceiver extends ThreadedOperation {
 
     long getTickrate();
 

@@ -7,7 +7,7 @@ import de.lama.packets.util.ExceptionHandler;
 public class AbstractPacketComponentBuilder {
 
     private static final int PORT = 4999;
-    private static final int TICKRATE = (int) Math.pow(2, 4);
+    private static final int TICKRATE = (int) Math.pow(2, 4); // 16
     private static final int TICKRATE_LIMIT = 1000;
 
     protected int port;

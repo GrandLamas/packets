@@ -1,14 +1,18 @@
 package de.lama.packets.server;
 
-import de.lama.packets.AbstractPacketComponent;
-import de.lama.packets.client.Client;
+import de.lama.packets.AbstractPacketIOComponent;
 import de.lama.packets.Packet;
+import de.lama.packets.client.Client;
+import de.lama.packets.client.virtual.VirtualClientBuilder;
+import de.lama.packets.event.events.server.ClientCloseEvent;
+import de.lama.packets.event.events.server.ClientConnectEvent;
+import de.lama.packets.event.events.server.ServerHandshakeListener;
 import de.lama.packets.operation.Operation;
+import de.lama.packets.operation.operations.ComponentCloseOperation;
+import de.lama.packets.operation.operations.SocketCloseOperation;
+import de.lama.packets.operation.operations.server.BroadcastOperation;
+import de.lama.packets.operation.operations.server.ClientCloseOperation;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.client.server.ServerClientBuilder;
-import de.lama.packets.server.event.ClientConnectEvent;
-import de.lama.packets.server.event.ClientDisconnectEvent;
-import de.lama.packets.server.event.ServerHandshakeListener;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.net.ServerSocket;
@@ -17,20 +21,21 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-class LinkedClientServer extends AbstractPacketComponent implements PacketServer {
+class LinkedClientServer extends AbstractPacketIOComponent implements PacketServer {
 
     private final ServerSocket socket;
     private final int tickrate;
     private final Collection<Client> clients;
-    private final ServerClientBuilder clientBuilder;
-    private boolean open;
+    private final VirtualClientBuilder clientBuilder;
+    private boolean closed;
 
     LinkedClientServer(ServerSocket socket, int tickrate, PacketRegistry registry, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
         this.socket = socket;
         this.tickrate = tickrate;
         this.clients = new ConcurrentLinkedQueue<>();
-        this.clientBuilder = new ServerClientBuilder().exceptionHandler(this.exceptionHandler);
+        this.clientBuilder = new VirtualClientBuilder().exceptionHandler(this.exceptionHandler).server(this);
+        this.closed = true;
 
         this.registerDefaultListener();
     }
@@ -39,62 +44,55 @@ class LinkedClientServer extends AbstractPacketComponent implements PacketServer
         this.eventHandler.subscribe(ClientConnectEvent.class, new ServerHandshakeListener());
     }
 
-    protected void register(Socket socket) {
-        Client client = this.clientBuilder.server(this).exceptionHandler(this.exceptionHandler).build(socket);
+    protected boolean register(Socket socket) {
+        if (this.closed) return false;
+        Client client = this.clientBuilder.build(socket);
         if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
-            return;
+            return true;
         }
 
         this.clients.add(client);
-    }
-
-    protected ExceptionHandler getExceptionHandler() {
-        return this.exceptionHandler;
-    }
-
-    protected ServerSocket getSocket() {
-        return this.socket;
-    }
-
-    protected void setOpen(boolean open) {
-        this.open = open;
+        return true;
     }
 
     @Override
     public Operation open() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
-        if (this.open) throw new IllegalStateException("Server already running");
-        return new ServerOpenOperation(this);
+        if (!this.closed) throw new IllegalStateException("Server already running");
+        this.closed = false;
+        return new ThreadedClientAcceptor(this.socket, this::register, this.exceptionHandler);
     }
 
     @Override
     public Operation close() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
-        if (!this.open) throw new IllegalStateException("Server not running");
-        return new ServerCloseOperation(this);
+        if (this.closed) throw new IllegalStateException("Server not running");
+        this.closed = true;
+        return new ComponentCloseOperation(this.threadedOperations, this.exceptionHandler);
     }
 
     @Override
     public Operation close(Client client) {
-        if (this.eventHandler.isCancelled(new ClientDisconnectEvent(this, client))) return null;
+        if (this.eventHandler.isCancelled(new ClientCloseEvent(this, client))) return null;
         return new ClientCloseOperation(client, this.clients::remove);
     }
 
     @Override
     public Operation shutdown() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
-        return new ServerShutdownOperation(this);
+        this.closed = true;
+        return new SocketCloseOperation(this.socket, this.threadedOperations, this.exceptionHandler);
     }
 
     @Override
     public Operation broadcast(Packet packet) {
-        return new BroadcastOperation(this, packet);
+        return new BroadcastOperation(this.clients, packet);
     }
 
     @Override
-    public boolean isOpen() {
-        return this.open;
+    public boolean isClosed() {
+        return !this.closed;
     }
 
     @Override

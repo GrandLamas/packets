@@ -1,4 +1,4 @@
-package de.lama.packets.client.launchable;
+package de.lama.packets.client.packet;
 
 import de.lama.packets.client.Client;
 

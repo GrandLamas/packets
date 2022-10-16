@@ -1,4 +1,4 @@
-package de.lama.packets.client.launchable;
+package de.lama.packets.client.packet;
 
 import de.lama.packets.AbstractPacketComponentBuilder;
 import de.lama.packets.registry.PacketRegistry;
@@ -47,7 +47,7 @@ public class ClientBuilder extends AbstractPacketComponentBuilder {
     }
 
     public PacketClient build() throws IOException {
-        return new LocalGsonClient(this.createSocket(), Objects.requireNonNull(this.registry),
+        return new GsonClient(this.createSocket(), Objects.requireNonNull(this.registry),
                 this.tickrate, Objects.requireNonNull(this.exceptionHandler));
     }
 }

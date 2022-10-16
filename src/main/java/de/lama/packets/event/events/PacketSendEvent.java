@@ -1,5 +1,6 @@
-package de.lama.packets;
+package de.lama.packets.event.events;
 
+import de.lama.packets.Packet;
 import de.lama.packets.event.CancelContainer;
 import de.lama.packets.event.Cancellable;
 import de.lama.packets.event.PacketEvent;

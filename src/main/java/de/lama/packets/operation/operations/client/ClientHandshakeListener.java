@@ -1,9 +1,9 @@
-package de.lama.packets.client.launchable;
+package de.lama.packets.operation.operations.client;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.HandshakePacket;
 import de.lama.packets.Packet;
-import de.lama.packets.PacketReceiveEvent;
+import de.lama.packets.event.events.PacketReceiveEvent;
 
 import java.util.function.Consumer;
 

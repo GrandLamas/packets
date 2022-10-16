@@ -1,4 +1,4 @@
-package de.lama.packets;
+package de.lama.packets.operation.operations;
 
 import de.lama.packets.operation.Operation;
 import de.lama.packets.transceiver.TransceivablePacket;

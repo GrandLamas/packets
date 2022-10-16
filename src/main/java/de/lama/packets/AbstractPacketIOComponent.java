@@ -1,22 +1,34 @@
 package de.lama.packets;
 
 import de.lama.packets.event.EventHandler;
-import de.lama.packets.event.EventHandlerContainer;
 import de.lama.packets.event.OrderedEventExecutor;
+import de.lama.packets.operation.ThreadedOperation;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.registry.RegistryContainer;
 import de.lama.packets.util.ExceptionHandler;
 
-public abstract class AbstractPacketComponent implements RegistryContainer, EventHandlerContainer {
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+public abstract class AbstractPacketIOComponent implements PacketIOComponent {
 
     protected final EventHandler eventHandler;
     protected final PacketRegistry registry;
     protected final ExceptionHandler exceptionHandler;
+    protected final Set<ThreadedOperation> threadedOperations;
 
-    public AbstractPacketComponent(ExceptionHandler exceptionHandler, PacketRegistry registry) {
+    public AbstractPacketIOComponent(ExceptionHandler exceptionHandler, PacketRegistry registry) {
         this.exceptionHandler = exceptionHandler;
         this.registry = registry;
         this.eventHandler = new OrderedEventExecutor();
+        this.threadedOperations = new CopyOnWriteArraySet<>();
+    }
+
+    protected void registerOperation(ThreadedOperation operation) {
+        this.threadedOperations.add(operation);
+    }
+
+    protected void queueOperations() {
+        this.threadedOperations.forEach(ThreadedOperation::queue);
     }
 
     @Override
