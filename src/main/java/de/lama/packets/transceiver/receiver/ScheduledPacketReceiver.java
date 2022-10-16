@@ -11,7 +11,6 @@ import java.io.DataInputStream;
 import java.io.InputStream;
 import java.util.concurrent.ScheduledExecutorService;
 
-// TODO: Builder with merged tickrate on transmitter
 public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implements PacketReceiver {
 
     private final DirectPacketInputStream in;

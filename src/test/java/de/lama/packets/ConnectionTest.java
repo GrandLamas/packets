@@ -1,7 +1,8 @@
 package de.lama.packets;
 
-import de.lama.packets.client.packet.ClientBuilder;
-import de.lama.packets.client.packet.PacketClient;
+import de.lama.packets.client.ClientBuilder;
+import de.lama.packets.client.Client;
+import de.lama.packets.client.SocketBuilder;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
@@ -17,13 +18,14 @@ public class ConnectionTest {
         PacketRegistry registry = new HashedPacketRegistry();
         registry.registerPacket(MessagePacket.ID, MessagePacket.class);
 
-        startServer(registry);
+        ClientBuilder clientBuilder = new ClientBuilder().registry(registry);
+        startServer(clientBuilder);
         Thread.sleep(100);
-        connectClient(registry);
+        connectClient(clientBuilder);
     }
 
-    private static void startServer(PacketRegistry registry) throws IOException {
-        PacketServer server = new ServerBuilder().registry(registry).build();
+    private static void startServer(ClientBuilder builder) throws IOException {
+        PacketServer server = new ServerBuilder().clientBuilder(builder).build();
 
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
@@ -38,16 +40,16 @@ public class ConnectionTest {
         server.open().queue();
     }
 
-    private static void connectClient(PacketRegistry registry) {
+    private static void connectClient(ClientBuilder clientBuilder) {
         try {
-            PacketClient client = new ClientBuilder().registry(registry).localhost().build();
-//            Thread.sleep(1000);
+            Client client = clientBuilder.build(new SocketBuilder().localhost());
+            Thread.sleep(1000);
             long nanos = System.currentTimeMillis();
 //            for (int i = 1; i <= 10000; i++) {
-                client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
+                client.send(new MessagePacket("sussy amogus balls obama burger")).complete(); // very political
 //            }
-            System.out.println("Took: " + (System.currentTimeMillis() - nanos));
-        } catch (IOException e) {
+            System.out.println("Took " + (System.currentTimeMillis() - nanos) + "ms");
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

@@ -11,9 +11,17 @@ public class PacketTransmitterBuilder {
 
     private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(10);
 
-    private ScheduledExecutorService pool = SERVICE;
-    private int tickrate = 16;
+    private static final int TICKRATE = 16;
+
+    private ScheduledExecutorService pool;
+    private int tickrate;
     private ExceptionHandler exceptionHandler;
+
+    public PacketTransmitterBuilder() {
+        this.tickrate = TICKRATE;
+        this.pool = SERVICE;
+    }
+
     public PacketTransmitterBuilder tickrate(int tickrate) {
         this.tickrate = tickrate;
         return this;

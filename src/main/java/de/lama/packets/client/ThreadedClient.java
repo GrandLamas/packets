@@ -1,6 +1,7 @@
 package de.lama.packets.client;
 
 import de.lama.packets.AbstractPacketIOComponent;
+import de.lama.packets.DefaultPackets;
 import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.PacketSendEvent;
@@ -16,28 +17,31 @@ import de.lama.packets.transceiver.receiver.PacketReceiverBuilder;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.util.ExceptionHandler;
-import de.lama.packets.wrapper.GsonWrapper;
 import de.lama.packets.wrapper.PacketWrapper;
 
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public abstract class AbstractGsonClient extends AbstractPacketIOComponent implements Client {
+public class ThreadedClient extends AbstractPacketIOComponent implements Client {
 
     private static final ScheduledExecutorService TRANSCEIVER_POOL = Executors.newScheduledThreadPool(10);
 
     private final Socket socket;
+    private final PacketRegistry registry;
+    private final PacketWrapper wrapper;
     private final PacketTransmitter transmitter;
     private final PacketReceiver receiver;
-    private final PacketWrapper wrapper;
 
-    public AbstractGsonClient(Socket socket, PacketRegistry registry, int tickrate, ExceptionHandler exceptionHandler) {
-        super(exceptionHandler, registry);
+    public ThreadedClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, int tickrate, ExceptionHandler exceptionHandler) {
+        super(exceptionHandler);
         this.socket = socket;
-        this.wrapper = new GsonWrapper(registry);
+        this.registry = registry;
+        this.wrapper = wrapper;
 
+        // TODO: Pretty
         this.transmitter = new PacketTransmitterBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
                 .exceptionHandler(exceptionHandler)
                 .build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
@@ -46,9 +50,18 @@ public abstract class AbstractGsonClient extends AbstractPacketIOComponent imple
                 .exceptionHandler(exceptionHandler).packetConsumer(this::packetReceived)
                 .build(exceptionHandler.operate(socket::getInputStream, "Could not get input"));
 
-        this.registerOperation(transmitter);
-        this.registerOperation(receiver);
+        this.start();
+    }
+
+    private void start() {
+        this.registerPackets();
+        this.registerTask(this.transmitter);
+        this.registerTask(this.receiver);
         this.queueOperations();
+    }
+
+    private void registerPackets() {
+        Arrays.stream(DefaultPackets.values()).forEach(packet -> this.registry.registerPacket(packet.getId(), packet.getClazz()));
     }
 
     private PacketReceiveEvent wrapEvent(TransceivablePacket transceivablePacket) {
@@ -105,4 +118,8 @@ public abstract class AbstractGsonClient extends AbstractPacketIOComponent imple
         return this.socket.getPort();
     }
 
+    @Override
+    public PacketRegistry getRegistry() {
+        return this.registry;
+    }
 }

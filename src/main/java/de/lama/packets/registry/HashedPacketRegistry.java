@@ -4,6 +4,7 @@ import de.lama.packets.Packet;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HashedPacketRegistry extends AbstractRegistry implements PacketRegistry {
 
@@ -13,12 +14,11 @@ public class HashedPacketRegistry extends AbstractRegistry implements PacketRegi
     public HashedPacketRegistry() {
         this.registry = new HashMap<>();
         this.reverseRegistry = new HashMap<>();
-        this.registerDefaults();
     }
 
     @Override
     public <T extends Packet> void registerPacket(long id, Class<T> clazz) {
-        if (this.registry.containsKey(id)) throw new IllegalArgumentException("Id already taken");
+        if (Objects.equals(this.registry.get(id), clazz)) throw new IllegalArgumentException("Id already taken");
         this.registry.put(id, clazz);
         this.reverseRegistry.put(clazz, id);
     }

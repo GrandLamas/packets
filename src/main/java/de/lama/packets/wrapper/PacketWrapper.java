@@ -1,9 +1,8 @@
 package de.lama.packets.wrapper;
 
 import de.lama.packets.Packet;
-import de.lama.packets.registry.RegistryContainer;
 
-public interface PacketWrapper extends RegistryContainer {
+public interface PacketWrapper {
 
     byte[] wrap(Packet packet);
 

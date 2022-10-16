@@ -4,11 +4,10 @@ import de.lama.packets.client.Client;
 import de.lama.packets.Packet;
 import de.lama.packets.event.EventHandlerContainer;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.registry.RegistryContainer;
 
 import java.util.stream.Stream;
 
-public interface PacketServer extends RegistryContainer, EventHandlerContainer {
+public interface PacketServer extends EventHandlerContainer {
 
     Operation open();
 
@@ -21,8 +20,6 @@ public interface PacketServer extends RegistryContainer, EventHandlerContainer {
     Operation broadcast(Packet packet);
 
     boolean isClosed();
-
-    int getTickrate();
 
     int getPort();
 

@@ -1,40 +1,44 @@
 package de.lama.packets.server;
 
-import de.lama.packets.AbstractPacketComponentBuilder;
-import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.Packet;
+import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Objects;
 
-public class ServerBuilder extends AbstractPacketComponentBuilder {
+public class ServerBuilder {
+
+    private int port;
+    private ClientBuilder clientBuilder;
+    private ExceptionHandler exceptionHandler;
+
+    public ServerBuilder() {
+        this.port = Packet.PORT;
+    }
 
     private ServerSocket createSocket() throws IOException {
         return new ServerSocket(this.port);
     }
 
-    @Override
-    public ServerBuilder tickrate(int tickrate) {
-        return (ServerBuilder) super.tickrate(tickrate);
+    public ServerBuilder clientBuilder(ClientBuilder clientFactory) {
+        this.clientBuilder = clientFactory;
+        return this;
     }
 
-    @Override
-    public ServerBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
-        return (ServerBuilder) super.exceptionHandler(exceptionHandler);
-    }
-
-    @Override
     public ServerBuilder port(int port) {
-        return (ServerBuilder) super.port(port);
+        this.port = port;
+        return this;
     }
 
-    @Override
-    public ServerBuilder registry(PacketRegistry registry) {
-        return (ServerBuilder) super.registry(registry);
+    public ServerBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
+        return this;
     }
 
     public PacketServer build() throws IOException {
-        return new LinkedClientServer(this.createSocket(), this.tickrate, Objects.requireNonNull(this.registry), Objects.requireNonNull(this.exceptionHandler));
+        return new LinkedClientServer(this.createSocket(), Objects.requireNonNullElseGet(this.clientBuilder, ClientBuilder::new),
+                Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
     }
 }

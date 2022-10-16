@@ -3,7 +3,7 @@ package de.lama.packets.server;
 import de.lama.packets.AbstractPacketIOComponent;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
-import de.lama.packets.client.virtual.VirtualClientBuilder;
+import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.event.events.server.ClientCloseEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
 import de.lama.packets.event.events.server.ServerHandshakeListener;
@@ -12,7 +12,6 @@ import de.lama.packets.operation.operations.ComponentCloseOperation;
 import de.lama.packets.operation.operations.SocketCloseOperation;
 import de.lama.packets.operation.operations.server.BroadcastOperation;
 import de.lama.packets.operation.operations.server.ClientCloseOperation;
-import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.net.ServerSocket;
@@ -24,17 +23,17 @@ import java.util.stream.Stream;
 class LinkedClientServer extends AbstractPacketIOComponent implements PacketServer {
 
     private final ServerSocket socket;
-    private final int tickrate;
+    private final  ExceptionHandler exceptionHandler;
     private final Collection<Client> clients;
-    private final VirtualClientBuilder clientBuilder;
+    private final ClientBuilder clientFactory;
     private boolean closed;
 
-    LinkedClientServer(ServerSocket socket, int tickrate, PacketRegistry registry, ExceptionHandler exceptionHandler) {
-        super(exceptionHandler, registry);
+    LinkedClientServer(ServerSocket socket, ClientBuilder builder, ExceptionHandler exceptionHandler) {
+        super(exceptionHandler);
+        this.exceptionHandler = exceptionHandler;
         this.socket = socket;
-        this.tickrate = tickrate;
         this.clients = new ConcurrentLinkedQueue<>();
-        this.clientBuilder = new VirtualClientBuilder().exceptionHandler(this.exceptionHandler).server(this);
+        this.clientFactory = builder;
         this.closed = true;
 
         this.registerDefaultListener();
@@ -46,7 +45,7 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
 
     protected boolean register(Socket socket) {
         if (this.closed) return false;
-        Client client = this.clientBuilder.build(socket);
+        Client client = this.clientFactory.buildVirtual(socket);
         if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
             return true;
@@ -96,11 +95,6 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
     }
 
     @Override
-    public int getTickrate() {
-        return this.tickrate;
-    }
-
-    @Override
     public int getPort() {
         return this.socket.getLocalPort();
     }
@@ -110,8 +104,4 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
         return this.clients.stream();
     }
 
-    @Override
-    public PacketRegistry getRegistry() {
-        return this.registry;
-    }
 }

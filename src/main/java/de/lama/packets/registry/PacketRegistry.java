@@ -6,7 +6,7 @@ public interface PacketRegistry {
 
     /**
      * Registers a packet.
-     * Throws IllegalArgumentException if id already taken.
+     * Throws IllegalArgumentException if id already taken by another class.
      *
      * @param id The id
      * @param clazz The class
