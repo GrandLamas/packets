@@ -82,7 +82,7 @@ public abstract class AbstractGsonClient extends AbstractPacketIOComponent imple
     @Override
     public Operation close() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already closed");
-        return new SocketCloseOperation(this.socket, this.threadedOperations, this.exceptionHandler);
+        return new SocketCloseOperation(this.socket, this.repeatingOperations, this.exceptionHandler);
     }
 
     @Override

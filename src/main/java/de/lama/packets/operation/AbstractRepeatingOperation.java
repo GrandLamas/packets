@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public abstract class AbstractThreadedOperation implements ThreadedOperation {
+public abstract class AbstractRepeatingOperation implements RepeatingOperation {
 
     private static final ExecutorService POOL = Executors.newCachedThreadPool();
 

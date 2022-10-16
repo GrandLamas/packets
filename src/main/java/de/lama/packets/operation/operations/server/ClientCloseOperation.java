@@ -1,12 +1,12 @@
 package de.lama.packets.operation.operations.server;
 
 import de.lama.packets.client.Client;
-import de.lama.packets.operation.AbstractThreadedOperation;
+import de.lama.packets.operation.AbstractRepeatingOperation;
 import de.lama.packets.operation.Operation;
 
 import java.util.function.Consumer;
 
-public class ClientCloseOperation extends AbstractThreadedOperation {
+public class ClientCloseOperation extends AbstractRepeatingOperation {
 
     private final Client client;
     private final Consumer<Client> onFinish;

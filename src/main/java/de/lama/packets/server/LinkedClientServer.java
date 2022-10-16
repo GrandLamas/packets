@@ -61,7 +61,7 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
         if (!this.closed) throw new IllegalStateException("Server already running");
         this.closed = false;
-        return new ThreadedClientAcceptor(this.socket, this::register, this.exceptionHandler);
+        return new RepeatingClientAcceptor(this.socket, this::register, this.exceptionHandler);
     }
 
     @Override
@@ -69,7 +69,7 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
         if (this.closed) throw new IllegalStateException("Server not running");
         this.closed = true;
-        return new ComponentCloseOperation(this.threadedOperations, this.exceptionHandler);
+        return new ComponentCloseOperation(this.repeatingOperations, this.exceptionHandler);
     }
 
     @Override
@@ -82,7 +82,7 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
     public Operation shutdown() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
         this.closed = true;
-        return new SocketCloseOperation(this.socket, this.threadedOperations, this.exceptionHandler);
+        return new SocketCloseOperation(this.socket, this.repeatingOperations, this.exceptionHandler);
     }
 
     @Override

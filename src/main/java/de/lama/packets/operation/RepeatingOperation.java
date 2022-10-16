@@ -1,6 +1,6 @@
 package de.lama.packets.operation;
 
-public interface ThreadedOperation extends Operation {
+public interface RepeatingOperation extends Operation {
 
     void stop();
 

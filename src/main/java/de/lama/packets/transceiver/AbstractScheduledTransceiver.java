@@ -1,12 +1,12 @@
 package de.lama.packets.transceiver;
 
-import de.lama.packets.operation.AbstractThreadedOperation;
+import de.lama.packets.operation.AbstractRepeatingOperation;
 import de.lama.packets.operation.Operation;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractScheduledTransceiver extends AbstractThreadedOperation implements PacketTransceiver {
+public abstract class AbstractScheduledTransceiver extends AbstractRepeatingOperation implements PacketTransceiver {
 
     private final ScheduledExecutorService pool;
     private final long tickrate;

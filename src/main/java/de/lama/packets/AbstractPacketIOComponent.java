@@ -2,7 +2,7 @@ package de.lama.packets;
 
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.event.OrderedEventExecutor;
-import de.lama.packets.operation.ThreadedOperation;
+import de.lama.packets.operation.RepeatingOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
 
@@ -14,21 +14,21 @@ public abstract class AbstractPacketIOComponent implements PacketIOComponent {
     protected final EventHandler eventHandler;
     protected final PacketRegistry registry;
     protected final ExceptionHandler exceptionHandler;
-    protected final Set<ThreadedOperation> threadedOperations;
+    protected final Set<RepeatingOperation> repeatingOperations;
 
     public AbstractPacketIOComponent(ExceptionHandler exceptionHandler, PacketRegistry registry) {
         this.exceptionHandler = exceptionHandler;
         this.registry = registry;
         this.eventHandler = new OrderedEventExecutor();
-        this.threadedOperations = new CopyOnWriteArraySet<>();
+        this.repeatingOperations = new CopyOnWriteArraySet<>();
     }
 
-    protected void registerOperation(ThreadedOperation operation) {
-        this.threadedOperations.add(operation);
+    protected void registerOperation(RepeatingOperation operation) {
+        this.repeatingOperations.add(operation);
     }
 
     protected void queueOperations() {
-        this.threadedOperations.forEach(ThreadedOperation::queue);
+        this.repeatingOperations.forEach(RepeatingOperation::queue);
     }
 
     @Override
