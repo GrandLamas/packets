@@ -19,7 +19,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     private final PacketConsumer consumer;
     private TransceivablePacket last;
 
-    public ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketConsumer consumer) {
+    ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketConsumer consumer) {
         super(pool, tickrate);
         this.consumer = consumer;
         this.in = new DirectPacketInputStream(new DataInputStream(new BufferedInputStream(inputStream)));

@@ -41,11 +41,13 @@ public class ConnectionTest {
     private static void connectClient(PacketRegistry registry) {
         try {
             PacketClient client = new ClientBuilder().registry(registry).localhost().build();
-            Thread.sleep(1000);
-            for (int i = 1; i <= 10000; i++) {
-                client.send(new MessagePacket("sussy amogus balls obama burger " + i)).queue(); // very political
-            }
-        } catch (IOException | InterruptedException e) {
+//            Thread.sleep(1000);
+            long nanos = System.currentTimeMillis();
+//            for (int i = 1; i <= 10000; i++) {
+                client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
+//            }
+            System.out.println("Took: " + (System.currentTimeMillis() - nanos));
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -1,6 +1,7 @@
 package de.lama.packets.client;
 
-import de.lama.packets.*;
+import de.lama.packets.AbstractPacketIOComponent;
+import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.PacketSendEvent;
 import de.lama.packets.io.CachedIOPacket;
@@ -11,7 +12,7 @@ import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.transceiver.IoTransceivablePacket;
 import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.transceiver.receiver.PacketReceiver;
-import de.lama.packets.transceiver.receiver.ScheduledPacketReceiver;
+import de.lama.packets.transceiver.receiver.PacketReceiverBuilder;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.util.ExceptionHandler;
@@ -40,8 +41,9 @@ public abstract class AbstractGsonClient extends AbstractPacketIOComponent imple
         this.transmitter = new PacketTransmitterBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
                 .exceptionHandler(exceptionHandler).build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
 
-        this.receiver = new ScheduledPacketReceiver(exceptionHandler.operate(socket::getInputStream, "Could not get input"),
-                tickrate, TRANSCEIVER_POOL, exceptionHandler, this::packetReceived);
+        this.receiver = new PacketReceiverBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
+                .exceptionHandler(exceptionHandler).packetConsumer(this::packetReceived)
+                .build(exceptionHandler.operate(socket::getInputStream, "Could not get input"));
 
         this.registerOperation(transmitter);
         this.registerOperation(receiver);
