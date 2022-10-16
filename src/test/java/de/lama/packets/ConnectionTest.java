@@ -42,9 +42,8 @@ public class ConnectionTest {
         try {
             PacketClient client = new ClientBuilder().registry(registry).localhost().build();
             Thread.sleep(1000);
-            for (int i = 1; i <= 1000; i++) {
+            for (int i = 1; i <= 10000; i++) {
                 client.send(new MessagePacket("sussy amogus balls obama burger " + i)).queue(); // very political
-                Thread.sleep(1000);
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
