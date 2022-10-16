@@ -9,8 +9,8 @@ import java.util.Set;
 
 public class ComponentCloseOperation extends AbstractThreadedOperation {
 
-    protected final Set<ThreadedOperation> operations;
-    protected final ExceptionHandler exceptionHandler;
+    private final Set<ThreadedOperation> operations;
+    private final ExceptionHandler exceptionHandler;
 
     public ComponentCloseOperation(Set<ThreadedOperation> operations, ExceptionHandler exceptionHandler) {
         this.operations = operations;
@@ -19,7 +19,7 @@ public class ComponentCloseOperation extends AbstractThreadedOperation {
 
     @Override
     public Operation complete() {
-        this.operations.forEach(ThreadedOperation::stop);
+        this.operations.forEach(operation -> this.exceptionHandler.operate(operation::stop, "Could not stop operation"));
         return this;
     }
 }
