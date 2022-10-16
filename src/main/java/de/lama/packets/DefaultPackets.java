@@ -1,7 +1,4 @@
-package de.lama.packets.registry;
-
-import de.lama.packets.HandshakePacket;
-import de.lama.packets.Packet;
+package de.lama.packets;
 
 public enum DefaultPackets {
 

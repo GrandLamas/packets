@@ -1,5 +1,7 @@
 package de.lama.packets.registry;
 
+import de.lama.packets.DefaultPackets;
+
 import java.util.Arrays;
 
 public abstract class AbstractRegistry implements PacketRegistry {
