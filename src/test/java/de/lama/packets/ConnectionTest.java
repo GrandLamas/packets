@@ -4,8 +4,6 @@ import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
-import de.lama.packets.registry.HashedPacketRegistry;
-import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.Server;
 import de.lama.packets.server.ServerBuilder;
 
@@ -14,17 +12,16 @@ import java.io.IOException;
 public class ConnectionTest {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        PacketRegistry registry = new HashedPacketRegistry();
-        registry.registerPacket(MessagePacket.ID, MessagePacket.class);
+        ClientBuilder clientBuilder = new ClientBuilder();
+        clientBuilder.registry().registerPacket(MessagePacket.ID, MessagePacket.class);
 
-        ClientBuilder clientBuilder = new ClientBuilder().registry(registry);
         startServer(clientBuilder);
         Thread.sleep(100);
         connectClient(clientBuilder);
     }
 
     private static void startServer(ClientBuilder builder) throws IOException {
-        Server server = new ServerBuilder().clientBuilder(builder).build();
+        Server server = new ServerBuilder().clients(builder).build();
 
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());

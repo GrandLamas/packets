@@ -22,7 +22,7 @@ public class ServerBuilder {
         return new ServerSocket(this.port);
     }
 
-    public ServerBuilder clientBuilder(ClientBuilder clientFactory) {
+    public ServerBuilder clients(ClientBuilder clientFactory) {
         this.clientBuilder = clientFactory;
         return this;
     }
@@ -38,7 +38,8 @@ public class ServerBuilder {
     }
 
     public Server build() throws IOException {
-        return new UniqueSocketServer(this.createSocket(), Objects.requireNonNullElseGet(this.clientBuilder, ClientBuilder::new),
-                Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
+        ClientBuilder clientBuilder = Objects.requireNonNullElseGet(this.clientBuilder, ClientBuilder::new);
+        ExceptionHandler exceptionHandler = Objects.requireNonNullElse(this.exceptionHandler, clientBuilder.exceptionHandler());
+        return new UniqueSocketServer(this.createSocket(), clientBuilder, exceptionHandler);
     }
 }
