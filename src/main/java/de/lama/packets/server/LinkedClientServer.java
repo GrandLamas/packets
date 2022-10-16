@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 class LinkedClientServer extends AbstractPacketIOComponent implements PacketServer {
 
     private final ServerSocket socket;
-    private final  ExceptionHandler exceptionHandler;
+    private final ExceptionHandler exceptionHandler;
     private final Collection<Client> clients;
     private final ClientBuilder clientFactory;
     private boolean closed;
@@ -33,7 +33,7 @@ class LinkedClientServer extends AbstractPacketIOComponent implements PacketServ
         this.exceptionHandler = exceptionHandler;
         this.socket = socket;
         this.clients = new ConcurrentLinkedQueue<>();
-        this.clientFactory = builder;
+        this.clientFactory = builder.clone();
         this.closed = true;
 
         this.registerDefaultListener();

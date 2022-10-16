@@ -1,14 +1,13 @@
 package de.lama.packets;
 
-import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.client.Client;
-import de.lama.packets.client.SocketBuilder;
+import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.event.events.PacketReceiveEvent;
+import de.lama.packets.event.events.server.ClientConnectEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.PacketServer;
 import de.lama.packets.server.ServerBuilder;
-import de.lama.packets.event.events.server.ClientConnectEvent;
 
 import java.io.IOException;
 
@@ -42,7 +41,7 @@ public class ConnectionTest {
 
     private static void connectClient(ClientBuilder clientBuilder) {
         try {
-            Client client = clientBuilder.build(new SocketBuilder().localhost());
+            Client client = clientBuilder.build();
             Thread.sleep(1000);
             long nanos = System.currentTimeMillis();
 //            for (int i = 1; i <= 10000; i++) {

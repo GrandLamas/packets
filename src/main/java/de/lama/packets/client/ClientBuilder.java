@@ -1,5 +1,6 @@
 package de.lama.packets.client;
 
+import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.client.ClientHandshakeListener;
 import de.lama.packets.registry.HashedPacketRegistry;
@@ -12,12 +13,15 @@ import de.lama.packets.wrapper.WrapperFactory;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.function.Supplier;
 
-public class ClientBuilder {
+public class ClientBuilder implements Cloneable {
 
     private static final int TICKRATE = (int) Math.pow(2, 4); // 16
     static final int TICKRATE_LIMIT = 1000;
-    static final PacketRegistry GLOBAL_REGISTRY = new HashedPacketRegistry();
+    static final int PORT = Packet.PORT;
+    static final String LOCALHOST = "localhost";
+    static final Supplier<PacketRegistry> GLOBAL_REGISTRY = HashedPacketRegistry::new;
     static final WrapperFactory DEFAULT_WRAPPER = new GsonFactory();
 
     private ExceptionHandler exceptionHandler;
@@ -50,18 +54,25 @@ public class ClientBuilder {
         return this;
     }
 
-    public Client build(SocketBuilder builder) throws IOException {
-        Socket socket = builder.build();
-        Client client = this.buildVirtual(socket);
-        client.getEventHandler().subscribe(PacketReceiveEvent.class, new ClientHandshakeListener(client));
-        return client;
-    }
-
     public Client buildVirtual(Socket socket) {
-        PacketRegistry registry = Objects.requireNonNullElse(this.registry, GLOBAL_REGISTRY);
+        PacketRegistry registry = Objects.requireNonNullElseGet(this.registry, GLOBAL_REGISTRY);
         PacketWrapper wrapper = Objects.requireNonNullElse(this.wrapperFactory, DEFAULT_WRAPPER).create(registry);
         return new ThreadedClient(socket, registry, wrapper,
                 this.tickrate, Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
+    }
+
+    public Client build(Socket socket) {
+        Client built = this.buildVirtual(socket);
+        built.getEventHandler().subscribe(PacketReceiveEvent.class, new ClientHandshakeListener(built));
+        return built;
+    }
+
+    public Client build(String address, int port) throws IOException {
+        return this.build(new Socket(address, port));
+    }
+
+    public Client build() throws IOException {
+        return this.build(LOCALHOST, PORT);
     }
 
     public ExceptionHandler exceptionHandler() {
@@ -72,11 +83,25 @@ public class ClientBuilder {
         return this.registry;
     }
 
+    public int tickrate() {
+        return this.tickrate;
+    }
+
     public WrapperFactory wrapperFactory() {
         return this.wrapperFactory;
     }
 
-    public int tickrate() {
-        return this.tickrate;
+    @Override
+    public ClientBuilder clone() {
+        try {
+            ClientBuilder clone = (ClientBuilder) super.clone();
+            clone.exceptionHandler = this.exceptionHandler;
+            clone.registry = this.registry;
+            clone.tickrate = this.tickrate;
+            clone.wrapperFactory = this.wrapperFactory;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }
