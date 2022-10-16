@@ -1,7 +1,6 @@
 package de.lama.packets.transceiver.transmitter;
 
 import de.lama.packets.util.ExceptionHandler;
-import de.lama.packets.wrapper.PacketWrapper;
 
 import java.io.OutputStream;
 import java.util.Objects;
@@ -15,8 +14,6 @@ public class PacketTransmitterBuilder {
     private ScheduledExecutorService pool = SERVICE;
     private int tickrate = 16;
     private ExceptionHandler exceptionHandler;
-    private PacketWrapper packetWrapper;
-
     public PacketTransmitterBuilder tickrate(int tickrate) {
         this.tickrate = tickrate;
         return this;
@@ -32,13 +29,8 @@ public class PacketTransmitterBuilder {
         return this;
     }
 
-    public PacketTransmitterBuilder packetWrapper(PacketWrapper packetWrapper) {
-        this.packetWrapper = packetWrapper;
-        return this;
-    }
-
     public PacketTransmitter build(OutputStream out) {
-        return new ScheduledPacketQueue(Objects.requireNonNull(out), this.tickrate, Objects.requireNonNull(this.pool),
-                Objects.requireNonNull(this.exceptionHandler), Objects.requireNonNull(this.packetWrapper));
+        return new ScheduledPacketTransmitter(Objects.requireNonNull(out), this.tickrate, Objects.requireNonNull(this.pool),
+                Objects.requireNonNull(this.exceptionHandler));
     }
 }

@@ -1,7 +1,6 @@
 package de.lama.packets.io;
 
 import de.lama.packets.Packet;
-import de.lama.packets.wrapper.PacketWrapper;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -10,16 +9,15 @@ import java.io.InputStream;
 public class PacketInputStream extends InputStream {
 
     private final DataInputStream in;
-    private final PacketWrapper wrapper;
 
-    public PacketInputStream(DataInputStream in, PacketWrapper wrapper) {
+    public PacketInputStream(DataInputStream in) {
         this.in = in;
-        this.wrapper = wrapper;
     }
 
-    public Packet readPacket() throws IOException {
+    public IOPacket readPacket() throws IOException {
         char type = this.in.readChar();
         if (type != Packet.TYPE) return null;
+        long packetId = this.in.readLong();
         int length = this.in.readInt();
         byte[] buffer = new byte[length];
 
@@ -28,7 +26,7 @@ public class PacketInputStream extends InputStream {
             read += this.in.read(buffer, read, buffer.length - read);
         }
 
-        return this.wrapper.unwrap(buffer);
+        return new CachedIOPacket(type, packetId, length, buffer);
     }
 
     @Override

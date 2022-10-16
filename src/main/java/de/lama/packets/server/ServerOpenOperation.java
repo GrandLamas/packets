@@ -1,6 +1,6 @@
 package de.lama.packets.server;
 
-import de.lama.packets.operation.AbstractSimpleThreadedOperation;
+import de.lama.packets.operation.AbstractThreadedOperation;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.server.exception.ServerException;
 
@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-class ServerOpenOperation extends AbstractSimpleThreadedOperation {
+class ServerOpenOperation extends AbstractThreadedOperation {
 
     private static final ExecutorService REGISTRATIONS = Executors.newCachedThreadPool();
 

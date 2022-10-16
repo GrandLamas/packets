@@ -1,9 +1,9 @@
 package de.lama.packets.server;
 
-import de.lama.packets.operation.AbstractSimpleThreadedOperation;
+import de.lama.packets.operation.AbstractThreadedOperation;
 import de.lama.packets.operation.Operation;
 
-public class ServerShutdownOperation extends AbstractSimpleThreadedOperation {
+public class ServerShutdownOperation extends AbstractThreadedOperation {
 
     private final LinkedClientServer server;
 

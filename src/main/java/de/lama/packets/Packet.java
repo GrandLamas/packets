@@ -3,29 +3,9 @@ package de.lama.packets;
 /**
  * Immutable
  */
-public class Packet implements Cloneable {
+public interface Packet extends Cloneable {
 
-    public static final String VERSION = "v0.1";
-    public static final char TYPE = 's';
+    String VERSION = "0.1";
+    char TYPE = 'p';
 
-    private long id;
-
-    public Packet(long id) {
-        this.id = id;
-    }
-
-    public long getId() {
-        return this.id;
-    }
-
-    @Override
-    public Packet clone() {
-        try {
-            Packet clone = (Packet) super.clone();
-            clone.id = this.id;
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
-    }
 }

@@ -1,15 +1,13 @@
 package de.lama.packets.client;
 
-import de.lama.packets.AbstractPacketComponent;
-import de.lama.packets.Packet;
-import de.lama.packets.event.PacketReceiveEvent;
-import de.lama.packets.event.PacketSendEvent;
+import de.lama.packets.*;
+import de.lama.packets.io.CachedIOPacket;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.operation.PacketSendOperation;
-import de.lama.packets.operation.SocketCloseOperation;
-import de.lama.packets.transceiver.receiver.ScheduledPacketReceiver;
+import de.lama.packets.transceiver.IoTransceivablePacket;
+import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.transceiver.receiver.PacketReceiver;
+import de.lama.packets.transceiver.receiver.ScheduledPacketReceiver;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.util.ExceptionHandler;
@@ -28,21 +26,37 @@ public abstract class AbstractGsonClient extends AbstractPacketComponent impleme
     protected final Socket socket;
     protected final PacketTransmitter transmitter;
     protected final PacketReceiver receiver;
+    protected final PacketWrapper wrapper;
 
     public AbstractGsonClient(Socket socket, PacketRegistry registry, int tickrate, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
         this.socket = socket;
+        this.wrapper = new GsonWrapper(registry);
 
-        PacketWrapper packetWrapper = new GsonWrapper(registry);
-        this.transmitter = new PacketTransmitterBuilder().packetWrapper(packetWrapper)
-                .threadPool(SERVICE).tickrate(tickrate)
+        this.transmitter = new PacketTransmitterBuilder().threadPool(SERVICE).tickrate(tickrate)
                 .exceptionHandler(exceptionHandler).build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
 
         this.receiver = new ScheduledPacketReceiver(exceptionHandler.operate(socket::getInputStream, "Could not get input"),
-                tickrate, SERVICE, packetWrapper, exceptionHandler, packet -> this.eventHandler.notify(new PacketReceiveEvent(packet)));
+                tickrate, SERVICE, exceptionHandler, this::packetReceived);
 
         this.transmitter.start();
         this.receiver.start();
+    }
+
+    private PacketReceiveEvent wrapEvent(TransceivablePacket transceivablePacket) {
+        return new PacketReceiveEvent(transceivablePacket.id(), this.parsePacket(transceivablePacket));
+    }
+
+    private void packetReceived(TransceivablePacket transceivablePacket) {
+        this.eventHandler.notify(this.wrapEvent(transceivablePacket));
+    }
+
+    private TransceivablePacket parsePacket(long packetId, Packet packet) {
+        return new IoTransceivablePacket(new CachedIOPacket(packetId, this.wrapper.wrap(packet)));
+    }
+
+    private Packet parsePacket(TransceivablePacket packet) {
+        return this.wrapper.unwrap(packet.id(), packet.data());
     }
 
     @Override
@@ -52,8 +66,9 @@ public abstract class AbstractGsonClient extends AbstractPacketComponent impleme
 
     @Override
     public Operation send(Packet packet) {
-        if (this.eventHandler.isCancelled(new PacketSendEvent(packet))) return null;
-        return new PacketSendOperation(this.transmitter, packet);
+        long packetId = this.registry.parseId(packet.getClass());
+        if (this.eventHandler.isCancelled(new PacketSendEvent(packetId, packet))) return null;
+        return new PacketSendOperation(this.transmitter, this.parsePacket(packetId, packet));
     }
 
     @Override
@@ -61,13 +76,13 @@ public abstract class AbstractGsonClient extends AbstractPacketComponent impleme
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already closed");
         this.transmitter.stop();
         this.receiver.stop();
-        // TODO: Stop packet transmitter
+        // TODO: Move to operation?
         return new SocketCloseOperation(this.socket, this.exceptionHandler);
     }
 
     @Override
-    public Packet awaitPacket(long timeoutInMillis) {
-        return this.receiver.awaitPacket(timeoutInMillis);
+    public PacketReceiveEvent awaitPacket(long timeoutInMillis) {
+        return this.wrapEvent(this.receiver.awaitPacket(timeoutInMillis));
     }
 
     @Override

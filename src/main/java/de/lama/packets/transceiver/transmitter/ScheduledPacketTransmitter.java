@@ -1,10 +1,9 @@
 package de.lama.packets.transceiver.transmitter;
 
-import de.lama.packets.Packet;
 import de.lama.packets.io.PacketOutputStream;
 import de.lama.packets.transceiver.AbstractScheduledTransceiver;
+import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.util.ExceptionHandler;
-import de.lama.packets.wrapper.PacketWrapper;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -13,42 +12,42 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 
-class ScheduledPacketQueue extends AbstractScheduledTransceiver implements PacketTransmitter {
+class ScheduledPacketTransmitter extends AbstractScheduledTransceiver implements PacketTransmitter {
 
     private final PacketOutputStream out;
     private final ExceptionHandler exceptionHandler;
-    private final Queue<Packet> packetQueue;
+    private final Queue<TransceivablePacket> packetQueue;
 
-    ScheduledPacketQueue(OutputStream outputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketWrapper packetWrapper) {
+    ScheduledPacketTransmitter(OutputStream outputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler) {
         super(pool, tickrate);
         this.exceptionHandler = exceptionHandler;
         this.packetQueue = new ConcurrentLinkedQueue<>();
-        this.out = new PacketOutputStream(new DataOutputStream(new BufferedOutputStream(outputStream)), packetWrapper);
+        this.out = new PacketOutputStream(new DataOutputStream(new BufferedOutputStream(outputStream)));
     }
 
     private void flush() {
         this.exceptionHandler.operate(this.out::flush, "Could not flush output");
     }
 
-    private void write(Packet packet) {
+    private void write(TransceivablePacket packet) {
         this.exceptionHandler.operate(() -> this.out.write(packet),"Could not write data");
     }
 
     @Override
     protected void tick() {
-        Packet send;
+        TransceivablePacket send;
         while ((send = this.packetQueue.poll()) != null) {
             this.complete(send);
         }
     }
 
     @Override
-    public void queue(Packet packet) {
+    public void queue(TransceivablePacket packet) {
         this.packetQueue.add(packet);
     }
 
     @Override
-    public void complete(Packet packet) {
+    public void complete(TransceivablePacket packet) {
         this.write(packet);
         this.flush();
     }

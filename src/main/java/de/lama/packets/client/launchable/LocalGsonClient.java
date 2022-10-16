@@ -1,7 +1,7 @@
 package de.lama.packets.client.launchable;
 
 import de.lama.packets.client.AbstractGsonClient;
-import de.lama.packets.event.PacketReceiveEvent;
+import de.lama.packets.PacketReceiveEvent;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
 

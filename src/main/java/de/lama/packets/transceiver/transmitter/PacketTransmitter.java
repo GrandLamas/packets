@@ -1,12 +1,12 @@
 package de.lama.packets.transceiver.transmitter;
 
-import de.lama.packets.Packet;
 import de.lama.packets.transceiver.PacketTransceiver;
+import de.lama.packets.transceiver.TransceivablePacket;
 
 public interface PacketTransmitter extends PacketTransceiver {
 
-    void queue(Packet packet);
+    void queue(TransceivablePacket packet);
 
-    void complete(Packet packet);
+    void complete(TransceivablePacket packet);
 
 }

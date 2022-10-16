@@ -1,8 +1,5 @@
 package de.lama.packets.io;
 
-import de.lama.packets.Packet;
-import de.lama.packets.wrapper.PacketWrapper;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,23 +7,21 @@ import java.io.OutputStream;
 public class PacketOutputStream extends OutputStream {
 
     private final DataOutputStream out;
-    private final PacketWrapper wrapper;
 
-    public PacketOutputStream(DataOutputStream out, PacketWrapper wrapper) {
+    public PacketOutputStream(DataOutputStream out) {
         this.out = out;
-        this.wrapper = wrapper;
+    }
+
+    public void write(IOPacket packet) throws IOException {
+        this.out.writeChar(packet.type());
+        this.out.writeLong(packet.id());
+        this.out.writeInt(packet.size());
+        this.out.write(packet.data());
     }
 
     @Override
     public void write(int b) throws IOException {
         this.out.write(b);
-    }
-
-    public void write(Packet packet) throws IOException {
-        byte[] data = this.wrapper.wrap(packet);
-        this.out.writeChar(Packet.TYPE);
-        this.out.writeInt(data.length);
-        this.out.write(data);
     }
 
     @Override

@@ -12,6 +12,10 @@ public abstract class AbstractPacketWrapper {
     }
 
     protected Class<? extends Packet> parse(long id) {
-        return this.registry.parseId(id);
+        return this.registry.parseClass(id);
+    }
+
+    public PacketRegistry getRegistry() {
+        return this.registry;
     }
 }

@@ -1,14 +1,15 @@
-package de.lama.packets.operation;
+package de.lama.packets;
 
-import de.lama.packets.Packet;
+import de.lama.packets.operation.Operation;
+import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 
 public class PacketSendOperation implements Operation {
 
     private final PacketTransmitter transmitter;
-    private final Packet packet;
+    private final TransceivablePacket packet;
 
-    public PacketSendOperation(PacketTransmitter transmitter, Packet packet) {
+    public PacketSendOperation(PacketTransmitter transmitter, TransceivablePacket packet) {
         this.transmitter = transmitter;
         this.packet = packet;
     }

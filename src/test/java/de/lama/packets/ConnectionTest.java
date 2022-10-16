@@ -2,7 +2,8 @@ package de.lama.packets;
 
 import de.lama.packets.client.launchable.ClientBuilder;
 import de.lama.packets.client.launchable.PacketClient;
-import de.lama.packets.event.PacketReceiveEvent;
+import de.lama.packets.registry.HashedPacketRegistry;
+import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.PacketServer;
 import de.lama.packets.server.ServerBuilder;
 import de.lama.packets.server.event.ClientConnectEvent;
@@ -12,20 +13,22 @@ import java.io.IOException;
 public class ConnectionTest {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        startServer();
+        PacketRegistry registry = new HashedPacketRegistry();
+        registry.registerPacket(MessagePacket.ID, MessagePacket.class);
+
+        startServer(registry);
         Thread.sleep(100);
-        connectClient();
+        connectClient(registry);
     }
 
-    private static void startServer() throws IOException {
-        PacketServer server = new ServerBuilder().build();
-        server.getRegistry().registerPacket(MessagePacket.ID, MessagePacket.class);
+    private static void startServer(PacketRegistry registry) throws IOException {
+        PacketServer server = new ServerBuilder().registry(registry).build();
 
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
 
             connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> {
-                if (event.packet().getId() == MessagePacket.ID) {
+                if (event.packetId() == MessagePacket.ID) {
                     System.out.println(((MessagePacket) event.packet()).getMessage());
                 }
             });
@@ -34,11 +37,11 @@ public class ConnectionTest {
         server.open().queue();
     }
 
-    private static void connectClient() {
+    private static void connectClient(PacketRegistry registry) {
         try {
-            PacketClient client = new ClientBuilder().localhost().build();
+            PacketClient client = new ClientBuilder().registry(registry).localhost().build();
             Thread.sleep(100);
-            client.send(new MessagePacket("Laura suckt")).queue();
+            client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }

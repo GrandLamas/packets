@@ -14,6 +14,8 @@ public interface PacketRegistry {
      */
     <T extends Packet> void registerPacket(long id, Class<T> clazz);
 
-    Class<? extends Packet> parseId(long id);
+    Class<? extends Packet> parseClass(long id);
+
+    long parseId(Class<? extends Packet> clazz);
 
 }

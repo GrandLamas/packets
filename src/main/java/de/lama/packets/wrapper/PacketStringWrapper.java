@@ -10,8 +10,8 @@ public interface PacketStringWrapper extends PacketWrapper {
     Charset CHARSET = StandardCharsets.UTF_8;
 
     @Override
-    default Packet unwrap(byte[] bytes) {
-        return this.unwrapString(new String(bytes, CHARSET));
+    default Packet unwrap(long packetId, byte[] bytes) {
+        return this.unwrapString(packetId, new String(bytes, CHARSET));
     }
 
     @Override
@@ -21,6 +21,6 @@ public interface PacketStringWrapper extends PacketWrapper {
 
     String wrapString(Packet packet);
 
-    Packet unwrapString(String from);
+    Packet unwrapString(long packetId, String from);
 
 }

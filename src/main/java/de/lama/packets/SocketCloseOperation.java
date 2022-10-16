@@ -1,10 +1,12 @@
-package de.lama.packets.operation;
+package de.lama.packets;
 
+import de.lama.packets.operation.AbstractThreadedOperation;
+import de.lama.packets.operation.Operation;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.net.Socket;
 
-public class SocketCloseOperation extends AbstractSimpleThreadedOperation {
+public class SocketCloseOperation extends AbstractThreadedOperation {
 
     private final Socket socket;
     private final ExceptionHandler exceptionHandler;
