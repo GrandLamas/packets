@@ -1,4 +1,4 @@
-package de.lama.packets.operation.operations.client;
+package de.lama.packets.event.events.client;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.HandshakePacket;

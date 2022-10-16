@@ -2,7 +2,7 @@ package de.lama.packets.client.packet;
 
 import de.lama.packets.client.AbstractGsonClient;
 import de.lama.packets.event.events.PacketReceiveEvent;
-import de.lama.packets.operation.operations.client.ClientHandshakeListener;
+import de.lama.packets.event.events.client.ClientHandshakeListener;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
 
