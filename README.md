@@ -10,7 +10,7 @@
 ## Quickstart - General
 Every operation in this API uses the <code>Operation</code> interface.
 For example <code>server.send(packet)</code> returns such an operation.
-Using this operation you may execute <code>Operatoin#complete</code> (synchronized) or <code>Operation#queue</code> (async).
+Using this operation you may execute <code>Operation#complete</code> (synchronized) or <code>Operation#queue</code> (async).
 Operations are immutable and the methods mentioned above will return itself for example executing it multiple times. 
 Almost all asynchronous operations use a centralized ThreadPool, they may also use a local thread pool depending on the operation.
 
