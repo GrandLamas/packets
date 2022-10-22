@@ -11,12 +11,11 @@ import java.io.IOException;
 
 public class ConnectionTest {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         ClientBuilder clientBuilder = new ClientBuilder();
         clientBuilder.registry().registerPacket(MessagePacket.ID, MessagePacket.class);
 
         startServer(clientBuilder);
-        Thread.sleep(100);
         connectClient(clientBuilder);
     }
 
@@ -26,11 +25,7 @@ public class ConnectionTest {
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
 
-            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> {
-                if (event.packetId() == MessagePacket.ID) {
-                    System.out.println(((MessagePacket) event.packet()).getMessage());
-                }
-            });
+            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Received: " + event.packetId()));
         });
 
         server.open().queue();
@@ -39,13 +34,10 @@ public class ConnectionTest {
     private static void connectClient(ClientBuilder clientBuilder) {
         try {
             Client client = clientBuilder.build();
-            Thread.sleep(1000);
-            long nanos = System.currentTimeMillis();
-//            for (int i = 1; i <= 10000; i++) {
-                client.send(new MessagePacket("sussy amogus balls obama burger")).complete(); // very political
-//            }
-            System.out.println("Took " + (System.currentTimeMillis() - nanos) + "ms");
-        } catch (IOException | InterruptedException e) {
+            for (int i = 1; i <= 10000; i++) {
+                client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
+            }
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

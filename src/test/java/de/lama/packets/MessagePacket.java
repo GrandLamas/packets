@@ -2,7 +2,7 @@ package de.lama.packets;
 
 public class MessagePacket implements Packet {
 
-    public static final long ID = 1;
+    public static final long ID = 0;
 
     private final String message;
 
