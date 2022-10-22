@@ -30,15 +30,13 @@ public class ThreadedClient extends AbstractPacketIOComponent implements Client 
     private static final ScheduledExecutorService TRANSCEIVER_POOL = Executors.newScheduledThreadPool(10);
 
     private final Socket socket;
-    private final PacketRegistry registry;
     private final PacketWrapper wrapper;
     private final PacketTransmitter transmitter;
     private final PacketReceiver receiver;
 
     public ThreadedClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, int tickrate, ExceptionHandler exceptionHandler) {
-        super(exceptionHandler);
+        super(exceptionHandler, registry);
         this.socket = socket;
-        this.registry = registry;
         this.wrapper = wrapper;
 
         // TODO: Pretty
@@ -116,10 +114,5 @@ public class ThreadedClient extends AbstractPacketIOComponent implements Client 
     @Override
     public int getPort() {
         return this.socket.getPort();
-    }
-
-    @Override
-    public PacketRegistry getRegistry() {
-        return this.registry;
     }
 }

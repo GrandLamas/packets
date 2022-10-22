@@ -4,6 +4,8 @@ import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
+import de.lama.packets.registry.HashedPacketRegistry;
+import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.Server;
 import de.lama.packets.server.ServerBuilder;
 
@@ -12,15 +14,15 @@ import java.io.IOException;
 public class ConnectionTest {
 
     public static void main(String[] args) throws IOException {
-        ClientBuilder clientBuilder = new ClientBuilder();
-        clientBuilder.registry().registerPacket(MessagePacket.ID, MessagePacket.class);
+        PacketRegistry registry = new HashedPacketRegistry();
+        registry.registerPacket(MessagePacket.ID, MessagePacket.class);
 
-        startServer(clientBuilder);
-        connectClient(clientBuilder);
+        startServer(registry);
+        connectClient(registry);
     }
 
-    private static void startServer(ClientBuilder builder) throws IOException {
-        Server server = new ServerBuilder().clients(builder).build();
+    private static void startServer(PacketRegistry registry) throws IOException {
+        Server server = new ServerBuilder().registry(registry).build();
 
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
@@ -31,9 +33,9 @@ public class ConnectionTest {
         server.open().queue();
     }
 
-    private static void connectClient(ClientBuilder clientBuilder) {
+    private static void connectClient(PacketRegistry registry) {
         try {
-            Client client = clientBuilder.build();
+            Client client = new ClientBuilder().registry(registry).build();
             for (int i = 1; i <= 10000; i++) {
                 client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
             }

@@ -28,10 +28,19 @@ public class ClientBuilder implements Cloneable {
     private int tickrate;
 
     public ClientBuilder() {
-        this.registry = DEFAULT_REGISTRY.get();
-        this.wrapperFactory = DEFAULT_WRAPPER.get();
         this.tickrate = TICKRATE;
-        this.exceptionHandler = Exception::printStackTrace;
+    }
+
+    private PacketRegistry buildRegistry() {
+        return Objects.requireNonNullElseGet(this.registry, DEFAULT_REGISTRY);
+    }
+
+    private PacketWrapper buildWrapper(PacketRegistry registry) {
+        return Objects.requireNonNullElseGet(this.wrapperFactory, DEFAULT_WRAPPER).create(registry);
+    }
+
+    private ExceptionHandler buildHandler() {
+        return Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace);
     }
 
     public ClientBuilder registry(PacketRegistry registry) {
@@ -56,17 +65,13 @@ public class ClientBuilder implements Cloneable {
     }
 
     public Client buildVirtual(Socket socket) {
-        PacketRegistry registry = Objects.requireNonNullElseGet(this.registry, DEFAULT_REGISTRY);
-        PacketWrapper wrapper = Objects.requireNonNullElseGet(this.wrapperFactory, DEFAULT_WRAPPER).create(registry);
-        return new ThreadedClient(socket, registry, wrapper,
-                this.tickrate, Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
+        PacketRegistry registry = this.buildRegistry();
+        return new ThreadedClient(socket, registry, this.buildWrapper(registry), this.tickrate, this.buildHandler());
     }
 
     public Client build(Socket socket) {
-        PacketRegistry registry = Objects.requireNonNullElseGet(this.registry, DEFAULT_REGISTRY);
-        PacketWrapper wrapper = Objects.requireNonNullElseGet(this.wrapperFactory, DEFAULT_WRAPPER).create(registry);
-        return new HandshakeClient(socket, registry, wrapper,
-                this.tickrate, Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
+        PacketRegistry registry = this.buildRegistry();
+        return new HandshakeClient(socket, registry, this.buildWrapper(registry), this.tickrate, this.buildHandler());
     }
 
     public Client build(String address, int port) throws IOException {
@@ -75,22 +80,6 @@ public class ClientBuilder implements Cloneable {
 
     public Client build() throws IOException {
         return this.build(LOCALHOST, PORT);
-    }
-
-    public ExceptionHandler exceptionHandler() {
-        return this.exceptionHandler;
-    }
-
-    public PacketRegistry registry() {
-        return this.registry;
-    }
-
-    public int tickrate() {
-        return this.tickrate;
-    }
-
-    public WrapperFactory wrapperFactory() {
-        return this.wrapperFactory;
     }
 
     @Override

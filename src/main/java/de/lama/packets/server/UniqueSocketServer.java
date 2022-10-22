@@ -12,6 +12,7 @@ import de.lama.packets.operation.operations.ComponentCloseOperation;
 import de.lama.packets.operation.operations.SocketCloseOperation;
 import de.lama.packets.operation.operations.server.BroadcastOperation;
 import de.lama.packets.operation.operations.ClientCloseOperation;
+import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.net.ServerSocket;
@@ -28,12 +29,12 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
     private final ClientBuilder clientFactory;
     private boolean closed;
 
-    UniqueSocketServer(ServerSocket socket, ClientBuilder builder, ExceptionHandler exceptionHandler) {
-        super(exceptionHandler);
+    UniqueSocketServer(ServerSocket socket, ClientBuilder builder, PacketRegistry registry, ExceptionHandler exceptionHandler) {
+        super(exceptionHandler, registry);
         this.exceptionHandler = exceptionHandler;
         this.socket = socket;
         this.clients = new ConcurrentLinkedQueue<>();
-        this.clientFactory = builder.clone();
+        this.clientFactory = builder;
         this.closed = true;
 
         this.registerDefaultListener();
