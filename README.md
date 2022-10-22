@@ -21,7 +21,7 @@ The first interaction between the server and the client will always be handshake
 There is also an event system. You can find more details <a href='#Events'>here</a>.
 
 ## Quickstart - Server
-First of all you need a <code>ServerBuilder</code> to create a new <code>PacketServer</code> Instance.
+First of all you need a <code>ServerBuilder</code> to create a new <code>Server</code> Instance.
 With this builder, you are able to configure (tickrate, encryption, ...) your server.<br>
 
 Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!<br>
