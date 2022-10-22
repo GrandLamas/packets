@@ -1,17 +1,17 @@
 package de.lama.packets.server;
 
 import de.lama.packets.AbstractPacketIOComponent;
+import de.lama.packets.Handshake;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.event.events.server.ClientCloseEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
-import de.lama.packets.event.events.server.ServerHandshakeListener;
 import de.lama.packets.operation.Operation;
+import de.lama.packets.operation.operations.ClientCloseOperation;
 import de.lama.packets.operation.operations.ComponentCloseOperation;
 import de.lama.packets.operation.operations.SocketCloseOperation;
 import de.lama.packets.operation.operations.server.BroadcastOperation;
-import de.lama.packets.operation.operations.ClientCloseOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
 
@@ -36,12 +36,6 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
         this.clients = new ConcurrentLinkedQueue<>();
         this.clientFactory = builder;
         this.closed = true;
-
-        this.registerDefaultListener();
-    }
-
-    private void registerDefaultListener() {
-        this.eventHandler.subscribe(ClientConnectEvent.class, new ServerHandshakeListener());
     }
 
     private boolean register(Socket socket) {
@@ -50,6 +44,7 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
         if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
         } else {
+            new Handshake(client).complete();
             this.clients.add(client);
         }
         

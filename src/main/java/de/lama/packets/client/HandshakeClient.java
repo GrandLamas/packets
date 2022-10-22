@@ -1,9 +1,8 @@
 package de.lama.packets.client;
 
+import de.lama.packets.Handshake;
 import de.lama.packets.HandshakePacket;
 import de.lama.packets.Packet;
-import de.lama.packets.event.events.PacketReceiveEvent;
-import de.lama.packets.event.events.client.ClientHandshakeListener;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
@@ -18,8 +17,7 @@ class HandshakeClient extends ThreadedClient {
     public HandshakeClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, int tickrate, ExceptionHandler exceptionHandler) {
         super(socket, registry, wrapper, tickrate, exceptionHandler);
 
-        this.getEventHandler().subscribe(PacketReceiveEvent.class, new ClientHandshakeListener(this));
-        this.send(new HandshakePacket(Packet.VERSION)).queue();
+        new Handshake(this).queue();
     }
 
     public void awaitHandshake() throws InterruptedException {
