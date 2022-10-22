@@ -6,11 +6,11 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class DirectPacketInputStream extends InputStream implements PacketInputStream {
+public class BufferedPacketInputStream extends InputStream implements PacketInputStream {
 
     private final DataInputStream in;
 
-    public DirectPacketInputStream(DataInputStream in) {
+    public BufferedPacketInputStream(DataInputStream in) {
         this.in = in;
     }
 

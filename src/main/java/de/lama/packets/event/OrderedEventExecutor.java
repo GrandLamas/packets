@@ -1,6 +1,7 @@
 package de.lama.packets.event;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 
 public class OrderedEventExecutor implements EventHandler {
@@ -14,7 +15,7 @@ public class OrderedEventExecutor implements EventHandler {
     @Override
     @SuppressWarnings("unchecked")
     public <R extends Event> UUID subscribe(Class<R> type, Consumer<R> eventConsumer) {
-        this.events.putIfAbsent(type, new LinkedHashSet<>());
+        this.events.putIfAbsent(type, new CopyOnWriteArraySet<>());
         RegisteredListener<R> listener = new RegisteredListener<>(UUID.randomUUID(), eventConsumer);
         this.events.get(type).add((RegisteredListener<Event>) listener);
         return listener.id();

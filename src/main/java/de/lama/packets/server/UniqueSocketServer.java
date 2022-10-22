@@ -11,7 +11,7 @@ import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.operations.ComponentCloseOperation;
 import de.lama.packets.operation.operations.SocketCloseOperation;
 import de.lama.packets.operation.operations.server.BroadcastOperation;
-import de.lama.packets.operation.operations.server.ClientCloseOperation;
+import de.lama.packets.operation.operations.ClientCloseOperation;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.net.ServerSocket;
@@ -43,15 +43,15 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
         this.eventHandler.subscribe(ClientConnectEvent.class, new ServerHandshakeListener());
     }
 
-    protected boolean register(Socket socket) {
+    private boolean register(Socket socket) {
         if (this.closed) return false;
         Client client = this.clientFactory.buildVirtual(socket);
         if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
-            return true;
+        } else {
+            this.clients.add(client);
         }
-
-        this.clients.add(client);
+        
         return true;
     }
 

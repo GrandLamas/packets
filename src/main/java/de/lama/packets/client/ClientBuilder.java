@@ -1,8 +1,6 @@
 package de.lama.packets.client;
 
 import de.lama.packets.Packet;
-import de.lama.packets.event.events.PacketReceiveEvent;
-import de.lama.packets.event.events.client.ClientHandshakeListener;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
@@ -33,6 +31,7 @@ public class ClientBuilder implements Cloneable {
         this.registry = DEFAULT_REGISTRY.get();
         this.wrapperFactory = DEFAULT_WRAPPER.get();
         this.tickrate = TICKRATE;
+        this.exceptionHandler = Exception::printStackTrace;
     }
 
     public ClientBuilder registry(PacketRegistry registry) {
@@ -64,9 +63,10 @@ public class ClientBuilder implements Cloneable {
     }
 
     public Client build(Socket socket) {
-        Client built = this.buildVirtual(socket);
-        built.getEventHandler().subscribe(PacketReceiveEvent.class, new ClientHandshakeListener(built));
-        return built;
+        PacketRegistry registry = Objects.requireNonNullElseGet(this.registry, DEFAULT_REGISTRY);
+        PacketWrapper wrapper = Objects.requireNonNullElseGet(this.wrapperFactory, DEFAULT_WRAPPER).create(registry);
+        return new HandshakeClient(socket, registry, wrapper,
+                this.tickrate, Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace));
     }
 
     public Client build(String address, int port) throws IOException {

@@ -4,11 +4,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class DirectPacketOutputStream extends OutputStream implements PacketOutputStream {
+public class BufferedPacketOutputStream extends OutputStream implements PacketOutputStream {
 
     private final DataOutputStream out;
 
-    public DirectPacketOutputStream(DataOutputStream out) {
+    public BufferedPacketOutputStream(DataOutputStream out) {
         this.out = out;
     }
 

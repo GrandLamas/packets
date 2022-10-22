@@ -18,7 +18,7 @@ public class HashedPacketRegistry extends AbstractRegistry implements PacketRegi
 
     @Override
     public <T extends Packet> void registerPacket(long id, Class<T> clazz) {
-        if (Objects.equals(this.registry.get(id), clazz)) throw new IllegalArgumentException("Id already taken");
+        if (Objects.equals(this.registry.get(id), clazz)) throw new IllegalArgumentException("Id " + id + " already taken");
         this.registry.put(id, clazz);
         this.reverseRegistry.put(clazz, id);
     }
