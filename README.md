@@ -25,16 +25,16 @@ First of all you need a <code>ServerBuilder</code> to create a new <code>PacketS
 With this builder, you are able to configure (tickrate, encryption, ...) your server.<br>
 
 Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!<br>
-<code>PacketServer server = new ServerBuilder().build();</code>
+<code>Server server = new ServerBuilder().build();</code>
 
-You may now open the server to new clients using <code>PacketServer#open</code>.<br>
+You may now open the server to new clients using <code>Server#open</code>.<br>
 Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in closing the socket of this new client.
 
-You are also able to prevent the server from accepting new clients using <code>PacketServer#close</code> or shut it down entirely by using <code>PacketServer#shutdown</code>
+You are also able to prevent the server from accepting new clients using <code>PacketServer#close</code> or shut it down entirely by using <code>Server#shutdown</code>
 
 ## Quickstart - Client
 Opening a new (localhost-addressed) client is fairly simple.<br>
-<code>PacketClient client = new ClientBuilder().localhost().build();</code><br>
+<code>Client client = new ClientBuilder().localhost().build();</code><br>
 Unlike the server, the client cannot be reopened after getting closed once.
 
 ## Events
