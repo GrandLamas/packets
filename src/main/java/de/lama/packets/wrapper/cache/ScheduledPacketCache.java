@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 public class ScheduledPacketCache implements PacketCache {
 
     private static final ScheduledExecutorService POOL = Executors.newScheduledThreadPool(10);
-    private static final long COLLECT_DELAY_SECS = 30; // 60s
-    private static final long REMOVE_TIME_SECS = COLLECT_DELAY_SECS; // 10min
+    private static final long COLLECT_DELAY_SECS = 30;
+    private static final long REMOVE_TIME_SECS = COLLECT_DELAY_SECS;
 
     private final Map<Long, Map<Integer, CachedObject<byte[]>>> byteCache;
     private final Map<Long, Map<Integer, CachedObject<Packet>>> packetCache;
