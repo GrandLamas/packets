@@ -2,6 +2,7 @@ package de.lama.packets.registry;
 
 import de.lama.packets.Packet;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -11,9 +12,11 @@ public class HashedPacketRegistry extends AbstractRegistry implements PacketRegi
     private final Map<Long, Class<? extends Packet>> registry;
     private final Map<Class<? extends Packet>, Long> reverseRegistry;
 
-    public HashedPacketRegistry() {
+    public HashedPacketRegistry(RegistryEntry<?>... entries) {
         this.registry = new HashMap<>();
         this.reverseRegistry = new HashMap<>();
+
+        Arrays.stream(entries).forEach(e -> this.registerPacket(e.id(), e.clazz()));
     }
 
     @Override
