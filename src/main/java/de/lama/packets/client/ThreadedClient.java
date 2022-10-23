@@ -71,7 +71,7 @@ public class ThreadedClient extends AbstractPacketIOComponent implements Client 
     }
 
     private TransceivablePacket parsePacket(long packetId, Packet packet) {
-        return new IoTransceivablePacket(new CachedIoPacket(packetId, this.wrapper.wrap(packet)));
+        return new IoTransceivablePacket(new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet)));
     }
 
     private Packet parsePacket(TransceivablePacket packet) {

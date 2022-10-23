@@ -15,11 +15,11 @@ public interface PacketStringWrapper extends PacketWrapper {
     }
 
     @Override
-    default byte[] wrap(Packet packet) {
-        return this.wrapString(packet).getBytes(CHARSET);
+    default byte[] wrap(long packetId, Packet packet) {
+        return this.wrapString(packetId, packet).getBytes(CHARSET);
     }
 
-    String wrapString(Packet packet);
+    String wrapString(long packetId, Packet packet);
 
     Packet unwrapString(long packetId, String from);
 

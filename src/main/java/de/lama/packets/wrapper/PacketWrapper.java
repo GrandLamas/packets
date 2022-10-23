@@ -4,7 +4,7 @@ import de.lama.packets.Packet;
 
 public interface PacketWrapper {
 
-    byte[] wrap(Packet packet);
+    byte[] wrap(long packetId, Packet packet);
 
     Packet unwrap(long packetId, byte[] bytes);
 

@@ -6,6 +6,6 @@ public class GsonFactory implements WrapperFactory {
 
     @Override
     public PacketWrapper create(PacketRegistry registry) {
-        return new GsonWrapper(registry);
+        return new CachedGsonWrapper(registry);
     }
 }
