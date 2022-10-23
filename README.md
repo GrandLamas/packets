@@ -10,7 +10,7 @@
 ## Quickstart - General
 Every operation in this API uses the <code>Operation</code> interface.
 For example <code>server.send(packet)</code> returns such an operation.
-Using this operation you may execute <code>Operatoin#complete</code> (synchronized) or <code>Operation#queue</code> (async).
+Using this operation you may execute <code>Operation#complete</code> (synchronized) or <code>Operation#queue</code> (async).
 Operations are immutable and the methods mentioned above will return itself for example executing it multiple times. 
 Almost all asynchronous operations use a centralized ThreadPool, they may also use a local thread pool depending on the operation.
 
@@ -21,20 +21,20 @@ The first interaction between the server and the client will always be handshake
 There is also an event system. You can find more details <a href='#Events'>here</a>.
 
 ## Quickstart - Server
-First of all you need a <code>ServerBuilder</code> to create a new <code>PacketServer</code> Instance.
+First of all you need a <code>ServerBuilder</code> to create a new <code>Server</code> Instance.
 With this builder, you are able to configure (tickrate, encryption, ...) your server.<br>
 
 Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!<br>
-<code>PacketServer server = new ServerBuilder().build();</code>
+<code>Server server = new ServerBuilder().build();</code>
 
-You may now open the server to new clients using <code>PacketServer#open</code>.<br>
+You may now open the server to new clients using <code>Server#open</code>.<br>
 Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in closing the socket of this new client.
 
-You are also able to prevent the server from accepting new clients using <code>PacketServer#close</code> or shut it down entirely by using <code>PacketServer#shutdown</code>
+You are also able to prevent the server from accepting new clients using <code>PacketServer#close</code> or shut it down entirely by using <code>Server#shutdown</code>
 
 ## Quickstart - Client
 Opening a new (localhost-addressed) client is fairly simple.<br>
-<code>PacketClient client = new ClientBuilder().localhost().build();</code><br>
+<code>Client client = new ClientBuilder().build();</code><br>
 Unlike the server, the client cannot be reopened after getting closed once.
 
 ## Events
