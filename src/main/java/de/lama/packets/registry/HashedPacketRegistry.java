@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class HashedPacketRegistry extends AbstractRegistry implements PacketRegistry {
+public class HashedPacketRegistry implements PacketRegistry {
 
     private final Map<Long, Class<? extends Packet>> registry;
     private final Map<Class<? extends Packet>, Long> reverseRegistry;
