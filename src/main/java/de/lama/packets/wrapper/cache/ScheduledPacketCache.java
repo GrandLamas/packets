@@ -2,6 +2,7 @@ package de.lama.packets.wrapper.cache;
 
 import de.lama.packets.Packet;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -14,8 +15,8 @@ public class ScheduledPacketCache implements PacketCache {
     private static final long DELAY_SECONDS = 60; // 60s
     private static final long NO_ACCESS_REMOVE = 10 * 60 * 1000; // 10min
 
-    private final Map<Long, Map<Packet, CachedObject<byte[]>>> byteCache;
-    private final Map<Long, Map<byte[], CachedObject<Packet>>> packetCache;
+    private final Map<Long, Map<Integer, CachedObject<byte[]>>> byteCache;
+    private final Map<Long, Map<Integer, CachedObject<Packet>>> packetCache;
 
     public ScheduledPacketCache() {
         this.byteCache = new ConcurrentHashMap<>();
@@ -58,26 +59,25 @@ public class ScheduledPacketCache implements PacketCache {
     }
 
     @Override
-    public void cache(long id, Packet packet, byte[] data) {
-        this.byteCache.putIfAbsent(id, new ConcurrentHashMap<>());
-        this.byteCache.get(id).put(packet, new CachedObject<>(data, System.currentTimeMillis()));
-    }
-
-    @Override
     public void cache(long id, byte[] data, Packet packet) {
+        this.byteCache.putIfAbsent(id, new ConcurrentHashMap<>());
+        this.byteCache.get(id).put(packet.hashCode(), new CachedObject<>(data, System.currentTimeMillis()));
+
         this.packetCache.putIfAbsent(id, new ConcurrentHashMap<>());
-        this.packetCache.get(id).put(data, new CachedObject<>(packet, System.currentTimeMillis()));
+        this.packetCache.get(id).put(Arrays.hashCode(data), new CachedObject<>(packet, System.currentTimeMillis()));
     }
 
     @Override
     public Packet load(long id, byte[] data) {
         var cache = this.packetCache.get(id);
-        return cache == null ? null : cache.get(data).object();
+        var cachedData = cache != null ? cache.get(Arrays.hashCode(data)) : null;
+        return cachedData == null ? null : cachedData.object();
     }
 
     @Override
     public byte[] load(long id, Packet packet) {
         var cache = this.byteCache.get(id);
-        return cache == null ? null : cache.get(packet).object();
+        var cachedData = cache != null ? cache.get(packet.hashCode()) : null;
+        return cachedData == null ? null : cachedData.object();
     }
 }

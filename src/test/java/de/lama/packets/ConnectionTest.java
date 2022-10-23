@@ -36,9 +36,11 @@ public class ConnectionTest {
     private static void connectClient(PacketRegistry registry) {
         try {
             Client client = new ClientBuilder().registry(registry).build("localhost", 4999);
+            long millis = System.currentTimeMillis();
             for (int i = 1; i <= 10000; i++) {
                 client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
             }
+            System.out.println("TIME: " + (System.currentTimeMillis() - millis));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -13,4 +13,9 @@ public class MessagePacket implements Packet {
     public String getMessage() {
         return this.message;
     }
+
+    @Override
+    public int hashCode() {
+        return this.message.hashCode();
+    }
 }
