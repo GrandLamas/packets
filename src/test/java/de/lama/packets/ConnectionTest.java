@@ -22,7 +22,7 @@ public class ConnectionTest {
     }
 
     private static void startServer(PacketRegistry registry) throws IOException {
-        Server server = new ServerBuilder().registry(registry).build();
+        Server server = new ServerBuilder().registry(registry).build(4999);
 
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
@@ -35,7 +35,7 @@ public class ConnectionTest {
 
     private static void connectClient(PacketRegistry registry) {
         try {
-            Client client = new ClientBuilder().registry(registry).build();
+            Client client = new ClientBuilder().registry(registry).build("localhost", 4999);
             for (int i = 1; i <= 10000; i++) {
                 client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
             }

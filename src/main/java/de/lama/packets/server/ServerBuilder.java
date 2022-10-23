@@ -1,6 +1,5 @@
 package de.lama.packets.server;
 
-import de.lama.packets.Packet;
 import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
@@ -15,14 +14,9 @@ public class ServerBuilder {
 
     private static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
 
-    private int port;
     private ClientBuilder clientBuilder;
     private ExceptionHandler exceptionHandler;
     private PacketRegistry registry;
-
-    public ServerBuilder() {
-        this.port = Packet.PORT;
-    }
 
     private PacketRegistry buildRegistry() {
         return Objects.requireNonNullElseGet(this.registry, DEFAULT_REGISTRY);
@@ -36,8 +30,8 @@ public class ServerBuilder {
         return Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace);
     }
 
-    private ServerSocket createSocket() throws IOException {
-        return new ServerSocket(this.port);
+    private ServerSocket createSocket(int port) throws IOException {
+        return new ServerSocket(port);
     }
 
     public ServerBuilder registry(PacketRegistry registry) {
@@ -50,20 +44,15 @@ public class ServerBuilder {
         return this;
     }
 
-    public ServerBuilder port(int port) {
-        this.port = port;
-        return this;
-    }
-
     public ServerBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
         return this;
     }
 
-    public Server build() throws IOException {
+    public Server build(int port) throws IOException {
         ExceptionHandler exceptionHandler = this.buildExceptionHandler();
         PacketRegistry registry = this.buildRegistry();
         ClientBuilder clientBuilder = this.buildClientBuilder().exceptionHandler(exceptionHandler).registry(registry);
-        return new UniqueSocketServer(this.createSocket(), clientBuilder, registry, exceptionHandler);
+        return new UniqueSocketServer(this.createSocket(port), clientBuilder, registry, exceptionHandler);
     }
 }

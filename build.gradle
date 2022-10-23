@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'de.lama.packets'
-version '0.1.2-SNAPSHOT'
+version '0.1.4-SNAPSHOT'
 
 repositories {
     mavenCentral()
