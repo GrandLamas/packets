@@ -13,41 +13,30 @@ import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.transceiver.IoTransceivablePacket;
 import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.transceiver.receiver.PacketReceiver;
-import de.lama.packets.transceiver.receiver.PacketReceiverBuilder;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
-import de.lama.packets.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.wrapper.PacketWrapper;
 
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class ThreadedClient extends AbstractPacketIOComponent implements Client {
-
-    private static final ScheduledExecutorService TRANSCEIVER_POOL = Executors.newScheduledThreadPool(10);
 
     private final Socket socket;
     private final PacketWrapper wrapper;
     private final PacketTransmitter transmitter;
     private final PacketReceiver receiver;
 
-    public ThreadedClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, int tickrate, ExceptionHandler exceptionHandler) {
+    public ThreadedClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, PacketTransmitter transmitter,
+                          PacketReceiver receiver, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
         this.socket = socket;
         this.wrapper = wrapper;
+        this.transmitter = transmitter;
+        this.receiver = receiver;
 
-        // TODO: Pretty
-        this.transmitter = new PacketTransmitterBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
-                .exceptionHandler(exceptionHandler)
-                .build(exceptionHandler.operate(socket::getOutputStream, "Could not get output"));
-
-        this.receiver = new PacketReceiverBuilder().threadPool(TRANSCEIVER_POOL).tickrate(tickrate)
-                .exceptionHandler(exceptionHandler).packetConsumer(this::packetReceived)
-                .build(exceptionHandler.operate(socket::getInputStream, "Could not get input"));
-
+        this.receiver.subscribe(this::packetReceived);
         this.start();
     }
 

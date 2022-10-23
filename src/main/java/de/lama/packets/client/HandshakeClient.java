@@ -5,6 +5,8 @@ import de.lama.packets.HandshakePacket;
 import de.lama.packets.Packet;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.transceiver.receiver.PacketReceiver;
+import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.util.ExceptionHandler;
 import de.lama.packets.wrapper.PacketWrapper;
 
@@ -14,8 +16,8 @@ class HandshakeClient extends ThreadedClient {
 
     private boolean handshake;
 
-    public HandshakeClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, int tickrate, ExceptionHandler exceptionHandler) {
-        super(socket, registry, wrapper, tickrate, exceptionHandler);
+    public HandshakeClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, PacketTransmitter transmitter, PacketReceiver receiver, ExceptionHandler exceptionHandler) {
+        super(socket, registry, wrapper, transmitter, receiver, exceptionHandler);
 
         new Handshake(this).queue();
     }

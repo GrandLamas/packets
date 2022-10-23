@@ -7,4 +7,6 @@ public interface PacketReceiver extends PacketTransceiver {
 
     TransceivablePacket awaitPacket(long timeoutInMillis);
 
+    void subscribe(PacketConsumer consumer);
+
 }

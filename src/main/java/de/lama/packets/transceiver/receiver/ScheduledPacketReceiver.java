@@ -7,18 +7,20 @@ import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.util.ExceptionHandler;
 
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implements PacketReceiver {
 
     private final BufferedPacketInputStream in;
     private final ExceptionHandler exceptionHandler;
-    private final PacketConsumer consumer;
+    private final Collection<PacketConsumer> consumer;
     private TransceivablePacket last;
 
-    ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketConsumer consumer) {
+    ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler) {
         super(pool, tickrate);
-        this.consumer = consumer;
+        this.consumer = new ConcurrentLinkedQueue<>();
         this.in = new BufferedPacketInputStream(inputStream);
         this.exceptionHandler = exceptionHandler;
     }
@@ -32,7 +34,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
                 synchronized (this) {
                     this.notifyAll();
                 }
-                this.consumer.accept(ioPacket);
+                this.consumer.forEach(consumer -> consumer.accept(ioPacket));
             }
         }, "Failed to read packet");
     }
@@ -41,5 +43,10 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     public TransceivablePacket awaitPacket(long timeoutInMillis) {
         synchronized (this) {this.exceptionHandler.operate(() -> this.wait(timeoutInMillis), "Could not wait");}
         return this.last;
+    }
+
+    @Override
+    public void subscribe(PacketConsumer consumer) {
+        this.consumer.add(consumer);
     }
 }

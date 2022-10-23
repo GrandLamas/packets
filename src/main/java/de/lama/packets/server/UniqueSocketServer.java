@@ -40,14 +40,14 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
 
     private boolean register(Socket socket) {
         if (this.closed) return false;
-        Client client = this.clientFactory.buildVirtual(socket);
+        Client client = this.exceptionHandler.operate(() -> this.clientFactory.buildVirtual(socket), "Could not create client");
         if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
         } else {
             new Handshake(client).complete();
             this.clients.add(client);
         }
-        
+
         return true;
     }
 
