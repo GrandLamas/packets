@@ -1,15 +1,13 @@
 package de.lama.packets.io;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 public class BufferedPacketOutputStream extends OutputStream implements PacketOutputStream {
 
     private final DataOutputStream out;
 
-    public BufferedPacketOutputStream(DataOutputStream out) {
-        this.out = out;
+    public BufferedPacketOutputStream(OutputStream out) {
+        this.out = new DataOutputStream(new BufferedOutputStream(out));
     }
 
     @Override

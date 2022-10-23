@@ -6,8 +6,6 @@ import de.lama.packets.transceiver.IoTransceivablePacket;
 import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.util.ExceptionHandler;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.InputStream;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -21,7 +19,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler, PacketConsumer consumer) {
         super(pool, tickrate);
         this.consumer = consumer;
-        this.in = new BufferedPacketInputStream(new DataInputStream(new BufferedInputStream(inputStream)));
+        this.in = new BufferedPacketInputStream(inputStream);
         this.exceptionHandler = exceptionHandler;
     }
 

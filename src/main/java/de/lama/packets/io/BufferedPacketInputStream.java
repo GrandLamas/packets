@@ -2,6 +2,7 @@ package de.lama.packets.io;
 
 import de.lama.packets.Packet;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,8 +11,8 @@ public class BufferedPacketInputStream extends InputStream implements PacketInpu
 
     private final DataInputStream in;
 
-    public BufferedPacketInputStream(DataInputStream in) {
-        this.in = in;
+    public BufferedPacketInputStream(InputStream in) {
+        this.in = new DataInputStream(new BufferedInputStream(in));
     }
 
     @Override
