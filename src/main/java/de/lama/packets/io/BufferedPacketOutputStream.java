@@ -12,9 +12,12 @@ public class BufferedPacketOutputStream extends OutputStream implements PacketOu
 
     @Override
     public void write(IoPacket packet) throws IOException {
+        // HEAD
         this.out.writeChar(packet.type());
         this.out.writeLong(packet.id());
         this.out.writeInt(packet.size());
+
+        // DATA
         this.out.write(packet.data());
     }
 
