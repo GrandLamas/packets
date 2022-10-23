@@ -1,6 +1,5 @@
 package de.lama.packets.client;
 
-import de.lama.packets.Packet;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.ExceptionHandler;
@@ -17,8 +16,6 @@ public class ClientBuilder implements Cloneable {
 
     private static final int TICKRATE = (int) Math.pow(2, 4); // 16
     static final int TICKRATE_LIMIT = 1000;
-    static final int PORT = Packet.PORT;
-    static final String LOCALHOST = "localhost";
     static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
     static final Supplier<WrapperFactory> DEFAULT_WRAPPER = GsonFactory::new;
 
@@ -48,7 +45,7 @@ public class ClientBuilder implements Cloneable {
         return this;
     }
 
-    public ClientBuilder wrapperFactory(WrapperFactory wrapperFactory) {
+    public ClientBuilder wrapper(WrapperFactory wrapperFactory) {
         this.wrapperFactory = wrapperFactory;
         return this;
     }
@@ -76,10 +73,6 @@ public class ClientBuilder implements Cloneable {
 
     public Client build(String address, int port) throws IOException {
         return this.build(new Socket(address, port));
-    }
-
-    public Client build() throws IOException {
-        return this.build(LOCALHOST, PORT);
     }
 
     @Override
