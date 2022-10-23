@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 public class ScheduledPacketCache implements PacketCache {
 
     private static final ScheduledExecutorService POOL = Executors.newScheduledThreadPool(10);
-    private static final long DELAY_SECONDS = 60; // 60s
-    private static final long NO_ACCESS_REMOVE = 10 * 60 * 1000; // 10min
+    private static final long COLLECT_DELAY_SECS = 30; // 60s
+    private static final long REMOVE_TIME_SECS = COLLECT_DELAY_SECS; // 10min
 
     private final Map<Long, Map<Integer, CachedObject<byte[]>>> byteCache;
     private final Map<Long, Map<Integer, CachedObject<Packet>>> packetCache;
@@ -27,11 +27,12 @@ public class ScheduledPacketCache implements PacketCache {
 
     private void collectGarbage() {
         var current = System.currentTimeMillis();
+        long removeTimeMillis = REMOVE_TIME_SECS * 1000;
         for (var id : this.byteCache.keySet()) {
             var cached = this.byteCache.get(id);
             for (var key : cached.keySet()) {
                 var finalCache = cached.get(key);
-                if (finalCache.lastAccess() + NO_ACCESS_REMOVE >= current) {
+                if (finalCache.lastAccess() + removeTimeMillis >= current) {
                     cached.remove(key);
                     if (cached.size() == 0) {
                         this.byteCache.remove(id);
@@ -44,7 +45,7 @@ public class ScheduledPacketCache implements PacketCache {
             var cached = this.packetCache.get(id);
             for (var key : cached.keySet()) {
                 var finalCache = cached.get(key);
-                if (finalCache.lastAccess() + NO_ACCESS_REMOVE >= current) {
+                if (finalCache.lastAccess() + removeTimeMillis >= current) {
                     cached.remove(key);
                     if (cached.size() == 0) {
                         this.packetCache.remove(id);
@@ -55,7 +56,7 @@ public class ScheduledPacketCache implements PacketCache {
     }
 
     private void startTimer() {
-        POOL.scheduleWithFixedDelay(this::collectGarbage, DELAY_SECONDS, DELAY_SECONDS, TimeUnit.SECONDS);
+        POOL.scheduleWithFixedDelay(this::collectGarbage, COLLECT_DELAY_SECS, COLLECT_DELAY_SECS, TimeUnit.SECONDS);
     }
 
     @Override
