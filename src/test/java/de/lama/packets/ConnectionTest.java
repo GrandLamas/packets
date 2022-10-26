@@ -2,7 +2,6 @@ package de.lama.packets;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
-import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
@@ -27,7 +26,7 @@ public class ConnectionTest {
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
 
-            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Received: " + event.packetId()));
+//            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Received: " + event.packetId()));
         });
 
         server.open().queue();
@@ -37,8 +36,8 @@ public class ConnectionTest {
         try {
             Client client = new ClientBuilder().registry(registry).build("localhost", 4999);
             long millis = System.currentTimeMillis();
-            for (int i = 1; i <= 10000; i++) {
-                client.send(new MessagePacket("sussy amogus balls obama burger")).queue(); // very political
+            for (int i = 1; i <= 1000000; i++) {
+                client.send(new MessagePacket("sussy amogus balls obama burger")).complete(); // very political
             }
             System.out.println("TIME: " + (System.currentTimeMillis() - millis));
         } catch (IOException e) {

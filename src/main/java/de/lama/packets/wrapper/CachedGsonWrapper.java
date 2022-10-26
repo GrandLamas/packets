@@ -20,7 +20,7 @@ public class CachedGsonWrapper implements PacketStringWrapper {
 
     @Override
     public byte[] wrap(long packetId, Packet packet) {
-        var bytes = this.cache.load(packetId, packet);
+        byte[] bytes = this.cache.load(packetId, packet);
         if (bytes == null) {
             bytes = PacketStringWrapper.super.wrap(packetId, packet);
             this.cache.cache(packetId, bytes, packet);
@@ -30,7 +30,7 @@ public class CachedGsonWrapper implements PacketStringWrapper {
 
     @Override
     public Packet unwrap(long packetId, byte[] bytes) {
-        var packet = this.cache.load(packetId, bytes);
+        Packet packet = this.cache.load(packetId, bytes);
         if (packet == null) {
             packet = PacketStringWrapper.super.unwrap(packetId, bytes);
             this.cache.cache(packetId, bytes, packet);
