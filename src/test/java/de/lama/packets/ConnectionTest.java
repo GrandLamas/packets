@@ -2,6 +2,7 @@ package de.lama.packets;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
+import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
@@ -9,6 +10,7 @@ import de.lama.packets.server.Server;
 import de.lama.packets.server.ServerBuilder;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 public class ConnectionTest {
 
@@ -26,7 +28,7 @@ public class ConnectionTest {
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
 
-//            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Received: " + event.packetId()));
+            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Server Received: " + event.packetId()));
         });
 
         server.open().queue();
@@ -35,11 +37,15 @@ public class ConnectionTest {
     private static void connectClient(PacketRegistry registry) {
         try {
             Client client = new ClientBuilder().registry(registry).build("localhost", 4999);
+
+            client.getEventHandler().subscribe(PacketReceiveEvent.class, (event -> System.out.println("Client received: " + event.packetId())));
             long millis = System.currentTimeMillis();
-            for (int i = 1; i <= 1000000; i++) {
-                client.send(new MessagePacket("sussy amogus balls obama burger")).complete(); // very political
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                String next = scanner.next();
+                if (next.equals("quit")) return;
+                client.send(new MessagePacket(next)).complete();
             }
-            System.out.println("TIME: " + (System.currentTimeMillis() - millis));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

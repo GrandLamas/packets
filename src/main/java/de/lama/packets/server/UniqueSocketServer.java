@@ -44,8 +44,7 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
         if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
         } else {
-            new Handshake(client).complete();
-            this.clients.add(client);
+            new Handshake(client, () -> this.clients.add(client)).complete();
         }
 
         return true;

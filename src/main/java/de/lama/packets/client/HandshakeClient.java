@@ -19,7 +19,14 @@ class HandshakeClient extends ThreadedClient {
     public HandshakeClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, PacketTransmitter transmitter, PacketReceiver receiver, ExceptionHandler exceptionHandler) {
         super(socket, registry, wrapper, transmitter, receiver, exceptionHandler);
 
-        new Handshake(this).queue();
+        new Handshake(this, this::handshakeReceived).queue();
+    }
+
+    private void handshakeReceived() {
+        this.handshake = true;
+        synchronized (this) {
+            this.notifyAll();
+        }
     }
 
     public void awaitHandshake() throws InterruptedException {
@@ -32,8 +39,7 @@ class HandshakeClient extends ThreadedClient {
     public Operation send(Packet packet) {
         long packetId = this.getRegistry().parseId(packet.getClass());
         if (packetId != HandshakePacket.ID && !this.handshake) {
-            if (this.exceptionHandler.operate(this::awaitHandshake, "Could not wait for packet"))
-                this.handshake = true;
+            this.exceptionHandler.operate(this::awaitHandshake, "Could not wait for packet");
         }
 
         return super.send(packet);

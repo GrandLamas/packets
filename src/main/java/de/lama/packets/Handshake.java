@@ -11,10 +11,12 @@ import java.util.function.Consumer;
 public class Handshake implements Operation, Consumer<PacketReceiveEvent> {
 
     private final Client client;
+    private final Runnable onHandshake;
     private UUID listenerId;
 
-    public Handshake(Client client) {
+    public Handshake(Client client, Runnable onHandshake) {
         this.client = client;
+        this.onHandshake = onHandshake;
     }
 
     private void registerListener() {
@@ -38,8 +40,8 @@ public class Handshake implements Operation, Consumer<PacketReceiveEvent> {
             throw new ServerException("Invalid version for client " + this.client.getAddress().toString());
         }
 
-        synchronized (this.client) {this.client.notifyAll();}
         this.client.getEventHandler().unsubscribe(this.listenerId);
+        this.onHandshake.run();
     }
 
     @Override
