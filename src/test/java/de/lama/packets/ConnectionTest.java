@@ -18,7 +18,8 @@ public class ConnectionTest {
         PacketRegistry registry = new HashedPacketRegistry();
         registry.registerPacket(MessagePacket.ID, MessagePacket.class);
 
-        startServer(registry);
+        if (args.length >= 1 && args[0].equals("host"))
+            startServer(registry);
         connectClient(registry);
     }
 
@@ -28,7 +29,7 @@ public class ConnectionTest {
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
 
-            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Server Received: " + event.packetId()));
+            connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> server.broadcast(event.packet()).queue());
         });
 
         server.open().queue();
@@ -38,11 +39,13 @@ public class ConnectionTest {
         try {
             Client client = new ClientBuilder().registry(registry).build("localhost", 4999);
 
-            client.getEventHandler().subscribe(PacketReceiveEvent.class, (event -> System.out.println("Client received: " + event.packetId())));
-            long millis = System.currentTimeMillis();
+            client.getEventHandler().subscribe(PacketReceiveEvent.class, (event -> {
+                if (event.packetId() != MessagePacket.ID) return;
+                System.out.println(((MessagePacket) event.packet()).getMessage());
+            }));
             Scanner scanner = new Scanner(System.in);
             while (true) {
-                String next = scanner.next();
+                String next = scanner.nextLine();
                 if (next.equals("quit")) return;
                 client.send(new MessagePacket(next)).complete();
             }

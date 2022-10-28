@@ -69,7 +69,7 @@ public class ThreadedClient extends AbstractPacketIOComponent implements Client 
 
     @Override
     public int hashCode() {
-        return this.getAddress().hashCode();
+        return this.socket.hashCode();
     }
 
     @Override
