@@ -55,3 +55,10 @@ Some of the events implement <code>Cancellable</code>. Those events can be cance
   **Packet**:<br>
     - PacketReceiveEvent - Triggered when a packet has been received from the client<br>
     - ServerClientPacketSendEvent - Triggered when a packet is about to be sent to a client<br>
+    
+## Technical Stuff
+The transmitted packets have fixed structure:
+1. A char which contains the type of the following data, if its a Packet is 'p' (1 byte)
+2. A long which contains the ID of the following packet (8 bytes)
+3. A int which contains the size of the incomming packet (4 bytes)
+4. The packet in the format given by the wrapper. Default is UTF-8 encoded JSON (x bytes)
