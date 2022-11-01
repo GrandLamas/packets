@@ -3,9 +3,9 @@ package de.lama.packets.registry;
 import de.lama.packets.Packet;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HashedPacketRegistry implements PacketRegistry {
 
@@ -13,8 +13,8 @@ public class HashedPacketRegistry implements PacketRegistry {
     private final Map<Class<? extends Packet>, Long> reverseRegistry;
 
     public HashedPacketRegistry(RegistryEntry<?>... entries) {
-        this.registry = new HashMap<>();
-        this.reverseRegistry = new HashMap<>();
+        this.registry = new ConcurrentHashMap<>();
+        this.reverseRegistry = new ConcurrentHashMap<>();
 
         Arrays.stream(entries).forEach(e -> this.registerPacket(e.id(), e.clazz()));
     }
