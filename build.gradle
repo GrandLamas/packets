@@ -15,7 +15,7 @@ jar {
     }
 }
 
-task fatJar(type: Jar) {
+tasks.register('fatJar') {
     baseName = 'Packets'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -25,7 +25,7 @@ task fatJar(type: Jar) {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
-    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 test {
