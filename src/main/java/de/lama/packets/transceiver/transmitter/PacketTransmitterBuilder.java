@@ -1,26 +1,13 @@
 package de.lama.packets.transceiver.transmitter;
 
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.transceiver.AbstractTransceiverBuilder;
+import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.OutputStream;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class PacketTransmitterBuilder {
-
-    private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(10);
-
-    private static final int TICKRATE = 16;
-
-    private ScheduledExecutorService pool;
-    private int tickrate;
-    private ExceptionHandler exceptionHandler;
-
-    public PacketTransmitterBuilder() {
-        this.tickrate = TICKRATE;
-        this.pool = SERVICE;
-    }
+public class PacketTransmitterBuilder extends AbstractTransceiverBuilder {
 
     public PacketTransmitterBuilder tickrate(int tickrate) {
         this.tickrate = tickrate;

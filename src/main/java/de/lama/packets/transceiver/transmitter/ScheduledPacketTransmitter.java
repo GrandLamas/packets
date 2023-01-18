@@ -3,7 +3,7 @@ package de.lama.packets.transceiver.transmitter;
 import de.lama.packets.io.BufferedPacketOutputStream;
 import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.transceiver.TransceivablePacket;
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.OutputStream;
 import java.util.Queue;

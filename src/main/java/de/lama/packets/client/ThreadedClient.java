@@ -1,6 +1,6 @@
 package de.lama.packets.client;
 
-import de.lama.packets.AbstractPacketIOComponent;
+import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.DefaultPackets;
 import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
@@ -8,20 +8,20 @@ import de.lama.packets.event.events.PacketSendEvent;
 import de.lama.packets.io.CachedIoPacket;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.operations.PacketSendOperation;
-import de.lama.packets.operation.operations.SocketCloseOperation;
+import de.lama.packets.operation.operations.AdapterCloseOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.transceiver.IoTransceivablePacket;
 import de.lama.packets.transceiver.TransceivablePacket;
 import de.lama.packets.transceiver.receiver.PacketReceiver;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 import de.lama.packets.wrapper.PacketWrapper;
 
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 
-public class ThreadedClient extends AbstractPacketIOComponent implements Client {
+class ThreadedClient extends AbstractNetworkAdapter implements Client {
 
     private final Socket socket;
     private final PacketWrapper wrapper;
@@ -36,19 +36,34 @@ public class ThreadedClient extends AbstractPacketIOComponent implements Client 
         this.transmitter = transmitter;
         this.receiver = receiver;
 
-        this.receiver.subscribe(this::packetReceived);
-        this.start();
+        this.registerPackets();
     }
 
-    private void start() {
-        this.registerPackets();
+    protected PacketTransmitter getTransmitter() {
+        return this.transmitter;
+    }
+
+    public PacketReceiver getReceiver() {
+        return this.receiver;
+    }
+
+    @Override
+    public Operation shutdown() {
+        if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
+        return new AdapterCloseOperation(this.socket, this.repeatingOperations, this.getExceptionHandler());
+    }
+
+    @Override
+    public Operation open() {
+        this.receiver.subscribe(this::packetReceived);
         this.registerTask(this.transmitter);
         this.registerTask(this.receiver);
         this.queueOperations();
+        return null;
     }
 
     private void registerPackets() {
-        Arrays.stream(DefaultPackets.values()).forEach(packet -> this.registry.registerPacket(packet.getId(), packet.getClazz()));
+        Arrays.stream(DefaultPackets.values()).forEach(packet -> this.getRegistry().registerPacket(packet.getId(), packet.getClazz()));
     }
 
     private PacketReceiveEvent wrapEvent(TransceivablePacket transceivablePacket) {
@@ -56,15 +71,15 @@ public class ThreadedClient extends AbstractPacketIOComponent implements Client 
     }
 
     private void packetReceived(TransceivablePacket transceivablePacket) {
-        this.eventHandler.notify(this.wrapEvent(transceivablePacket));
+        this.getEventHandler().notify(this.wrapEvent(transceivablePacket));
     }
 
-    private TransceivablePacket parsePacket(long packetId, Packet packet) {
-        return new IoTransceivablePacket(new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet)));
-    }
-
-    private Packet parsePacket(TransceivablePacket packet) {
+    protected Packet parsePacket(TransceivablePacket packet) {
         return this.wrapper.unwrap(packet.id(), packet.data());
+    }
+
+    protected TransceivablePacket parsePacket(long packetId, Packet packet) {
+        return new IoTransceivablePacket(new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet)));
     }
 
     @Override
@@ -74,15 +89,15 @@ public class ThreadedClient extends AbstractPacketIOComponent implements Client 
 
     @Override
     public Operation send(Packet packet) {
-        long packetId = this.registry.parseId(packet.getClass());
-        if (this.eventHandler.isCancelled(new PacketSendEvent(packetId, packet))) return null;
+        long packetId = this.getRegistry().parseId(packet.getClass());
+        if (this.getEventHandler().isCancelled(new PacketSendEvent(packetId, packet))) return null;
         return new PacketSendOperation(this.transmitter, this.parsePacket(packetId, packet));
     }
 
     @Override
     public Operation close() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already closed");
-        return new SocketCloseOperation(this.socket, this.repeatingOperations, this.exceptionHandler);
+        return new AdapterCloseOperation(this.socket, this.repeatingOperations, this.getExceptionHandler());
     }
 
     @Override

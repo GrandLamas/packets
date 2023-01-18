@@ -1,18 +1,20 @@
 package de.lama.packets.operation;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public abstract class AbstractRepeatingOperation implements RepeatingOperation {
 
-    private static final ExecutorService POOL = Executors.newCachedThreadPool();
+    private Future<?> task;
 
-    protected Future<?> task;
+    protected abstract Future<?> start();
 
     @Override
     public Operation queue() {
-        this.task = POOL.submit(this::complete);
+        if (this.isRunning()) {
+            throw new IllegalStateException("Already running");
+        }
+
+        this.task = this.start();
         return this;
     }
 

@@ -18,6 +18,8 @@ public class ConnectionTest {
         PacketRegistry registry = new HashedPacketRegistry();
         registry.registerPacket(MessagePacket.ID, MessagePacket.class);
 
+        System.out.println(new MessagePacket("Test"));
+
         if (args.length >= 1 && args[0].equals("host"))
             startServer(registry);
         connectClient(registry);

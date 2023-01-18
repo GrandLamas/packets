@@ -4,37 +4,41 @@ import de.lama.packets.io.BufferedPacketInputStream;
 import de.lama.packets.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.transceiver.IoTransceivablePacket;
 import de.lama.packets.transceiver.TransceivablePacket;
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implements PacketReceiver {
 
     private final BufferedPacketInputStream in;
     private final ExceptionHandler exceptionHandler;
-    private final Collection<PacketConsumer> consumer;
+    private final Map<UUID, PacketConsumer> consumer;
     private TransceivablePacket last;
 
     ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler) {
         super(pool, tickrate);
-        this.consumer = new ConcurrentLinkedQueue<>();
+        this.consumer = new ConcurrentHashMap<>();
         this.in = new BufferedPacketInputStream(inputStream);
         this.exceptionHandler = exceptionHandler;
+    }
+
+    private void packetReceived(TransceivablePacket packet) {
+        this.last = packet;
+        synchronized (this) {
+            this.notifyAll();
+        }
+        this.consumer.values().forEach(consumer -> consumer.accept(packet));
     }
 
     @Override
     protected void tick() {
         this.exceptionHandler.operate(() -> {
             while (this.in.available() > 0) {
-                TransceivablePacket ioPacket = new IoTransceivablePacket(this.in.readPacket());
-                this.last = ioPacket;
-                synchronized (this) {
-                    this.notifyAll();
-                }
-                this.consumer.forEach(consumer -> consumer.accept(ioPacket));
+                this.packetReceived(new IoTransceivablePacket(this.in.readPacket()));
             }
         }, "Failed to read packet");
     }
@@ -46,7 +50,14 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     }
 
     @Override
-    public void subscribe(PacketConsumer consumer) {
-        this.consumer.add(consumer);
+    public UUID subscribe(PacketConsumer consumer) {
+        UUID uuid = UUID.randomUUID();
+        this.consumer.put(uuid, consumer);
+        return uuid;
+    }
+
+    @Override
+    public boolean unsubscribe(UUID uuid) {
+        return this.consumer.remove(uuid) != null;
     }
 }

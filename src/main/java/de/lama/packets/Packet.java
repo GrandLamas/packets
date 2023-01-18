@@ -5,6 +5,6 @@ package de.lama.packets;
  */
 public interface Packet extends Cloneable {
 
-    String VERSION = "0.1.2";
+    String VERSION = "0.1.3";
     char TYPE = 'p';
 }

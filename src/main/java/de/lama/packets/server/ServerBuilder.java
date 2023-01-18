@@ -3,7 +3,7 @@ package de.lama.packets.server;
 import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;

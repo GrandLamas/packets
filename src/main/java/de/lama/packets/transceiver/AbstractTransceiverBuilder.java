@@ -1,6 +1,6 @@
 package de.lama.packets.transceiver;
 
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

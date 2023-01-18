@@ -19,13 +19,13 @@ public class BufferedPacketInputStream extends InputStream implements PacketInpu
     public IoPacket readPacket() throws IOException {
         char type = this.in.readChar();
         if (type != Packet.TYPE) return null;
+
         // HEAD
         long packetId = this.in.readLong();
         int length = this.in.readInt();
         byte[] buffer = new byte[length];
 
         // DATA
-
         int read = 0;
         while (read < length) {
             read += this.in.read(buffer, read, buffer.length - read);

@@ -1,4 +1,4 @@
-package de.lama.packets.util;
+package de.lama.packets.util.exception;
 
 import de.lama.packets.server.exception.ServerException;
 

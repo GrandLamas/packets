@@ -1,7 +1,7 @@
 package de.lama.packets.transceiver.receiver;
 
 import de.lama.packets.transceiver.AbstractTransceiverBuilder;
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.InputStream;
 import java.util.Objects;

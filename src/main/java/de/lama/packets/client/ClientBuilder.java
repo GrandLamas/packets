@@ -6,7 +6,7 @@ import de.lama.packets.transceiver.receiver.PacketReceiver;
 import de.lama.packets.transceiver.receiver.PacketReceiverBuilder;
 import de.lama.packets.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.transceiver.transmitter.PacketTransmitterBuilder;
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 import de.lama.packets.wrapper.GsonFactory;
 import de.lama.packets.wrapper.PacketWrapper;
 import de.lama.packets.wrapper.WrapperFactory;
@@ -80,14 +80,9 @@ public class ClientBuilder implements Cloneable {
         return this;
     }
 
-    public Client buildVirtual(Socket socket) throws IOException {
-        PacketRegistry registry = this.buildRegistry();
-        return new ThreadedClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler());
-    }
-
     public Client build(Socket socket) throws IOException {
         PacketRegistry registry = this.buildRegistry();
-        return new HandshakeClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler());
+        return new ThreadedClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler());
     }
 
     public Client build(String address, int port) throws IOException {

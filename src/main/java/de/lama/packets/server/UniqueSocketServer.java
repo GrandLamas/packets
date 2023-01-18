@@ -1,27 +1,26 @@
 package de.lama.packets.server;
 
-import de.lama.packets.AbstractPacketIOComponent;
-import de.lama.packets.Handshake;
+import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
-import de.lama.packets.event.events.server.ClientCloseEvent;
 import de.lama.packets.event.events.server.ClientConnectEvent;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.operations.ClientCloseOperation;
-import de.lama.packets.operation.operations.ComponentCloseOperation;
-import de.lama.packets.operation.operations.SocketCloseOperation;
+import de.lama.packets.operation.operations.TransceiverCloseOperation;
+import de.lama.packets.operation.operations.AdapterCloseOperation;
 import de.lama.packets.operation.operations.server.BroadcastOperation;
+import de.lama.packets.operation.operations.server.RepeatingClientAcceptor;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.util.ExceptionHandler;
+import de.lama.packets.util.exception.ExceptionHandler;
 
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
+class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
 
     private final ServerSocket socket;
     private final ExceptionHandler exceptionHandler;
@@ -40,11 +39,11 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
 
     private boolean register(Socket socket) {
         if (this.closed) return false;
-        Client client = this.exceptionHandler.operate(() -> this.clientFactory.buildVirtual(socket), "Could not create client");
+        Client client = this.exceptionHandler.operate(() -> this.clientFactory.build(socket), "Could not create client");
         if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
         } else {
-            new Handshake(client, () -> this.clients.add(client)).complete();
+//            new HandshakeListener(client, () -> this.clients.add(client)).complete();
         }
 
         return true;
@@ -63,20 +62,14 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
         if (this.closed) throw new IllegalStateException("Server not running");
         this.closed = true;
-        return new ComponentCloseOperation(this.repeatingOperations, this.exceptionHandler);
-    }
-
-    @Override
-    public Operation close(Client client) {
-        if (this.eventHandler.isCancelled(new ClientCloseEvent(this, client))) return null;
-        return new ClientCloseOperation(client, this.clients::remove);
+        return new TransceiverCloseOperation(this.repeatingOperations, this.exceptionHandler);
     }
 
     @Override
     public Operation shutdown() {
         if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
         this.closed = true;
-        return new SocketCloseOperation(this.socket, this.repeatingOperations, this.exceptionHandler);
+        return new AdapterCloseOperation(this.socket, this.repeatingOperations, this.exceptionHandler);
     }
 
     @Override
@@ -92,6 +85,11 @@ class UniqueSocketServer extends AbstractPacketIOComponent implements Server {
     @Override
     public int getPort() {
         return this.socket.getLocalPort();
+    }
+
+    @Override
+    public InetAddress getAddress() {
+        return this.socket.getInetAddress();
     }
 
     @Override

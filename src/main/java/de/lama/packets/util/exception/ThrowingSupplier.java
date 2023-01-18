@@ -1,4 +1,4 @@
-package de.lama.packets.util;
+package de.lama.packets.util.exception;
 
 public interface ThrowingSupplier<T> {
 
