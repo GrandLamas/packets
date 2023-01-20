@@ -50,23 +50,25 @@ Some of the events implement <code>Cancellable</code>. Those events can be cance
 
 ### List of events
   **Connect**:<br>
-    - ClientConnectEvent - Triggered when a new client connects<br>
-    - ClientDisconnectEvent - Triggered when a client disconnects<br>
+    
+    - ClientConnectEvent - Triggered when a new client connects
+    - ClientDisconnectEvent - Triggered when a client disconnects
 
   **Packet**:<br>
-    - PacketReceiveEvent - Triggered when a packet has been received from the client<br>
-    - ServerClientPacketSendEvent - Triggered when a packet is about to be sent to a client<br>
-
+    
+    - PacketReceiveEvent - Triggered when a packet has been received from the client
+    - ServerClientPacketSendEvent - Triggered when a packet is about to be sent to a client
 ## Packets-IDs
-Following IDs for packets are already used any may not be used by the user again:
-    69420: Handshake-Packet
+Following IDs for packets are already used any **may not be used** by the user again:<br>
+    
+1. 69420: Handshake-Packet
     
 ## Technical Stuff
 The transmitted packets have fixed structure:
-1. A char which contains the type of the following data, if its a Packet is 'p' (1 byte)
-2. A long which contains the ID of the following packet (8 bytes)
-3. A int which contains the size of the incomming packet (4 bytes)
-4. The packet in the format given by the wrapper. Default is UTF-8 encoded JSON (x bytes)
+1. **A char** which contains the type of the following data, if its a Packet is 'p' (1 byte)
+2. **A long** which contains the ID of the following packet (8 bytes)
+3. **An int** which contains the size of the incomming packet (4 bytes)
+4. **The packet** in the format given by the wrapper. Default is UTF-8 encoded JSON (x bytes)
 
 Packets transmitted using the <a href='https://github.com/GrandLamas/packets/blob/master/src/main/java/de/lama/packets/wrapper/CachedGsonWrapper.java'>
 CachedGsonWrapper</a> (default) will use a cache, which will significantly improve performance on heavy packet load, if multiple packets with the same hash will be sent.
