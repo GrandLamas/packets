@@ -1,6 +1,5 @@
 package de.lama.packets.client;
 
-import de.lama.packets.HandshakePacket;
 import de.lama.packets.Packet;
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.event.events.PacketReceiveEvent;
@@ -23,6 +22,7 @@ class HandshakeClient implements Client {
     public HandshakeClient(Client client) {
         this.client = client;
 
+        this.getRegistry().registerPacket(HandshakePacket.ID, HandshakePacket.class);
         this.handshakeUuid = this.client.getEventHandler().subscribe(PacketReceiveEvent.class, new HandshakeListener(this::onHandshake));
         this.client.open().complete();
         this.client.send(HANDSHAKE_PACKET).complete();

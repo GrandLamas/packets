@@ -1,4 +1,6 @@
-package de.lama.packets;
+package de.lama.packets.client;
+
+import de.lama.packets.Packet;
 
 public record HandshakePacket(String version) implements Packet {
 

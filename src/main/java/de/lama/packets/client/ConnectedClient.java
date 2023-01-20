@@ -1,7 +1,6 @@
 package de.lama.packets.client;
 
 import de.lama.packets.AbstractNetworkAdapter;
-import de.lama.packets.DefaultPackets;
 import de.lama.packets.Packet;
 import de.lama.packets.client.transceiver.IoTransceivablePacket;
 import de.lama.packets.client.transceiver.TransceivablePacket;
@@ -18,7 +17,6 @@ import de.lama.packets.wrapper.PacketWrapper;
 
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Arrays;
 
 class ConnectedClient extends AbstractNetworkAdapter implements Client {
 
@@ -35,13 +33,8 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
         this.transmitter = transmitter;
         this.receiver = receiver;
 
-        this.registerPackets();
         this.receiver.subscribe(this::packetReceived);
         this.transmitter.start();
-    }
-
-    private void registerPackets() {
-        Arrays.stream(DefaultPackets.values()).forEach(packet -> this.getRegistry().registerPacket(packet.getId(), packet.getClazz()));
     }
 
     private PacketReceiveEvent wrapEvent(TransceivablePacket transceivablePacket) {

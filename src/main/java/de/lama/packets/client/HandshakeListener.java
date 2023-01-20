@@ -1,6 +1,5 @@
 package de.lama.packets.client;
 
-import de.lama.packets.HandshakePacket;
 import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
 
