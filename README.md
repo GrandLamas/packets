@@ -57,7 +57,7 @@ Some of the events implement <code>Cancellable</code>. Those events can be cance
     - PacketReceiveEvent - Triggered when a packet has been received from the client<br>
     - ServerClientPacketSendEvent - Triggered when a packet is about to be sent to a client<br>
 
-## Packets-IDs
+## Packet-IDs
 Following IDs for packets are already used any may not be used by the user again:
     69420: Handshake-Packet
     
