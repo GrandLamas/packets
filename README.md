@@ -35,7 +35,8 @@ You are also able to prevent the server from accepting new clients using <code>P
 ## Quickstart - Client
 Opening a new (localhost-addressed) client is fairly simple.<br>
 <code>Client client = new ClientBuilder().build(ADDRESS, PORT);</code><br>
-Unlike the server, the client cannot be reopened after getting closed once.
+Now, if you also want to receive packets, you may also open your client. Otherwise your client will only be able to send packets.<br>
+You may use <code>client#open</code> for that. You are also able to close the client or shut it down entirely.
 
 ## Events
 Almost every central API object is an <code>EventHandlerContainer</code>, which means you can use its EventHandler to subscribe to the events of the API object.
@@ -62,3 +63,7 @@ The transmitted packets have fixed structure:
 2. A long which contains the ID of the following packet (8 bytes)
 3. A int which contains the size of the incomming packet (4 bytes)
 4. The packet in the format given by the wrapper. Default is UTF-8 encoded JSON (x bytes)
+
+## TODO
+- Encryption
+- More events
