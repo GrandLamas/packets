@@ -2,8 +2,8 @@ package de.lama.packets.client;
 
 import de.lama.packets.HandshakePacket;
 import de.lama.packets.Packet;
-import de.lama.packets.transceiver.TransceivablePacket;
-import de.lama.packets.transceiver.receiver.PacketConsumer;
+import de.lama.packets.client.transceiver.TransceivablePacket;
+import de.lama.packets.client.transceiver.receiver.PacketConsumer;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

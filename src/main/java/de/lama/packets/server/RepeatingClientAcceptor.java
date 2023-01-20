@@ -1,4 +1,4 @@
-package de.lama.packets.operation.operations.server;
+package de.lama.packets.server;
 
 import de.lama.packets.operation.AbstractRepeatingOperation;
 import de.lama.packets.operation.Operation;
@@ -23,16 +23,24 @@ public class RepeatingClientAcceptor extends AbstractRepeatingOperation {
     }
 
     @Override
-    public Operation complete() {
-        while (true) {
-            Socket accept = this.exceptionHandler.operate(this.socket::accept, "Could not accept client");
-            if (!this.clientRegister.apply(accept)) break;
-        }
+    public Operation queue() {
+        this.executor.submit(this::complete);
         return this;
     }
 
     @Override
-    protected Future<?> start() {
-        return this.executor.submit(this::complete);
+    public Operation complete() {
+        Socket accept = this.exceptionHandler.operate(this.socket::accept, "Could not accept client");
+        this.clientRegister.apply(accept);
+        return this;
+    }
+
+    @Override
+    protected Future<?> createRepeatingTask() {
+        return this.executor.submit(() -> {
+            while (!this.socket.isClosed()) {
+                this.complete();
+            }
+        });
     }
 }

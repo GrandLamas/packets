@@ -2,26 +2,57 @@ package de.lama.packets;
 
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.event.OrderedEventExecutor;
-import de.lama.packets.operation.RepeatingOperation;
+import de.lama.packets.operation.Operation;
+import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
-
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public abstract class AbstractNetworkAdapter implements NetworkAdapter {
 
     private final NetworkAdapterData data;
 
     public AbstractNetworkAdapter(ExceptionHandler exceptionHandler, PacketRegistry registry) {
-        this.data = new NetworkAdapterData(exceptionHandler, new OrderedEventExecutor(), new CopyOnWriteArraySet<>(), registry);
+        this.data = new NetworkAdapterData(exceptionHandler, new OrderedEventExecutor(), registry);
     }
 
-    protected void registerTask(RepeatingOperation operation) {
-        this.data.repeatingOperations().add(operation);
+    protected abstract void executeClose();
+
+    protected abstract void executeOpen();
+
+    protected abstract void executeShutdown();
+
+    @Override
+    public Operation open() {
+        return new SimpleOperation((async) -> {
+            if (!this.isClosed()) throw new IllegalStateException("Adapter already open");
+            this.executeOpen();
+        });
     }
 
-    protected void queueOperations() {
-        this.data.repeatingOperations().forEach(RepeatingOperation::queue);
+    @Override
+    public Operation close() {
+        return new SimpleOperation((async) -> {
+            if (this.isClosed()) throw new IllegalStateException("Adapter already closed");
+            this.executeClose();
+        });
+    }
+
+    @Override
+    public Operation shutdown() {
+        return new SimpleOperation((async) -> {
+            if (this.hasShutdown()) throw new IllegalStateException("Adapter already shutdown");
+            if (!this.isClosed()) {
+                if (async) this.close().queue();
+                else this.close().complete();
+            }
+
+            this.executeShutdown();
+        });
+    }
+
+    @Override
+    public ExceptionHandler getExceptionHandler() {
+        return this.data.exceptionHandler();
     }
 
     @Override

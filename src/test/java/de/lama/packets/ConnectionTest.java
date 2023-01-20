@@ -20,9 +20,10 @@ public class ConnectionTest {
 
         System.out.println(new MessagePacket("Test"));
 
-        if (args.length >= 1 && args[0].equals("host"))
+        if (args.length >= 1 && args[0].equals("client"))
+            connectClient(registry);
+        else
             startServer(registry);
-        connectClient(registry);
     }
 
     private static void startServer(PacketRegistry registry) throws IOException {
@@ -40,10 +41,11 @@ public class ConnectionTest {
     private static void connectClient(PacketRegistry registry) {
         try {
             Client client = new ClientBuilder().registry(registry).build("localhost", 4999);
+            client.open().queue();
 
             client.getEventHandler().subscribe(PacketReceiveEvent.class, (event -> {
                 if (event.packetId() != MessagePacket.ID) return;
-                System.out.println(((MessagePacket) event.packet()).getMessage());
+                System.out.println(((MessagePacket) event.packet()).message());
             }));
             Scanner scanner = new Scanner(System.in);
             while (true) {

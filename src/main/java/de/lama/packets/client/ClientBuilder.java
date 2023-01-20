@@ -1,11 +1,11 @@
 package de.lama.packets.client;
 
+import de.lama.packets.client.transceiver.receiver.PacketReceiver;
+import de.lama.packets.client.transceiver.receiver.PacketReceiverBuilder;
+import de.lama.packets.client.transceiver.transmitter.PacketTransmitter;
+import de.lama.packets.client.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.transceiver.receiver.PacketReceiver;
-import de.lama.packets.transceiver.receiver.PacketReceiverBuilder;
-import de.lama.packets.transceiver.transmitter.PacketTransmitter;
-import de.lama.packets.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.util.exception.ExceptionHandler;
 import de.lama.packets.wrapper.GsonFactory;
 import de.lama.packets.wrapper.PacketWrapper;
@@ -82,7 +82,7 @@ public class ClientBuilder implements Cloneable {
 
     public Client build(Socket socket) throws IOException {
         PacketRegistry registry = this.buildRegistry();
-        return new ThreadedClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler());
+        return new ConnectedClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler());
     }
 
     public Client build(String address, int port) throws IOException {

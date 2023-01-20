@@ -6,10 +6,8 @@ import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
 import de.lama.packets.event.events.server.ClientConnectEvent;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.operations.TransceiverCloseOperation;
-import de.lama.packets.operation.operations.AdapterCloseOperation;
-import de.lama.packets.operation.operations.server.BroadcastOperation;
-import de.lama.packets.operation.operations.server.RepeatingClientAcceptor;
+import de.lama.packets.operation.RepeatingOperation;
+import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
 
@@ -23,63 +21,62 @@ import java.util.stream.Stream;
 class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
 
     private final ServerSocket socket;
-    private final ExceptionHandler exceptionHandler;
     private final Collection<Client> clients;
     private final ClientBuilder clientFactory;
-    private boolean closed;
+    private final RepeatingOperation clientAcceptor;
 
     UniqueSocketServer(ServerSocket socket, ClientBuilder builder, PacketRegistry registry, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
-        this.exceptionHandler = exceptionHandler;
         this.socket = socket;
         this.clients = new ConcurrentLinkedQueue<>();
         this.clientFactory = builder;
-        this.closed = true;
+        this.clientAcceptor = new RepeatingClientAcceptor(this.socket, this::register, this.getExceptionHandler());
     }
 
     private boolean register(Socket socket) {
-        if (this.closed) return false;
-        Client client = this.exceptionHandler.operate(() -> this.clientFactory.build(socket), "Could not create client");
-        if (this.eventHandler.isCancelled(new ClientConnectEvent(this, client))) {
+        Client client = this.getExceptionHandler().operate(() -> this.clientFactory.build(socket), "Could not create client");
+        if (this.getEventHandler().isCancelled(new ClientConnectEvent(this, client))) {
             client.close();
-        } else {
-//            new HandshakeListener(client, () -> this.clients.add(client)).complete();
+            return false;
         }
 
+        client.open().complete();
+        this.clients.add(client);
         return true;
     }
 
     @Override
-    public Operation open() {
-        if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
-        if (!this.closed) throw new IllegalStateException("Server already running");
-        this.closed = false;
-        return new RepeatingClientAcceptor(this.socket, this::register, this.exceptionHandler);
+    protected void executeOpen() {
+        this.clientAcceptor.start();
     }
 
     @Override
-    public Operation close() {
-        if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
-        if (this.closed) throw new IllegalStateException("Server not running");
-        this.closed = true;
-        return new TransceiverCloseOperation(this.repeatingOperations, this.exceptionHandler);
+    protected void executeClose() {
+        this.clientAcceptor.stop();
     }
 
     @Override
-    public Operation shutdown() {
-        if (this.socket.isClosed()) throw new IllegalStateException("Socket already shutdown");
-        this.closed = true;
-        return new AdapterCloseOperation(this.socket, this.repeatingOperations, this.exceptionHandler);
+    protected void executeShutdown() {
+        this.getExceptionHandler().operate(this.socket::close, "Could not close socket");
     }
 
     @Override
     public Operation broadcast(Packet packet) {
-        return new BroadcastOperation(this.clients, packet);
+        return new SimpleOperation((async) -> this.clients.forEach(client -> {
+            Operation send = client.send(packet);
+            if (async) send.queue();
+            else send.complete();
+        }));
     }
 
     @Override
     public boolean isClosed() {
-        return !this.closed;
+        return this.hasShutdown() || !this.clientAcceptor.isRunning();
+    }
+
+    @Override
+    public boolean hasShutdown() {
+        return this.socket.isClosed();
     }
 
     @Override

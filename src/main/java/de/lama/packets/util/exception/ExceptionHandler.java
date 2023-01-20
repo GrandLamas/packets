@@ -1,6 +1,6 @@
 package de.lama.packets.util.exception;
 
-import de.lama.packets.server.exception.ServerException;
+import de.lama.packets.server.ServerException;
 
 import java.util.function.Consumer;
 
@@ -42,5 +42,9 @@ public interface ExceptionHandler extends Consumer<Exception> {
             this.accept(new ServerException(failMessage, e));
         }
         return false;
+    }
+
+    default void acceptIf(boolean check, Exception exception) {
+        if (check) this.accept(exception);
     }
 }

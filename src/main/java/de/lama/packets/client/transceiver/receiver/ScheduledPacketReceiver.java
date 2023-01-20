@@ -1,9 +1,9 @@
-package de.lama.packets.transceiver.receiver;
+package de.lama.packets.client.transceiver.receiver;
 
+import de.lama.packets.client.transceiver.IoTransceivablePacket;
+import de.lama.packets.client.transceiver.TransceivablePacket;
 import de.lama.packets.io.BufferedPacketInputStream;
-import de.lama.packets.transceiver.AbstractScheduledTransceiver;
-import de.lama.packets.transceiver.IoTransceivablePacket;
-import de.lama.packets.transceiver.TransceivablePacket;
+import de.lama.packets.client.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.InputStream;

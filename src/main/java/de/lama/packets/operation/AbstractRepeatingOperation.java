@@ -6,16 +6,12 @@ public abstract class AbstractRepeatingOperation implements RepeatingOperation {
 
     private Future<?> task;
 
-    protected abstract Future<?> start();
+    protected abstract Future<?> createRepeatingTask();
 
     @Override
-    public Operation queue() {
-        if (this.isRunning()) {
-            throw new IllegalStateException("Already running");
-        }
-
-        this.task = this.start();
-        return this;
+    public void start() {
+        if (this.isRunning()) throw new IllegalStateException("Already running");
+        this.task = this.createRepeatingTask();
     }
 
     @Override

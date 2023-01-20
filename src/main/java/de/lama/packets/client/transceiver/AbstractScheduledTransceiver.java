@@ -1,4 +1,4 @@
-package de.lama.packets.transceiver;
+package de.lama.packets.client.transceiver;
 
 import de.lama.packets.operation.AbstractRepeatingOperation;
 import de.lama.packets.operation.Operation;
@@ -30,7 +30,13 @@ public abstract class AbstractScheduledTransceiver extends AbstractRepeatingOper
     }
 
     @Override
-    protected Future<?> start() {
+    public Operation queue() {
+        this.pool.submit(this::complete);
+        return this;
+    }
+
+    @Override
+    protected Future<?> createRepeatingTask() {
         return this.pool.scheduleAtFixedRate(this::complete, this.tickrate, this.tickrate, TimeUnit.MILLISECONDS);
     }
 

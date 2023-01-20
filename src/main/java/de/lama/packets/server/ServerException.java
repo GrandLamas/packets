@@ -1,4 +1,4 @@
-package de.lama.packets.server.exception;
+package de.lama.packets.server;
 
 public class ServerException extends RuntimeException {
 

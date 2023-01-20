@@ -1,8 +1,8 @@
-package de.lama.packets.transceiver.transmitter;
+package de.lama.packets.client.transceiver.transmitter;
 
+import de.lama.packets.client.transceiver.TransceivablePacket;
 import de.lama.packets.io.BufferedPacketOutputStream;
-import de.lama.packets.transceiver.AbstractScheduledTransceiver;
-import de.lama.packets.transceiver.TransceivablePacket;
+import de.lama.packets.client.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.OutputStream;

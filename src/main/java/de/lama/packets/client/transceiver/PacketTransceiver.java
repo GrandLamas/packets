@@ -1,4 +1,4 @@
-package de.lama.packets.transceiver;
+package de.lama.packets.client.transceiver;
 
 import de.lama.packets.operation.RepeatingOperation;
 
