@@ -11,7 +11,7 @@
 Every operation in this API uses the <code>Operation</code> interface.
 For example <code>server.send(packet)</code> returns such an operation.
 Using this operation you may execute <code>Operation#complete</code> (synchronized) or <code>Operation#queue</code> (async).
-Operations are immutable and the methods mentioned above will return itself for example executing it multiple times. 
+Operations are immutable and the methods mentioned above will return itself for example executing it multiple times.
 Almost all asynchronous operations use a centralized ThreadPool, they may also use a local thread pool depending on the operation.
 
 If you want to use custom packets, you may register your packets in the <code>PacketRegistry</code>.
@@ -49,20 +49,20 @@ Code:<br>
 Some of the events implement <code>Cancellable</code>. Those events can be cancelled using <code>Cancellable#setCancelled</code>.
 
 ### List of events
-  **Connect**:<br>
-    
+**Connect**:<br>
+
     - ClientConnectEvent - Triggered when a new client connects
     - ClientDisconnectEvent - Triggered when a client disconnects
 
-  **Packet**:<br>
-    
+**Packet**:<br>
+
     - PacketReceiveEvent - Triggered when a packet has been received from the client
     - ServerClientPacketSendEvent - Triggered when a packet is about to be sent to a client
-## Packets-IDs
+## Packet-IDs
 Following IDs for packets are already used any **may not be used** by the user again:<br>
-    
+
 1. 69420: Handshake-Packet
-    
+
 ## Technical Stuff
 The transmitted packets have fixed structure:
 1. **A char** which contains the type of the following data, if its a Packet is 'p' (1 byte)
