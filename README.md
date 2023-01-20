@@ -15,7 +15,7 @@ Operations are immutable and the methods mentioned above will return itself for 
 Almost all asynchronous operations use a centralized ThreadPool, they may also use a local thread pool depending on the operation.
 
 If you want to use custom packets, you may register your packets in the <code>PacketRegistry</code>.
-You may want to watch out of registering a packet with an existing packet id. You can find a list of default packets <a href='https://github.com/GrandLamas/packets/blob/master/src/main/java/de/lama/packets/DefaultPackets.java'>here</a>.<br>
+You may want to watch out of registering a packet with an existing packet id. You can find a list of default packets <a href='#Packet-IDs'>here</a>.<br>
 The first interaction between the server and the client will always be handshake for checking the versions etc.
 
 There is also an event system. You can find more details <a href='#Events'>here</a>.
@@ -56,6 +56,10 @@ Some of the events implement <code>Cancellable</code>. Those events can be cance
   **Packet**:<br>
     - PacketReceiveEvent - Triggered when a packet has been received from the client<br>
     - ServerClientPacketSendEvent - Triggered when a packet is about to be sent to a client<br>
+
+## Packets-IDs
+Following IDs for packets are already used any may not be used by the user again:
+    69420: Handshake-Packet
     
 ## Technical Stuff
 The transmitted packets have fixed structure:
