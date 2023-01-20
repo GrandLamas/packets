@@ -6,12 +6,15 @@ import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 public class RepeatingClientAcceptor extends AbstractRepeatingOperation {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService registerPool = Executors.newCachedThreadPool();
     private final ServerSocket socket;
     private final Function<Socket, Boolean> clientRegister;
     private final ExceptionHandler exceptionHandler;
@@ -31,7 +34,7 @@ public class RepeatingClientAcceptor extends AbstractRepeatingOperation {
     @Override
     public Operation complete() {
         Socket accept = this.exceptionHandler.operate(this.socket::accept, "Could not accept client");
-        this.clientRegister.apply(accept);
+        this.registerPool.submit(() -> this.clientRegister.apply(accept));
         return this;
     }
 

@@ -36,7 +36,7 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
     private boolean register(Socket socket) {
         Client client = this.getExceptionHandler().operate(() -> this.clientFactory.build(socket), "Could not create client");
         if (this.getEventHandler().isCancelled(new ClientConnectEvent(this, client))) {
-            client.close();
+            client.shutdown().complete();
             return false;
         }
 

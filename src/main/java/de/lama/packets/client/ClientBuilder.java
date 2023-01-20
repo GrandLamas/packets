@@ -82,7 +82,7 @@ public class ClientBuilder implements Cloneable {
 
     public Client build(Socket socket) throws IOException {
         PacketRegistry registry = this.buildRegistry();
-        return new ConnectedClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler());
+        return new HandshakeClient(new ConnectedClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler()));
     }
 
     public Client build(String address, int port) throws IOException {
