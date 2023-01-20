@@ -64,6 +64,9 @@ The transmitted packets have fixed structure:
 3. A int which contains the size of the incomming packet (4 bytes)
 4. The packet in the format given by the wrapper. Default is UTF-8 encoded JSON (x bytes)
 
+Packets transmitted using the <a href='https://github.com/GrandLamas/packets/blob/master/src/main/java/de/lama/packets/wrapper/CachedGsonWrapper.java'>
+CachedGsonWrapper</a> (default) will use a cache, which will significantly improve performance on heavy packet load, if multiple packets with the same hash will be sent.
+
 ## TODO
 - Encryption
 - More events
