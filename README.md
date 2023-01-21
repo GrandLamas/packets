@@ -26,7 +26,9 @@ First of all you need a <code>ServerBuilder</code> to create a new <code>Server<
 With this builder, you are able to configure (tickrate, encryption, ...) your server.<br>
 
 Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!<br>
-<code>Server server = new ServerBuilder().build(PORT);</code>
+```
+Server server = new ServerBuilder().build(PORT);
+```
 
 You may now open the server to new clients using <code>Server#open</code>.<br>
 Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in closing the socket of this new client.
@@ -35,7 +37,10 @@ You are also able to prevent the server from accepting new clients using <code>P
 
 ## Quickstart - Client
 Opening a new (localhost-addressed) client is fairly simple.<br>
-<code>Client client = new ClientBuilder().build(ADDRESS, PORT);</code><br>
+```
+Client client = new ClientBuilder().build(ADDRESS, PORT);
+```
+
 Now, if you also want to receive packets, you may also open your client. Otherwise your client will only be able to send packets.<br>
 You may use <code>client#open</code> for that. You are also able to close the client or shut it down entirely.
 
@@ -43,34 +48,32 @@ You may use <code>client#open</code> for that. You are also able to close the cl
 Almost every central API object is an <code>EventHandlerContainer</code>, which means you can use its EventHandler to subscribe to the events of the API object.
 
 For example the <code>Server</code> will notify you about every incoming connection if you've subscribe using the <code>ClientConnectEvent</code>.<br>
-Code:<br>
-<code>server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> System.out.println("Connected client " + connectEvent.client().getAddress().toString()));
-</code>
-
-Some events implement <code>Cancellable</code>. Some of these events can be cancelled using <code>Cancellable#setCancelled</code>.
+```
+server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> System.out.println("Connected client " + connectEvent.client().getAddress().toString()));
+```
+Some events implement <code>Cancellable</code>. Some of these events can be cancelled using <code>Cancellable#behaviour#setCancelled</code>.
 
 ### List of events
 **NetworkAdapter events**:<br>
 
-    - AdapterOpenEvent - Triggered when an adapter has been opened
-    - AdapterCloseEvent - Triggered when an adapter has been closed
-    - AdpterShutdownEvent - Triggered when an dapter has been shutdown
+* AdapterOpenEvent - Triggered when an adapter has been opened
+* AdapterCloseEvent - Triggered when an adapter has been closed
+* AdapterShutdownEvent - Triggered when an adapter has been shutdown
 
 
 **Server events**:<br>
 
-    - ClientConnectEvent - Triggered when a client connects to a server
-
+* ClientConnectEvent - Triggered when a client connects to a server
 
 **Client events**:<br>
 
-    - PacektSendEvent - Triggered when a packet has been sent
-    - PacketReceiveEvent - Triggered when a packet has been received
+* PacketSendEvent - Triggered when a packet has been sent
+* PacketReceiveEvent - Triggered when a packet has been received
 
 ## Packet-IDs
 Following IDs for packets are already used any **may not be used** by the user again:<br>
 
-1. 69420: Handshake-Packet
+* 69420: Handshake-Packet
 
 ## Technical Stuff
 The transmitted packets have fixed structure:
