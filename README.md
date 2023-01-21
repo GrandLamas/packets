@@ -17,6 +17,7 @@ Almost all asynchronous operations use a centralized ThreadPool, they may also u
 If you want to use custom packets, you may register your packets in the <code>PacketRegistry</code>.
 You may want to watch out of registering a packet with an existing packet id. You can find a list of default packets <a href='#Packet-IDs'>here</a>.<br>
 The first interaction between the server and the client will always be handshake for checking the versions etc.
+Furthermore, the client and the server are both implementing [NetworkAdapter](https://github.com/GrandLamas/packets/blob/master/src/main/java/de/lama/packets/NetworkAdapter.java).
 
 There is also an event system. You can find more details <a href='#Events'>here</a>.
 
@@ -46,18 +47,25 @@ Code:<br>
 <code>server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> System.out.println("Connected client " + connectEvent.client().getAddress().toString()));
 </code>
 
-Some of the events implement <code>Cancellable</code>. Those events can be cancelled using <code>Cancellable#setCancelled</code>.
+Some events implement <code>Cancellable</code>. Some of these events can be cancelled using <code>Cancellable#setCancelled</code>.
 
 ### List of events
-**Connect**:<br>
+**NetworkAdapter events**:<br>
 
-    - ClientConnectEvent - Triggered when a new client connects
-    - ClientDisconnectEvent - Triggered when a client disconnects
+    - AdapterOpenEvent - Triggered when an adapter has been opened
+    - AdapterCloseEvent - Triggered when an adapter has been closed
+    - AdpterShutdownEvent - Triggered when an dapter has been shutdown
 
-**Packet**:<br>
 
-    - PacketReceiveEvent - Triggered when a packet has been received from the client
-    - ServerClientPacketSendEvent - Triggered when a packet is about to be sent to a client
+**Server events**:<br>
+
+    - ClientConnectEvent - Triggered when a client connects to a server
+
+
+**Client events**:<br>
+
+    - PacektSendEvent - Triggered when a packet has been sent
+    - PacketReceiveEvent - Triggered when a packet has been received
 
 ## Packet-IDs
 Following IDs for packets are already used any **may not be used** by the user again:<br>
