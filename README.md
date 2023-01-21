@@ -9,10 +9,12 @@
 
 ## Quickstart - General
 Every operation in this API uses the <code>Operation</code> interface.
-For example <code>server.send(packet)</code> returns such an operation.
+For example send a client a packet returns such an operation.
 Using this operation you may execute <code>Operation#complete</code> (synchronized) or <code>Operation#queue</code> (async).
-Operations are immutable and the methods mentioned above will return itself for example executing it multiple times.
-Almost all asynchronous operations use a centralized ThreadPool, they may also use a local thread pool depending on the operation.
+Operations are immutable and the methods mentioned above will return itself for executing itself multiple times.
+<br>Some asynchronous operations use a centralized thread pool, they may also use a local thread pool depending on the operation.
+You may also configure your own thread pool with the provided factories.
+
 
 If you want to use custom packets, you may register your packets in the <code>PacketRegistry</code>.
 You may want to watch out of registering a packet with an existing packet id. You can find a list of default packets <a href='#Packet-IDs'>here</a>.<br>
@@ -31,12 +33,12 @@ Server server = new ServerBuilder().build(PORT);
 ```
 
 You may now open the server to new clients using <code>Server#open</code>.<br>
-Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in closing the socket of this new client.
+Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in shutting down the client.
 
-You are also able to prevent the server from accepting new clients using <code>PacketServer#close</code> or shut it down entirely by using <code>Server#shutdown</code>
+You are also able to prevent the server from accepting new clients using <code>Server#close</code> or shut it down entirely by using <code>Server#shutdown</code>
 
 ## Quickstart - Client
-Opening a new (localhost-addressed) client is fairly simple.<br>
+Opening a new client is fairly simple.<br>
 ```
 Client client = new ClientBuilder().build(ADDRESS, PORT);
 ```
@@ -52,6 +54,7 @@ For example the <code>Server</code> will notify you about every incoming connect
 server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> System.out.println("Connected client " + connectEvent.client().getAddress().toString()));
 ```
 Some events implement <code>Cancellable</code>. Some of these events can be cancelled using <code>Cancellable#behaviour#setCancelled</code>.
+In addition to that, all events are records.
 
 ### List of events
 **NetworkAdapter events**:<br>
