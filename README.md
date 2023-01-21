@@ -7,7 +7,7 @@
 - Give the user the opportunity to make the entire client-server interaction asynchronous
 - Be fast
 
-## Quickstart - General
+## Quick start - General
 Every operation in this API uses the <code>Operation</code> interface.
 For example send a client a packet returns such an operation.
 Using this operation you may execute <code>Operation#complete</code> (synchronized) or <code>Operation#queue</code> (async).
@@ -23,7 +23,7 @@ Furthermore, the client and the server are both implementing [NetworkAdapter](ht
 
 There is also an event system. You can find more details <a href='#Events'>here</a>.
 
-## Quickstart - Server
+## Quick start - Server
 First of all you need a <code>ServerBuilder</code> to create a new <code>Server</code> Instance.
 With this builder, you are able to configure (tickrate, encryption, ...) your server.<br>
 
@@ -82,7 +82,7 @@ Following IDs for packets are already used any **may not be used** by the user a
 The transmitted packets have fixed structure:
 1. **A char** which contains the type of the following data, if its a Packet is 'p' (1 byte)
 2. **A long** which contains the ID of the following packet (8 bytes)
-3. **An int** which contains the size of the incomming packet (4 bytes)
+3. **An int** which contains the size of the incoming packet (4 bytes)
 4. **The packet** in the format given by the wrapper. Default is UTF-8 encoded JSON (x bytes)
 
 Packets transmitted using the <a href='https://github.com/GrandLamas/packets/blob/master/src/main/java/de/lama/packets/wrapper/CachedGsonWrapper.java'>
