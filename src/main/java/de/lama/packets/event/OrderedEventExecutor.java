@@ -36,6 +36,6 @@ public class OrderedEventExecutor implements EventHandler {
     public boolean isCancelled(Event event) {
         if (!Cancellable.class.isAssignableFrom(event.getClass())) throw new IllegalArgumentException("No cancellable event provided");
         this.notify(event);
-        return ((Cancellable) event).isCancelled();
+        return ((Cancellable) event).behaviour().isCancelled();
     }
 }

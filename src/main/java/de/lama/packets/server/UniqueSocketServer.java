@@ -4,7 +4,8 @@ import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
 import de.lama.packets.client.ClientBuilder;
-import de.lama.packets.event.events.server.ClientConnectEvent;
+import de.lama.packets.event.events.AdapterShutdownEvent;
+import de.lama.packets.event.events.ClientConnectEvent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.RepeatingOperation;
 import de.lama.packets.operation.SimpleOperation;
@@ -40,9 +41,14 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
             return false;
         }
 
+        client.getEventHandler().subscribe(AdapterShutdownEvent.class, event -> this.unregister(client));
         client.open().complete();
         this.clients.add(client);
         return true;
+    }
+
+    private void unregister(Client client) {
+        this.clients.remove(client);
     }
 
     @Override

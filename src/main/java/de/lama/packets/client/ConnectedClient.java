@@ -38,7 +38,7 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
     }
 
     private PacketReceiveEvent wrapEvent(TransceivablePacket transceivablePacket) {
-        return new PacketReceiveEvent(transceivablePacket.id(), this.parsePacket(transceivablePacket));
+        return new PacketReceiveEvent(this, transceivablePacket.id(), this.parsePacket(transceivablePacket));
     }
 
     private void packetReceived(TransceivablePacket transceivablePacket) {
@@ -78,7 +78,7 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
     public Operation send(Packet packet) {
         return new SimpleOperation((async) -> {
             long packetId = this.getRegistry().parseId(packet.getClass());
-            if (this.getEventHandler().isCancelled(new PacketSendEvent(packetId, packet))) return;
+            if (this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet))) return;
             TransceivablePacket transceivablePacket = this.parsePacket(packetId, packet);
             if (async) this.transmitter.queue(transceivablePacket);
             else this.transmitter.complete(transceivablePacket);

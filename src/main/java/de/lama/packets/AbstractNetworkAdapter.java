@@ -2,6 +2,9 @@ package de.lama.packets;
 
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.event.OrderedEventExecutor;
+import de.lama.packets.event.events.AdapterCloseEvent;
+import de.lama.packets.event.events.AdapterOpenEvent;
+import de.lama.packets.event.events.AdapterShutdownEvent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
@@ -25,6 +28,7 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
     public Operation open() {
         return new SimpleOperation((async) -> {
             if (!this.isClosed()) throw new IllegalStateException("Adapter already open");
+            if (this.getEventHandler().isCancelled(new AdapterOpenEvent(this))) return;
             this.executeOpen();
         });
     }
@@ -33,6 +37,7 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
     public Operation close() {
         return new SimpleOperation((async) -> {
             if (this.isClosed()) throw new IllegalStateException("Adapter already closed");
+            if (this.getEventHandler().isCancelled(new AdapterCloseEvent(this))) return;
             this.executeClose();
         });
     }
@@ -41,6 +46,7 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
     public Operation shutdown() {
         return new SimpleOperation((async) -> {
             if (this.hasShutdown()) throw new IllegalStateException("Adapter already shutdown");
+            this.data.eventHandler().notify(new AdapterShutdownEvent(this));
             if (!this.isClosed()) {
                 if (async) this.close().queue();
                 else this.close().complete();

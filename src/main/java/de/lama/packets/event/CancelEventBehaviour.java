@@ -1,6 +1,6 @@
 package de.lama.packets.event;
 
-public class CancelContainer implements Cancellable {
+public class CancelEventBehaviour implements EventBehaviour {
 
     private boolean cancelled;
 
