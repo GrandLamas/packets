@@ -16,6 +16,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
@@ -73,6 +74,7 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
 
     @Override
     public Operation broadcast(Packet packet) {
+        Objects.requireNonNull(packet);
         return new SimpleOperation((async) -> this.clients.forEach(client -> {
             Operation send = client.send(packet);
             if (async) send.queue();

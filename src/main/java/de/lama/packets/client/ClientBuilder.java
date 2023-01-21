@@ -60,7 +60,7 @@ public class ClientBuilder implements Cloneable {
     }
 
     public ClientBuilder registry(PacketRegistry registry) {
-        this.registry = registry;
+        this.registry = Objects.requireNonNull(registry);
         return this;
     }
 

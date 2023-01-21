@@ -17,6 +17,7 @@ import de.lama.packets.wrapper.PacketWrapper;
 
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Objects;
 
 class ConnectedClient extends AbstractNetworkAdapter implements Client {
 
@@ -76,6 +77,7 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
 
     @Override
     public Operation send(Packet packet) {
+        Objects.requireNonNull(packet);
         return new SimpleOperation((async) -> {
             if (this.hasShutdown()) {
                 this.handle(new IllegalStateException("Client already closed"));
@@ -102,6 +104,10 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
 
     @Override
     public PacketReceiveEvent awaitPacket(long timeoutInMillis) {
+        if (timeoutInMillis < 0) {
+            throw new IllegalArgumentException("Timeout may not be lower than 0");
+        }
+
         return this.wrapEvent(this.receiver.awaitPacket(timeoutInMillis));
     }
 
