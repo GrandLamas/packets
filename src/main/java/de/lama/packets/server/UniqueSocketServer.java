@@ -67,6 +67,7 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
 
     @Override
     protected void executeShutdown() {
+        this.clients.forEach(client -> client.shutdown().complete());
         this.getExceptionHandler().operate(this.socket::close, "Could not close socket");
     }
 
