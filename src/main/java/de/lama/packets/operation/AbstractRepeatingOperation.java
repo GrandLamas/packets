@@ -23,7 +23,7 @@ public abstract class AbstractRepeatingOperation implements RepeatingOperation {
 
     @Override
     public boolean isRunning() {
-        return this.task != null;
+        return this.task != null && !this.task.isCancelled();
     }
 
     @Override

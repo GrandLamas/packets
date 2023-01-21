@@ -77,6 +77,11 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
     @Override
     public Operation send(Packet packet) {
         return new SimpleOperation((async) -> {
+            if (this.hasShutdown()) {
+                this.handle(new IllegalStateException("Client already closed"));
+                return;
+            }
+
             long packetId = this.getRegistry().parseId(packet.getClass());
             if (this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet))) return;
             TransceivablePacket transceivablePacket = this.parsePacket(packetId, packet);

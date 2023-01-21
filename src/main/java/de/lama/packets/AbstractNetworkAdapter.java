@@ -18,6 +18,10 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
         this.data = new NetworkAdapterData(exceptionHandler, new OrderedEventExecutor(), registry);
     }
 
+    protected void handle(Exception exception) {
+        this.getExceptionHandler().accept(exception);
+    }
+
     protected abstract void executeClose();
 
     protected abstract void executeOpen();
@@ -27,7 +31,11 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
     @Override
     public Operation open() {
         return new SimpleOperation((async) -> {
-            if (!this.isClosed()) throw new IllegalStateException("Adapter already open");
+            if (!this.isClosed()) {
+                this.handle(new IllegalStateException("Adapter already open"));
+                return;
+            }
+
             if (this.getEventHandler().isCancelled(new AdapterOpenEvent(this))) return;
             this.executeOpen();
         });
@@ -36,7 +44,11 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
     @Override
     public Operation close() {
         return new SimpleOperation((async) -> {
-            if (this.isClosed()) throw new IllegalStateException("Adapter already closed");
+            if (this.isClosed()) {
+                this.handle(new IllegalStateException("Adapter already closed"));
+                return;
+            }
+
             if (this.getEventHandler().isCancelled(new AdapterCloseEvent(this))) return;
             this.executeClose();
         });
@@ -45,11 +57,14 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
     @Override
     public Operation shutdown() {
         return new SimpleOperation((async) -> {
-            if (this.hasShutdown()) throw new IllegalStateException("Adapter already shutdown");
+            if (this.hasShutdown()) {
+                this.handle(new IllegalStateException("Adapter already shutdown"));
+                return;
+            }
+
             this.data.eventHandler().notify(new AdapterShutdownEvent(this));
             if (!this.isClosed()) {
-                if (async) this.close().queue();
-                else this.close().complete();
+                this.close().complete();
             }
 
             this.executeShutdown();
