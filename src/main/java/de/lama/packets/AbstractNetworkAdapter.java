@@ -63,10 +63,7 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
             }
 
             this.data.eventHandler().notify(new AdapterShutdownEvent(this));
-            if (!this.isClosed()) {
-                this.close().complete();
-            }
-
+            if (!this.isClosed()) this.close().complete();
             this.executeShutdown();
         });
     }

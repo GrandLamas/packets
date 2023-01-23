@@ -99,7 +99,7 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
 
     @Override
     public boolean hasShutdown() {
-        return this.socket.isClosed();
+        return !this.transmitter.isRunning() || this.socket.isClosed();
     }
 
     @Override
