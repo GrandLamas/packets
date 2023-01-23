@@ -1,6 +1,9 @@
 package de.lama.packets.io;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class BufferedPacketOutputStream extends OutputStream implements PacketOutputStream {
 
