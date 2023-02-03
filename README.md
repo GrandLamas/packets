@@ -44,7 +44,7 @@ Client client = new ClientBuilder().build(ADDRESS, PORT);
 ```
 
 Now, if you also want to receive packets, you may also open your client. Otherwise your client will only be able to send packets.<br>
-You may use <code>client#open</code> for that. You are also able to close the client or shut it down entirely.
+You may use <code>Client#open</code> for that. You are also able to close the client or shut it down entirely.
 
 ## Events
 Almost every central API object is an <code>EventHandlerContainer</code>, which means you can use its EventHandler to subscribe to the events of the API object.
@@ -91,3 +91,5 @@ CachedGsonWrapper</a> (default) will use a cache, which will significantly impro
 ## TODO
 - Encryption
 - More events
+- PacketCompression?
+- FileTransfers more than 75MB default
