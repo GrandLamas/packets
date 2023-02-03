@@ -41,7 +41,7 @@ class HandshakeClient implements Client {
 
     private final Client client;
     private final UUID handshakeUuid;
-    private boolean handshake;
+    private volatile boolean handshake;
 
     public HandshakeClient(Client client) {
         this.client = client;
