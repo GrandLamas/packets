@@ -28,7 +28,7 @@ import de.lama.packets.client.Client;
 import de.lama.packets.client.stream.socket.SocketClientBuilder;
 import de.lama.packets.client.HandshakePacket;
 import de.lama.packets.server.Server;
-import de.lama.packets.server.ServerBuilder;
+import de.lama.packets.server.socket.SocketServerBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class BrokenPipeTest {
 
     @Test
     public void clientClosedTest() throws IOException {
-        Server server = new ServerBuilder().build(3999);
+        Server server = new SocketServerBuilder().build(3999);
         server.open().complete();
 
         Client client = new SocketClientBuilder().exceptionHandler(throwable ->
@@ -52,7 +52,7 @@ public class BrokenPipeTest {
 
     @Test
     public void serverClosedTest() throws IOException {
-        Server server = new ServerBuilder().build(3999);
+        Server server = new SocketServerBuilder().build(3999);
         server.open().complete();
 
         Client client = new SocketClientBuilder().exceptionHandler(throwable ->

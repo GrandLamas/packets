@@ -31,7 +31,7 @@ import de.lama.packets.event.events.ClientConnectEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.Server;
-import de.lama.packets.server.ServerBuilder;
+import de.lama.packets.server.socket.SocketServerBuilder;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -49,7 +49,7 @@ public class ChatTest {
     }
 
     private static void startServer(PacketRegistry registry) throws IOException {
-        Server server = new ServerBuilder().registry(registry).build(4999);
+        Server server = new SocketServerBuilder().registry(registry).build(4999);
 
         server.getEventHandler().subscribe(ClientConnectEvent.class, (connectEvent) -> {
             System.out.println("Connected client " + connectEvent.client().getAddress().toString());
