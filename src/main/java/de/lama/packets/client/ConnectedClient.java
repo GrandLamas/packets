@@ -26,13 +26,12 @@ package de.lama.packets.client;
 
 import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
-import de.lama.packets.client.transceiver.IoTransceivablePacket;
-import de.lama.packets.client.transceiver.TransceivablePacket;
-import de.lama.packets.client.transceiver.receiver.PacketReceiver;
-import de.lama.packets.client.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.PacketSendEvent;
 import de.lama.packets.io.CachedIoPacket;
+import de.lama.packets.io.IoPacket;
+import de.lama.packets.io.stream.receiver.PacketReceiver;
+import de.lama.packets.io.stream.transmitter.PacketTransmitter;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
@@ -62,20 +61,20 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
         this.transmitter.start();
     }
 
-    private PacketReceiveEvent wrapEvent(TransceivablePacket transceivablePacket) {
-        return new PacketReceiveEvent(this, transceivablePacket.id(), this.parsePacket(transceivablePacket));
+    private PacketReceiveEvent wrapEvent(IoPacket ioPacket) {
+        return new PacketReceiveEvent(this, ioPacket.id(), this.parsePacket(ioPacket));
     }
 
-    private void packetReceived(TransceivablePacket transceivablePacket) {
-        this.getEventHandler().notify(this.wrapEvent(transceivablePacket));
+    private void packetReceived(IoPacket ioPacket) {
+        this.getEventHandler().notify(this.wrapEvent(ioPacket));
     }
 
-    protected Packet parsePacket(TransceivablePacket packet) {
+    protected Packet parsePacket(IoPacket packet) {
         return this.wrapper.unwrap(packet.id(), packet.data());
     }
 
-    protected TransceivablePacket parsePacket(long packetId, Packet packet) {
-        return new IoTransceivablePacket(new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet)));
+    protected IoPacket parsePacket(long packetId, Packet packet) {
+        return new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet));
     }
 
     @Override
@@ -110,9 +109,9 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
 
             long packetId = this.getRegistry().parseId(packet.getClass());
             if (this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet))) return;
-            TransceivablePacket transceivablePacket = this.parsePacket(packetId, packet);
-            if (async) this.transmitter.queue(transceivablePacket);
-            else this.transmitter.complete(transceivablePacket);
+            IoPacket ioPacket = this.parsePacket(packetId, packet);
+            if (async) this.transmitter.queue(ioPacket);
+            else this.transmitter.complete(ioPacket);
         });
     }
 

@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.transceiver.receiver;
+package de.lama.packets.io.stream.receiver;
 
-import de.lama.packets.client.transceiver.IoTransceivablePacket;
-import de.lama.packets.client.transceiver.TransceivablePacket;
 import de.lama.packets.io.BufferedPacketInputStream;
-import de.lama.packets.client.transceiver.AbstractScheduledTransceiver;
+import de.lama.packets.io.IoPacket;
+import de.lama.packets.io.stream.AbstractScheduledTransceiver;
 import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.InputStream;
@@ -41,7 +40,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     private final BufferedPacketInputStream in;
     private final ExceptionHandler exceptionHandler;
     private final Map<UUID, PacketConsumer> consumer;
-    private TransceivablePacket last;
+    private IoPacket last;
 
     ScheduledPacketReceiver(InputStream inputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler) {
         super(pool, tickrate);
@@ -50,7 +49,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
         this.exceptionHandler = exceptionHandler;
     }
 
-    private void packetReceived(TransceivablePacket packet) {
+    private void packetReceived(IoPacket packet) {
         this.last = packet;
         synchronized (this) {
             this.notifyAll();
@@ -62,13 +61,13 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     protected void tick() {
         this.exceptionHandler.operate(() -> {
             while (this.in.available() > 0) {
-                this.packetReceived(new IoTransceivablePacket(this.in.readPacket()));
+                this.packetReceived(this.in.readPacket());
             }
         }, "Failed to read packet");
     }
 
     @Override
-    public TransceivablePacket awaitPacket(long timeoutInMillis) {
+    public IoPacket awaitPacket(long timeoutInMillis) {
         synchronized (this) {this.exceptionHandler.operate(() -> this.wait(timeoutInMillis), "Could not wait");}
         return this.last;
     }

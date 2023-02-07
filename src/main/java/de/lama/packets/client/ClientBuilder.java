@@ -24,10 +24,10 @@
 
 package de.lama.packets.client;
 
-import de.lama.packets.client.transceiver.receiver.PacketReceiver;
-import de.lama.packets.client.transceiver.receiver.PacketReceiverBuilder;
-import de.lama.packets.client.transceiver.transmitter.PacketTransmitter;
-import de.lama.packets.client.transceiver.transmitter.PacketTransmitterBuilder;
+import de.lama.packets.io.stream.receiver.PacketReceiver;
+import de.lama.packets.io.stream.receiver.PacketReceiverBuilder;
+import de.lama.packets.io.stream.transmitter.PacketTransmitter;
+import de.lama.packets.io.stream.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;

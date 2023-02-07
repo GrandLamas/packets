@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.transceiver.receiver;
+package de.lama.packets.io.stream;
 
-import de.lama.packets.client.transceiver.TransceivablePacket;
+import de.lama.packets.operation.RepeatingOperation;
 
-import java.util.function.Consumer;
+public interface PacketTransceiver extends RepeatingOperation {
 
-public interface PacketConsumer extends Consumer<TransceivablePacket> {
+    long getTickrate();
 
 }

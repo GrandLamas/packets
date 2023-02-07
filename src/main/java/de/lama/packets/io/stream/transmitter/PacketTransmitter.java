@@ -22,19 +22,15 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.transceiver;
+package de.lama.packets.io.stream.transmitter;
 
-import de.lama.packets.util.exception.ExceptionHandler;
+import de.lama.packets.io.IoPacket;
+import de.lama.packets.io.stream.PacketTransceiver;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+public interface PacketTransmitter extends PacketTransceiver {
 
-public abstract class AbstractTransceiverBuilder {
+    void queue(IoPacket packet);
 
-    private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(10);
-
-    protected ScheduledExecutorService pool = SERVICE;
-    protected int tickrate = 16;
-    protected ExceptionHandler exceptionHandler;
+    void complete(IoPacket packet);
 
 }

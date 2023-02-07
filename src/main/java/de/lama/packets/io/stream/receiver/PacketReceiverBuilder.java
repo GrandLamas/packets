@@ -22,29 +22,34 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.transceiver;
+package de.lama.packets.io.stream.receiver;
 
-import de.lama.packets.io.IoPacket;
+import de.lama.packets.io.stream.AbstractTransceiverBuilder;
+import de.lama.packets.util.exception.ExceptionHandler;
 
-public record IoTransceivablePacket(IoPacket packet) implements TransceivablePacket {
+import java.io.InputStream;
+import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
 
-    @Override
-    public char type() {
-        return this.packet.type();
+public class PacketReceiverBuilder extends AbstractTransceiverBuilder {
+
+    public PacketReceiverBuilder tickrate(int tickrate) {
+        this.tickrate = tickrate;
+        return this;
     }
 
-    @Override
-    public long id() {
-        return this.packet.id();
+    public PacketReceiverBuilder threadPool(ScheduledExecutorService pool) {
+        this.pool = pool;
+        return this;
     }
 
-    @Override
-    public int size() {
-        return this.packet.size();
+    public PacketReceiverBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
+        return this;
     }
 
-    @Override
-    public byte[] data() {
-        return this.packet.data();
+    public PacketReceiver build(InputStream in) {
+        return new ScheduledPacketReceiver(Objects.requireNonNull(in), this.tickrate, Objects.requireNonNull(this.pool),
+                Objects.requireNonNull(this.exceptionHandler));
     }
 }

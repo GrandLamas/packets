@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.transceiver;
+package de.lama.packets.io.stream;
 
 import de.lama.packets.operation.AbstractRepeatingOperation;
 import de.lama.packets.operation.Operation;

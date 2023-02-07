@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.transceiver.transmitter;
+package de.lama.packets.io.stream.transmitter;
 
-import de.lama.packets.client.transceiver.TransceivablePacket;
 import de.lama.packets.io.BufferedPacketOutputStream;
-import de.lama.packets.client.transceiver.AbstractScheduledTransceiver;
+import de.lama.packets.io.IoPacket;
+import de.lama.packets.io.stream.AbstractScheduledTransceiver;
 import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.OutputStream;
@@ -38,7 +38,7 @@ class ScheduledPacketTransmitter extends AbstractScheduledTransceiver implements
 
     private final BufferedPacketOutputStream out;
     private final ExceptionHandler exceptionHandler;
-    private final Queue<TransceivablePacket> packetQueue;
+    private final Queue<IoPacket> packetQueue;
 
     ScheduledPacketTransmitter(OutputStream outputStream, int tickrate, ScheduledExecutorService pool, ExceptionHandler exceptionHandler) {
         super(pool, tickrate);
@@ -51,25 +51,25 @@ class ScheduledPacketTransmitter extends AbstractScheduledTransceiver implements
         this.exceptionHandler.operate(this.out::flush, "Could not flush output");
     }
 
-    private void write(TransceivablePacket packet) {
+    private void write(IoPacket packet) {
         this.exceptionHandler.operate(() -> this.out.write(packet),"Could not write data");
     }
 
     @Override
     protected void tick() {
-        TransceivablePacket send;
+        IoPacket send;
         while ((send = this.packetQueue.poll()) != null) {
             this.complete(send);
         }
     }
 
     @Override
-    public void queue(TransceivablePacket packet) {
+    public void queue(IoPacket packet) {
         this.packetQueue.add(packet);
     }
 
     @Override
-    public void complete(TransceivablePacket packet) {
+    public void complete(IoPacket packet) {
         this.write(packet);
         this.flush();
     }

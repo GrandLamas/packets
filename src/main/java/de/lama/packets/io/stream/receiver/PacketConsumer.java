@@ -22,19 +22,12 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.transceiver.receiver;
+package de.lama.packets.io.stream.receiver;
 
-import de.lama.packets.client.transceiver.PacketTransceiver;
-import de.lama.packets.client.transceiver.TransceivablePacket;
+import de.lama.packets.io.IoPacket;
 
-import java.util.UUID;
+import java.util.function.Consumer;
 
-public interface PacketReceiver extends PacketTransceiver {
-
-    TransceivablePacket awaitPacket(long timeoutInMillis);
-
-    UUID subscribe(PacketConsumer consumer);
-
-    boolean unsubscribe(UUID uuid);
+public interface PacketConsumer extends Consumer<IoPacket> {
 
 }
