@@ -81,7 +81,6 @@ public class HandshakeClient implements Client {
         if (!this.handshake) {
             this.client.shutdown().complete();
         } else {
-            this.client.close().complete();
             synchronized (this) {
                 this.notifyAll();
             }
