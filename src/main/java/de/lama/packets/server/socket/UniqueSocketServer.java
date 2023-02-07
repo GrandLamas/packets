@@ -22,63 +22,40 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.server;
+package de.lama.packets.server.socket;
 
-import de.lama.packets.AbstractNetworkAdapter;
-import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
 import de.lama.packets.client.stream.socket.SocketClientBuilder;
-import de.lama.packets.event.events.AdapterShutdownEvent;
-import de.lama.packets.event.events.ClientConnectEvent;
-import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.RepeatingOperation;
-import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.server.AbstractServer;
+import de.lama.packets.server.Server;
 import de.lama.packets.util.exception.ExceptionHandler;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Stream;
 
-class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
+class UniqueSocketServer extends AbstractServer implements Server {
 
     private final ServerSocket socket;
-    private final Collection<Client> clients;
     private final SocketClientBuilder clientFactory;
     private final RepeatingOperation clientAcceptor;
 
     UniqueSocketServer(ServerSocket socket, SocketClientBuilder builder, PacketRegistry registry, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
         this.socket = socket;
-        this.clients = new ConcurrentLinkedQueue<>();
+
         this.clientFactory = builder;
-        this.clientAcceptor = new RepeatingClientAcceptor(this.socket, this::register, this.getExceptionHandler());
+        this.clientAcceptor = new RepeatingClientAcceptor(this.socket, this::build, this.getExceptionHandler());
 
         this.open().complete();
     }
 
-    private boolean register(Socket socket) {
+    private boolean build(Socket socket) {
         Client client = this.getExceptionHandler().operate(() -> this.clientFactory.build(socket), "Could not create client");
-        if (client == null) {
-            return false;
-        }
-
-        if (this.getEventHandler().isCancelled(new ClientConnectEvent(this, client))) {
-            client.shutdown().complete();
-            return false;
-        }
-
-        client.getEventHandler().subscribe(AdapterShutdownEvent.class, event -> this.unregister(client));
-        this.clients.add(client);
-        return true;
-    }
-
-    private void unregister(Client client) {
-        this.clients.remove(client);
+        return client != null && super.register(client);
     }
 
     @Override
@@ -92,24 +69,13 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
     }
 
     @Override
-    protected void executeShutdown() {
-        this.clients.forEach(client -> client.shutdown().complete());
-        this.getExceptionHandler().operate(this.socket::close, "Could not close socket");
-    }
-
-    @Override
-    public Operation broadcast(Packet packet) {
-        Objects.requireNonNull(packet);
-        return new SimpleOperation((async) -> this.clients.forEach(client -> {
-            Operation send = client.send(packet);
-            if (async) send.queue();
-            else send.complete();
-        }));
+    protected void shutdownConnection() throws IOException {
+        this.socket.close();
     }
 
     @Override
     public boolean isClosed() {
-        return this.hasShutdown() || !this.clientAcceptor.isRunning();
+        return super.isClosed() || !this.clientAcceptor.isRunning();
     }
 
     @Override
@@ -125,11 +91,6 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
     @Override
     public InetAddress getAddress() {
         return this.socket.getInetAddress();
-    }
-
-    @Override
-    public Stream<Client> getClients() {
-        return this.clients.stream();
     }
 
 }

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.server;
+package de.lama.packets.server.socket;
 
 import de.lama.packets.operation.AbstractRepeatingOperation;
 import de.lama.packets.operation.Operation;

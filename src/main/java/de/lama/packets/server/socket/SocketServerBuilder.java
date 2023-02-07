@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.server;
+package de.lama.packets.server.socket;
 
 import de.lama.packets.client.stream.socket.SocketClientBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.server.Server;
 import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ import java.net.ServerSocket;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class ServerBuilder {
+public class SocketServerBuilder {
 
     private static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
 
@@ -58,17 +59,17 @@ public class ServerBuilder {
         return new ServerSocket(port);
     }
 
-    public ServerBuilder registry(PacketRegistry registry) {
+    public SocketServerBuilder registry(PacketRegistry registry) {
         this.registry = registry;
         return this;
     }
 
-    public ServerBuilder clients(SocketClientBuilder clientFactory) {
+    public SocketServerBuilder clients(SocketClientBuilder clientFactory) {
         this.socketClientBuilder = clientFactory;
         return this;
     }
 
-    public ServerBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
+    public SocketServerBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
         return this;
     }

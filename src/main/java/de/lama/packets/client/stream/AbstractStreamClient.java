@@ -52,7 +52,6 @@ public abstract class AbstractStreamClient extends AbstractClient implements Cli
         this.transmitter.start();
     }
 
-
     protected abstract void shutdownConnection() throws IOException;
 
     @Override
