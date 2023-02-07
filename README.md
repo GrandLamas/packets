@@ -2,9 +2,10 @@
 
 ## Goals
 
-- Provide a simple and efficient interface to open a server and connect to servers
+- Provide a simple, efficient and high level interface to open a server and connect to servers
 - Send custom packets over the given connections effortlessly and without any boilerplate code
 - Give the user the opportunity to make the entire client-server interaction asynchronous
+- Be modular, so more io library adapter can be written 
 - Be fast
 
 ## Quick start - General
@@ -23,24 +24,27 @@ Furthermore, the client and the server are both implementing [NetworkAdapter](ht
 
 There is also an event system. You can find more details <a href='#Events'>here</a>.
 
-## Quick start - Server
-First of all you need a <code>ServerBuilder</code> to create a new <code>Server</code> Instance.
+ATM there is just an java.net.Socket implementation of server and client.<br>
+The API design supports more implementations, so I hope for more to come!
+
+## Quick start - Server (java.net.ServerSocket)
+First of all you need a <code>SocketServerBuilder</code> to create a new <code>Server</code> Instance.
 With this builder, you are able to configure (tickrate, encryption, ...) your server.<br>
 
-Using <code>ServerBuilder#build</code> you build your configurated server. Congratulations!<br>
+Using <code>SocketServerBuilder#build</code> you build your configurated server. Congratulations!<br>
 ```
-Server server = new ServerBuilder().build(PORT);
+Server server = new SocketServerBuilder().build(PORT);
 ```
 
-You may now open the server to new clients using <code>Server#open</code>.<br>
+
 Every connecting client will receive a Handshake for checking the API version, not answering this handshake will result in shutting down the client.
 
 You are also able to prevent the server from accepting new clients using <code>Server#close</code> or shut it down entirely by using <code>Server#shutdown</code>
 
-## Quickstart - Client
+## Quickstart - Client (java.net.Socket)
 Opening a new client is fairly simple.<br>
 ```
-Client client = new ClientBuilder().build(ADDRESS, PORT);
+Client client = new SocketClientBuilder().build(ADDRESS, PORT);
 ```
 
 Now, if you also want to receive packets, you may also open your client. Otherwise your client will only be able to send packets.<br>
@@ -79,7 +83,7 @@ Following IDs for packets are already used any **may not be used** by the user a
 * 69420: Handshake-Packet
 
 ## Technical Stuff
-The transmitted packets have fixed structure:
+The via de.lama.packets.stream transmitted packets have fixed structure:
 1. **A char** which contains the type of the following data, if its a Packet is 'p' (1 byte)
 2. **A long** which contains the ID of the following packet (8 bytes)
 3. **An int** which contains the size of the incoming packet (4 bytes)
@@ -90,6 +94,8 @@ CachedGsonWrapper</a> (default) will use a cache, which will significantly impro
 
 ## TODO
 - Encryption
+- More implementations
 - More events
 - PacketCompression?
+- Better builder
 - FileTransfers more than 75MB default
