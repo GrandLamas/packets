@@ -35,21 +35,29 @@ import de.lama.packets.util.exception.ExceptionHandler;
 import java.net.InetAddress;
 import java.util.UUID;
 
-class HandshakeClient implements Client {
-
-    private static final Packet HANDSHAKE_PACKET = new HandshakePacket(HandshakePacket.VERSION);
+public class HandshakeClient implements Client {
 
     private final Client client;
     private final UUID handshakeUuid;
+    private final HandshakePacket sent;
     private volatile boolean handshake;
 
     public HandshakeClient(Client client) {
         this.client = client;
+        this.sent = this.buildPacket();
 
         this.getRegistry().registerPacket(HandshakePacket.ID, HandshakePacket.class);
-        this.handshakeUuid = this.client.getEventHandler().subscribe(PacketReceiveEvent.class, new HandshakeListener(this::onHandshake));
+        this.handshakeUuid = this.client.getEventHandler().subscribe(PacketReceiveEvent.class, this::onEvent);
         this.client.open().complete();
-        this.client.send(HANDSHAKE_PACKET).complete();
+        this.client.send(this.sent).complete();
+    }
+
+    private Operation waitOperation(Operation operation) {
+        return new SimpleOperation((async) -> {
+            this.awaitHandshake();
+            if (async) operation.queue();
+            else operation.complete();
+        });
     }
 
     private void awaitHandshake() {
@@ -59,10 +67,17 @@ class HandshakeClient implements Client {
         }
     }
 
-    private void onHandshake(boolean accept) {
-        this.handshake = accept;
-        this.client.getEventHandler().unsubscribe(this.handshakeUuid);
+    protected HandshakePacket buildPacket() {
+        return new HandshakePacket(HandshakePacket.VERSION);
+    }
 
+    protected boolean validateHandshakePacket(HandshakePacket packet) {
+        return packet.version().equals(this.sent.version());
+    }
+
+    protected void onEvent(PacketReceiveEvent event) {
+        this.client.getEventHandler().unsubscribe(this.handshakeUuid);
+        this.handshake = event.packetId() == HandshakePacket.ID && this.validateHandshakePacket((HandshakePacket) event.packet());
         if (!this.handshake) {
             this.client.shutdown().complete();
         } else {
@@ -71,14 +86,6 @@ class HandshakeClient implements Client {
                 this.notifyAll();
             }
         }
-    }
-
-    private Operation waitOperation(Operation operation) {
-        return new SimpleOperation((async) -> {
-            this.awaitHandshake();
-            if (async) operation.queue();
-            else operation.complete();
-        });
     }
 
     @Override

@@ -22,13 +22,12 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io;
+package de.lama.packets.stream;
 
-import de.lama.packets.Packet;
+import java.io.IOException;
 
-public record CachedIoPacket(char type, long id, int size, byte[] data) implements IoPacket {
+public interface PacketInputStream {
 
-    public CachedIoPacket(long id, byte[] data) {
-        this(Packet.TYPE, id, data.length, data);
-    }
+    IoPacket readPacket() throws IOException;
+
 }

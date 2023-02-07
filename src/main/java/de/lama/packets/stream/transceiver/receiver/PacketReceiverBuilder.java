@@ -22,33 +22,34 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client;
+package de.lama.packets.stream.transceiver.receiver;
 
-import de.lama.packets.Packet;
-import de.lama.packets.event.events.PacketReceiveEvent;
+import de.lama.packets.stream.transceiver.AbstractTransceiverBuilder;
+import de.lama.packets.util.exception.ExceptionHandler;
 
-import java.util.function.Consumer;
+import java.io.InputStream;
+import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
 
-public class HandshakeListener implements Consumer<PacketReceiveEvent> {
+public class PacketReceiverBuilder extends AbstractTransceiverBuilder {
 
-    private final Consumer<Boolean> onHandshake;
-
-    public HandshakeListener(Consumer<Boolean> onHandshake) {
-        this.onHandshake = onHandshake;
+    public PacketReceiverBuilder tickrate(int tickrate) {
+        this.tickrate = tickrate;
+        return this;
     }
 
-    @Override
-    public void accept(PacketReceiveEvent event) {
-        if (event.packetId() != HandshakePacket.ID) {
-            this.onHandshake.accept(false);
-            return;
-        }
+    public PacketReceiverBuilder threadPool(ScheduledExecutorService pool) {
+        this.pool = pool;
+        return this;
+    }
 
-        if (!((HandshakePacket) event.packet()).version().equals(Packet.VERSION)) {
-            this.onHandshake.accept(false);
-            return;
-        }
+    public PacketReceiverBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
+        return this;
+    }
 
-        this.onHandshake.accept(true);
+    public PacketReceiver build(InputStream in) {
+        return new ScheduledPacketReceiver(Objects.requireNonNull(in), this.tickrate, Objects.requireNonNull(this.pool),
+                Objects.requireNonNull(this.exceptionHandler));
     }
 }

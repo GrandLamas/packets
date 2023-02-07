@@ -22,50 +22,54 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io.stream;
+package de.lama.packets.stream;
 
-import de.lama.packets.operation.AbstractRepeatingOperation;
-import de.lama.packets.operation.Operation;
+import de.lama.packets.Packet;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-public abstract class AbstractScheduledTransceiver extends AbstractRepeatingOperation implements PacketTransceiver {
+public class BufferedPacketInputStream extends InputStream implements PacketInputStream {
 
-    private final ScheduledExecutorService pool;
-    private final long tickrate;
+    private final DataInputStream in;
 
-    protected AbstractScheduledTransceiver(ScheduledExecutorService pool, int tickrate) {
-        this.pool = pool;
-        this.tickrate = this.calculateTickrate(tickrate);
-    }
-
-    private long calculateTickrate(int tickrate) {
-        return 1000L / tickrate;
-    }
-
-    protected abstract void tick();
-
-    @Override
-    public Operation complete() {
-        this.tick();
-        return this;
+    public BufferedPacketInputStream(InputStream in) {
+        this.in = new DataInputStream(new BufferedInputStream(in));
     }
 
     @Override
-    public Operation queue() {
-        this.pool.submit(this::complete);
-        return this;
+    public IoPacket readPacket() throws IOException {
+        char type = this.in.readChar();
+        if (type != Packet.TYPE) return null;
+
+        // HEAD
+        long packetId = this.in.readLong();
+        int length = this.in.readInt();
+        byte[] buffer = new byte[length];
+
+        // DATA
+        int read = 0;
+        while (read < length) {
+            read += this.in.read(buffer, read, buffer.length - read);
+        }
+
+        return new CachedIoPacket(type, packetId, length, buffer);
     }
 
     @Override
-    protected Future<?> createRepeatingTask() {
-        return this.pool.scheduleAtFixedRate(this::complete, this.tickrate, this.tickrate, TimeUnit.MILLISECONDS);
+    public int available() throws IOException {
+        return this.in.available();
     }
 
     @Override
-    public long getTickrate() {
-        return this.tickrate;
+    public int read() throws IOException {
+        return this.in.read();
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.in.close();
     }
 }

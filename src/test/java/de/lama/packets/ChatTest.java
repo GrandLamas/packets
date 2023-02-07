@@ -25,7 +25,7 @@
 package de.lama.packets;
 
 import de.lama.packets.client.Client;
-import de.lama.packets.client.ClientBuilder;
+import de.lama.packets.client.stream.socket.SocketClientBuilder;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.ClientConnectEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
@@ -62,7 +62,7 @@ public class ChatTest {
 
     private static void connectClient(PacketRegistry registry) {
         try {
-            Client client = new ClientBuilder().registry(registry).build("localhost", 4999);
+            Client client = new SocketClientBuilder().registry(registry).build("localhost", 4999);
             client.open().queue();
 
             client.getEventHandler().subscribe(PacketReceiveEvent.class, (event -> {

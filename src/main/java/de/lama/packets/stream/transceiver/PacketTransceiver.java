@@ -22,15 +22,12 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io.stream.transmitter;
+package de.lama.packets.stream.transceiver;
 
-import de.lama.packets.io.IoPacket;
-import de.lama.packets.io.stream.PacketTransceiver;
+import de.lama.packets.operation.RepeatingOperation;
 
-public interface PacketTransmitter extends PacketTransceiver {
+public interface PacketTransceiver extends RepeatingOperation {
 
-    void queue(IoPacket packet);
-
-    void complete(IoPacket packet);
+    long getTickrate();
 
 }

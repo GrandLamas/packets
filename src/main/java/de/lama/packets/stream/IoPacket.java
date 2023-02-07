@@ -22,12 +22,16 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io.stream;
+package de.lama.packets.stream;
 
-import de.lama.packets.operation.RepeatingOperation;
+public interface IoPacket {
 
-public interface PacketTransceiver extends RepeatingOperation {
+    char type();
 
-    long getTickrate();
+    long id();
+
+    int size();
+
+    byte[] data();
 
 }

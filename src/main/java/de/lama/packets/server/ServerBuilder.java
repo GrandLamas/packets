@@ -24,7 +24,7 @@
 
 package de.lama.packets.server;
 
-import de.lama.packets.client.ClientBuilder;
+import de.lama.packets.client.stream.socket.SocketClientBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
@@ -38,7 +38,7 @@ public class ServerBuilder {
 
     private static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
 
-    private ClientBuilder clientBuilder;
+    private SocketClientBuilder socketClientBuilder;
     private ExceptionHandler exceptionHandler;
     private PacketRegistry registry;
 
@@ -46,8 +46,8 @@ public class ServerBuilder {
         return Objects.requireNonNullElseGet(this.registry, DEFAULT_REGISTRY);
     }
 
-    private ClientBuilder buildClientBuilder() {
-        return Objects.requireNonNullElseGet(this.clientBuilder, ClientBuilder::new).clone();
+    private SocketClientBuilder buildClientBuilder() {
+        return Objects.requireNonNullElseGet(this.socketClientBuilder, SocketClientBuilder::new).clone();
     }
 
     private ExceptionHandler buildExceptionHandler() {
@@ -63,8 +63,8 @@ public class ServerBuilder {
         return this;
     }
 
-    public ServerBuilder clients(ClientBuilder clientFactory) {
-        this.clientBuilder = clientFactory;
+    public ServerBuilder clients(SocketClientBuilder clientFactory) {
+        this.socketClientBuilder = clientFactory;
         return this;
     }
 
@@ -76,7 +76,7 @@ public class ServerBuilder {
     public Server build(int port) throws IOException {
         ExceptionHandler exceptionHandler = this.buildExceptionHandler();
         PacketRegistry registry = this.buildRegistry();
-        ClientBuilder clientBuilder = this.buildClientBuilder().exceptionHandler(exceptionHandler).registry(registry);
-        return new UniqueSocketServer(this.createSocket(port), clientBuilder, registry, exceptionHandler);
+        SocketClientBuilder socketClientBuilder = this.buildClientBuilder().exceptionHandler(exceptionHandler).registry(registry);
+        return new UniqueSocketServer(this.createSocket(port), socketClientBuilder, registry, exceptionHandler);
     }
 }

@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io;
+package de.lama.packets.stream.transceiver.receiver;
 
-import java.io.IOException;
+import de.lama.packets.stream.IoPacket;
 
-public interface PacketOutputStream {
+import java.util.function.Consumer;
 
-    void write(IoPacket packet) throws IOException;
+public interface PacketConsumer extends Consumer<IoPacket> {
 
 }

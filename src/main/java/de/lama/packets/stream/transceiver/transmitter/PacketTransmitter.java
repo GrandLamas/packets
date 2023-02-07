@@ -22,16 +22,15 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io;
+package de.lama.packets.stream.transceiver.transmitter;
 
-public interface IoPacket {
+import de.lama.packets.stream.IoPacket;
+import de.lama.packets.stream.transceiver.PacketTransceiver;
 
-    char type();
+public interface PacketTransmitter extends PacketTransceiver {
 
-    long id();
+    void queue(IoPacket packet);
 
-    int size();
-
-    byte[] data();
+    void complete(IoPacket packet);
 
 }

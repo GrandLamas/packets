@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client;
+package de.lama.packets.client.stream.socket;
 
-import de.lama.packets.io.stream.receiver.PacketReceiver;
-import de.lama.packets.io.stream.receiver.PacketReceiverBuilder;
-import de.lama.packets.io.stream.transmitter.PacketTransmitter;
-import de.lama.packets.io.stream.transmitter.PacketTransmitterBuilder;
+import de.lama.packets.client.Client;
+import de.lama.packets.client.HandshakeClient;
+import de.lama.packets.stream.transceiver.receiver.PacketReceiver;
+import de.lama.packets.stream.transceiver.receiver.PacketReceiverBuilder;
+import de.lama.packets.stream.transceiver.transmitter.PacketTransmitter;
+import de.lama.packets.stream.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
@@ -42,7 +44,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
-public class ClientBuilder implements Cloneable {
+public class SocketClientBuilder implements Cloneable {
 
     private static final ScheduledExecutorService TRANSCEIVER_POOL = Executors.newScheduledThreadPool(10);
 
@@ -56,7 +58,7 @@ public class ClientBuilder implements Cloneable {
     private WrapperFactory wrapperFactory;
     private int tickrate;
 
-    public ClientBuilder() {
+    public SocketClientBuilder() {
         this.tickrate = TICKRATE;
         this.exceptionHandler = Exception::printStackTrace;
     }
@@ -83,30 +85,30 @@ public class ClientBuilder implements Cloneable {
         return Objects.requireNonNullElse(this.exceptionHandler, Exception::printStackTrace);
     }
 
-    public ClientBuilder registry(PacketRegistry registry) {
+    public SocketClientBuilder registry(PacketRegistry registry) {
         this.registry = Objects.requireNonNull(registry);
         return this;
     }
 
-    public ClientBuilder wrapper(WrapperFactory wrapperFactory) {
+    public SocketClientBuilder wrapper(WrapperFactory wrapperFactory) {
         this.wrapperFactory = wrapperFactory;
         return this;
     }
 
-    public ClientBuilder tickrate(int tickrate) {
+    public SocketClientBuilder tickrate(int tickrate) {
         if (tickrate > TICKRATE_LIMIT) throw new IllegalArgumentException("Tickrate out of bounds");
         this.tickrate = tickrate;
         return this;
     }
 
-    public ClientBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
+    public SocketClientBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
         return this;
     }
 
     public Client build(Socket socket) throws IOException {
         PacketRegistry registry = this.buildRegistry();
-        return new HandshakeClient(new ConnectedClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler()));
+        return new HandshakeClient(new SocketClient(socket, registry, this.buildWrapper(registry), this.buildTransmitter(socket), this.buildReceiver(socket), this.buildHandler()));
     }
 
     public Client build(String address, int port) throws IOException {
@@ -114,9 +116,9 @@ public class ClientBuilder implements Cloneable {
     }
 
     @Override
-    public ClientBuilder clone() {
+    public SocketClientBuilder clone() {
         try {
-            ClientBuilder clone = (ClientBuilder) super.clone();
+            SocketClientBuilder clone = (SocketClientBuilder) super.clone();
             clone.exceptionHandler = this.exceptionHandler;
             clone.registry = this.registry;
             clone.tickrate = this.tickrate;

@@ -22,34 +22,19 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io.stream.receiver;
+package de.lama.packets.stream.transceiver.receiver;
 
-import de.lama.packets.io.stream.AbstractTransceiverBuilder;
-import de.lama.packets.util.exception.ExceptionHandler;
+import de.lama.packets.stream.IoPacket;
+import de.lama.packets.stream.transceiver.PacketTransceiver;
 
-import java.io.InputStream;
-import java.util.Objects;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.UUID;
 
-public class PacketReceiverBuilder extends AbstractTransceiverBuilder {
+public interface PacketReceiver extends PacketTransceiver {
 
-    public PacketReceiverBuilder tickrate(int tickrate) {
-        this.tickrate = tickrate;
-        return this;
-    }
+    IoPacket awaitPacket(long timeoutInMillis);
 
-    public PacketReceiverBuilder threadPool(ScheduledExecutorService pool) {
-        this.pool = pool;
-        return this;
-    }
+    UUID subscribe(PacketConsumer consumer);
 
-    public PacketReceiverBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
-        this.exceptionHandler = exceptionHandler;
-        return this;
-    }
+    boolean unsubscribe(UUID uuid);
 
-    public PacketReceiver build(InputStream in) {
-        return new ScheduledPacketReceiver(Objects.requireNonNull(in), this.tickrate, Objects.requireNonNull(this.pool),
-                Objects.requireNonNull(this.exceptionHandler));
-    }
 }

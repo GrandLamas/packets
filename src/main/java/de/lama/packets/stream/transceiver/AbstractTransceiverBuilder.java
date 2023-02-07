@@ -22,34 +22,19 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io.stream.transmitter;
+package de.lama.packets.stream.transceiver;
 
-import de.lama.packets.io.stream.AbstractTransceiverBuilder;
 import de.lama.packets.util.exception.ExceptionHandler;
 
-import java.io.OutputStream;
-import java.util.Objects;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class PacketTransmitterBuilder extends AbstractTransceiverBuilder {
+public abstract class AbstractTransceiverBuilder {
 
-    public PacketTransmitterBuilder tickrate(int tickrate) {
-        this.tickrate = tickrate;
-        return this;
-    }
+    private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(10);
 
-    public PacketTransmitterBuilder threadPool(ScheduledExecutorService pool) {
-        this.pool = pool;
-        return this;
-    }
+    protected ScheduledExecutorService pool = SERVICE;
+    protected int tickrate = 16;
+    protected ExceptionHandler exceptionHandler;
 
-    public PacketTransmitterBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
-        this.exceptionHandler = exceptionHandler;
-        return this;
-    }
-
-    public PacketTransmitter build(OutputStream out) {
-        return new ScheduledPacketTransmitter(Objects.requireNonNull(out), this.tickrate, Objects.requireNonNull(this.pool),
-                Objects.requireNonNull(this.exceptionHandler));
-    }
 }

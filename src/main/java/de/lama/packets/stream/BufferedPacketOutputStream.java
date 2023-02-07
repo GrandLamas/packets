@@ -22,18 +22,44 @@
  * SOFTWARE.
  */
 
-package de.lama.packets;
+package de.lama.packets.stream;
 
-import java.net.InetAddress;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public interface IoComponent {
+public class BufferedPacketOutputStream extends OutputStream implements PacketOutputStream {
 
-    InetAddress getAddress();
+    private final DataOutputStream out;
 
-    /**
-     * Returns the port of the server.
-     * @return the port of the server
-     */
-    int getPort();
+    public BufferedPacketOutputStream(OutputStream out) {
+        this.out = new DataOutputStream(new BufferedOutputStream(out));
+    }
 
+    @Override
+    public void write(IoPacket packet) throws IOException {
+        // HEAD
+        this.out.writeChar(packet.type());
+        this.out.writeLong(packet.id());
+        this.out.writeInt(packet.size());
+
+        // DATA
+        this.out.write(packet.data());
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        this.out.write(b);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.out.close();
+    }
+
+    @Override
+    public void flush() throws IOException {
+        this.out.flush();
+    }
 }

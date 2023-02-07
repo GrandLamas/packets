@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io.stream.receiver;
+package de.lama.packets.stream;
 
-import de.lama.packets.io.IoPacket;
+import de.lama.packets.Packet;
 
-import java.util.function.Consumer;
+public record CachedIoPacket(char type, long id, int size, byte[] data) implements IoPacket {
 
-public interface PacketConsumer extends Consumer<IoPacket> {
-
+    public CachedIoPacket(long id, byte[] data) {
+        this(Packet.TYPE, id, data.length, data);
+    }
 }

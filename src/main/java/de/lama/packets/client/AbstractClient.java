@@ -28,44 +28,31 @@ import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.PacketSendEvent;
-import de.lama.packets.io.CachedIoPacket;
-import de.lama.packets.io.IoPacket;
-import de.lama.packets.io.stream.receiver.PacketReceiver;
-import de.lama.packets.io.stream.transmitter.PacketTransmitter;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.stream.CachedIoPacket;
+import de.lama.packets.stream.IoPacket;
 import de.lama.packets.util.exception.ExceptionHandler;
 import de.lama.packets.wrapper.PacketWrapper;
 
-import java.net.InetAddress;
-import java.net.Socket;
 import java.util.Objects;
 
-class ConnectedClient extends AbstractNetworkAdapter implements Client {
+public abstract class AbstractClient extends AbstractNetworkAdapter implements Client {
 
-    private final Socket socket;
     private final PacketWrapper wrapper;
-    private final PacketTransmitter transmitter;
-    private final PacketReceiver receiver;
 
-    public ConnectedClient(Socket socket, PacketRegistry registry, PacketWrapper wrapper, PacketTransmitter transmitter,
-                           PacketReceiver receiver, ExceptionHandler exceptionHandler) {
+    public AbstractClient(ExceptionHandler exceptionHandler, PacketRegistry registry, PacketWrapper wrapper) {
         super(exceptionHandler, registry);
-        this.socket = socket;
-        this.wrapper = wrapper;
-        this.transmitter = transmitter;
-        this.receiver = receiver;
 
-        this.receiver.subscribe(this::packetReceived);
-        this.transmitter.start();
+        this.wrapper = wrapper;
     }
 
-    private PacketReceiveEvent wrapEvent(IoPacket ioPacket) {
+    protected PacketReceiveEvent wrapEvent(IoPacket ioPacket) {
         return new PacketReceiveEvent(this, ioPacket.id(), this.parsePacket(ioPacket));
     }
 
-    private void packetReceived(IoPacket ioPacket) {
+    protected void packetReceived(IoPacket ioPacket) {
         this.getEventHandler().notify(this.wrapEvent(ioPacket));
     }
 
@@ -77,26 +64,7 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
         return new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet));
     }
 
-    @Override
-    protected void executeOpen() {
-        this.receiver.start();
-    }
-
-    @Override
-    protected void executeClose() {
-        this.receiver.stop();
-    }
-
-    @Override
-    protected void executeShutdown() {
-        this.transmitter.stop();
-        this.getExceptionHandler().operate(this.socket::close, "Failed to close socket");
-    }
-
-    @Override
-    public int hashCode() {
-        return this.socket.hashCode();
-    }
+    protected abstract void executeSend(boolean async, long packedId, Packet packet);
 
     @Override
     public Operation send(Packet packet) {
@@ -109,38 +77,12 @@ class ConnectedClient extends AbstractNetworkAdapter implements Client {
 
             long packetId = this.getRegistry().parseId(packet.getClass());
             if (this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet))) return;
-            IoPacket ioPacket = this.parsePacket(packetId, packet);
-            if (async) this.transmitter.queue(ioPacket);
-            else this.transmitter.complete(ioPacket);
+            this.executeSend(async, packetId, packet);
         });
     }
 
     @Override
     public boolean isClosed() {
-        return this.hasShutdown() || this.receiver == null || !this.receiver.isRunning();
-    }
-
-    @Override
-    public boolean hasShutdown() {
-        return !this.transmitter.isRunning() || this.socket.isClosed();
-    }
-
-    @Override
-    public PacketReceiveEvent awaitPacket(long timeoutInMillis) {
-        if (timeoutInMillis < 0) {
-            throw new IllegalArgumentException("Timeout may not be lower than 0");
-        }
-
-        return this.wrapEvent(this.receiver.awaitPacket(timeoutInMillis));
-    }
-
-    @Override
-    public InetAddress getAddress() {
-        return this.socket.getInetAddress();
-    }
-
-    @Override
-    public int getPort() {
-        return this.socket.getPort();
+        return this.hasShutdown();
     }
 }

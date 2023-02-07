@@ -29,7 +29,17 @@ import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.RegistryContainer;
 import de.lama.packets.util.exception.ExceptionHandlerContainer;
 
-public interface NetworkAdapter extends IoComponent, EventHandlerContainer, RegistryContainer, ExceptionHandlerContainer {
+import java.net.InetAddress;
+
+public interface NetworkAdapter extends EventHandlerContainer, RegistryContainer, ExceptionHandlerContainer {
+
+    InetAddress getAddress();
+
+    /**
+     * Returns the port of the server.
+     * @return the port of the server
+     */
+    int getPort();
 
     Operation open();
 

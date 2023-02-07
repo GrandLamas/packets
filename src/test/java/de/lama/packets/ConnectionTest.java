@@ -25,22 +25,61 @@
 package de.lama.packets;
 
 import de.lama.packets.client.Client;
-import de.lama.packets.client.ClientBuilder;
+import de.lama.packets.client.stream.socket.SocketClientBuilder;
+import de.lama.packets.event.events.PacketReceiveEvent;
+import de.lama.packets.registry.HashedPacketRegistry;
+import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.Server;
 import de.lama.packets.server.ServerBuilder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 public class ConnectionTest {
 
+    protected static PacketRegistry registry;
+    protected static ServerBuilder serverBuilder;
+    protected static SocketClientBuilder clientBuilder;
+
     protected Server server;
     protected Client client;
 
-    public ConnectionTest() throws IOException {
-        this.server = new ServerBuilder().build(3999);
-        this.server.open().complete();
+    @BeforeAll
+    public static void initBuilder() {
+        PacketRegistry registry = new HashedPacketRegistry();
+        registry.registerPacket(MessagePacket.ID, MessagePacket.class);
+        serverBuilder = new ServerBuilder().registry(registry);
+        clientBuilder = new SocketClientBuilder().registry(registry);
+    }
 
-        this.client = new ClientBuilder().build("localhost", 3999);
-        this.client.open().complete();
+    @BeforeEach
+    public void initConnection() throws IOException, InterruptedException {
+        this.server = serverBuilder.build(3999);
+        Thread.sleep(10);
+        this.client = clientBuilder.build("localhost", 3999);
+    }
+
+    @Test
+    public void sendToClientTest() {
+        this.client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Packet from server received!"));
+        this.server.broadcast(new MessagePacket("Server message")).complete();
+    }
+
+    @Test
+    public void sendToServerTest() {
+        this.server.getClients().forEach(client ->
+                client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Packet from client received!")));
+        this.client.send(new MessagePacket("Client message")).complete();
+    }
+
+    @AfterEach
+    public void shutdownConnection() throws InterruptedException {
+        Thread.sleep(100);
+        this.client.shutdown().complete();
+        this.server.shutdown().complete();
+        Thread.sleep(100);
     }
 }

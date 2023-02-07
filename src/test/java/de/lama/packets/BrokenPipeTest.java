@@ -25,7 +25,7 @@
 package de.lama.packets;
 
 import de.lama.packets.client.Client;
-import de.lama.packets.client.ClientBuilder;
+import de.lama.packets.client.stream.socket.SocketClientBuilder;
 import de.lama.packets.client.HandshakePacket;
 import de.lama.packets.server.Server;
 import de.lama.packets.server.ServerBuilder;
@@ -40,7 +40,7 @@ public class BrokenPipeTest {
         Server server = new ServerBuilder().build(3999);
         server.open().complete();
 
-        Client client = new ClientBuilder().exceptionHandler(throwable ->
+        Client client = new SocketClientBuilder().exceptionHandler(throwable ->
                 System.out.println("Successfully failed to send packet")).build("localhost", 3999);
         client.open().complete();
 
@@ -55,7 +55,7 @@ public class BrokenPipeTest {
         Server server = new ServerBuilder().build(3999);
         server.open().complete();
 
-        Client client = new ClientBuilder().exceptionHandler(throwable ->
+        Client client = new SocketClientBuilder().exceptionHandler(throwable ->
                 System.out.println("Successfully threw exception")).build("localhost", 3999);
         client.open().complete();
 

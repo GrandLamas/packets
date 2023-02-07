@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.io.stream.receiver;
+package de.lama.packets.stream.transceiver.receiver;
 
-import de.lama.packets.io.BufferedPacketInputStream;
-import de.lama.packets.io.IoPacket;
-import de.lama.packets.io.stream.AbstractScheduledTransceiver;
+import de.lama.packets.stream.BufferedPacketInputStream;
+import de.lama.packets.stream.IoPacket;
+import de.lama.packets.stream.transceiver.AbstractScheduledTransceiver;
 import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.InputStream;

@@ -27,7 +27,7 @@ package de.lama.packets.server;
 import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
-import de.lama.packets.client.ClientBuilder;
+import de.lama.packets.client.stream.socket.SocketClientBuilder;
 import de.lama.packets.event.events.AdapterShutdownEvent;
 import de.lama.packets.event.events.ClientConnectEvent;
 import de.lama.packets.operation.Operation;
@@ -48,15 +48,17 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
 
     private final ServerSocket socket;
     private final Collection<Client> clients;
-    private final ClientBuilder clientFactory;
+    private final SocketClientBuilder clientFactory;
     private final RepeatingOperation clientAcceptor;
 
-    UniqueSocketServer(ServerSocket socket, ClientBuilder builder, PacketRegistry registry, ExceptionHandler exceptionHandler) {
+    UniqueSocketServer(ServerSocket socket, SocketClientBuilder builder, PacketRegistry registry, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
         this.socket = socket;
         this.clients = new ConcurrentLinkedQueue<>();
         this.clientFactory = builder;
         this.clientAcceptor = new RepeatingClientAcceptor(this.socket, this::register, this.getExceptionHandler());
+
+        this.open().complete();
     }
 
     private boolean register(Socket socket) {
@@ -71,7 +73,6 @@ class UniqueSocketServer extends AbstractNetworkAdapter implements Server {
         }
 
         client.getEventHandler().subscribe(AdapterShutdownEvent.class, event -> this.unregister(client));
-        client.open().complete();
         this.clients.add(client);
         return true;
     }
