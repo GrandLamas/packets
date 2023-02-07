@@ -51,8 +51,7 @@ public abstract class AbstractClient extends AbstractNetworkAdapter implements C
 
     @Override
     public Operation send(Packet packet) {
-        Objects.requireNonNull(packet);
-        final long packetId = this.getRegistry().parseId(packet.getClass());
+        final long packetId = this.getRegistry().parseId(Objects.requireNonNull(packet).getClass());
         if (packetId == PacketRegistry.PACKET_NOT_FOUND)
             throw new IllegalArgumentException("No such packet");
 
