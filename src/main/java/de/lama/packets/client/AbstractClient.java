@@ -31,37 +31,20 @@ import de.lama.packets.event.events.PacketSendEvent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.stream.CachedIoPacket;
-import de.lama.packets.stream.IoPacket;
 import de.lama.packets.util.exception.ExceptionHandler;
-import de.lama.packets.wrapper.PacketWrapper;
 
 import java.util.Objects;
 
 public abstract class AbstractClient extends AbstractNetworkAdapter implements Client {
 
-    private final PacketWrapper wrapper;
-
-    public AbstractClient(ExceptionHandler exceptionHandler, PacketRegistry registry, PacketWrapper wrapper) {
+    public AbstractClient(ExceptionHandler exceptionHandler, PacketRegistry registry) {
         super(exceptionHandler, registry);
-
-        this.wrapper = wrapper;
     }
 
-    protected PacketReceiveEvent wrapEvent(IoPacket ioPacket) {
-        return new PacketReceiveEvent(this, ioPacket.id(), this.parsePacket(ioPacket));
-    }
-
-    protected void packetReceived(IoPacket ioPacket) {
-        this.getEventHandler().notify(this.wrapEvent(ioPacket));
-    }
-
-    protected Packet parsePacket(IoPacket packet) {
-        return this.wrapper.unwrap(packet.id(), packet.data());
-    }
-
-    protected IoPacket parsePacket(long packetId, Packet packet) {
-        return new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet));
+    protected PacketReceiveEvent packetReceived(long packetId, Packet packet) {
+        PacketReceiveEvent event = new PacketReceiveEvent(this, packetId, packet);
+        this.getEventHandler().notify(event);
+        return event;
     }
 
     protected abstract void executeSend(boolean async, long packedId, Packet packet);

@@ -33,22 +33,54 @@ import java.net.InetAddress;
 
 public interface NetworkAdapter extends EventHandlerContainer, RegistryContainer, ExceptionHandlerContainer {
 
+    /**
+     * Opens the adapter.
+     *
+     * @return the operation of opening
+     */
+    Operation open();
+
+    /**
+     * Closes the adapter.
+     *
+     * @return the operation of closing
+     */
+    Operation close();
+
+    /**
+     * Shuts the adapter down indefinitely.
+     * A shutdown is definite and cannot be undone.
+     *
+     * @return the operation of the shutdown
+     */
+    Operation shutdown();
+
+    /**
+     * Returns whether the adapter is closed or not
+     *
+     * @return if the adapter is closed
+     */
+    boolean isClosed();
+
+    /**
+     * Returns whether the adapter has been shutdown or not.
+     *
+     * @return if the adapter has been shutdown
+     */
+    boolean hasShutdown();
+
+    /**
+     * Returns the address of the server.
+     *
+     * @return the address of the server.
+     */
     InetAddress getAddress();
 
     /**
      * Returns the port of the server.
+     *
      * @return the port of the server
      */
     int getPort();
-
-    Operation open();
-
-    Operation close();
-
-    Operation shutdown();
-
-    boolean isClosed();
-
-    boolean hasShutdown();
 
 }

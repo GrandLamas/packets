@@ -128,9 +128,9 @@ public class HandshakeClient implements Client {
     }
 
     @Override
-    public PacketReceiveEvent awaitPacket(long timeoutInMillis) {
+    public PacketReceiveEvent read(long timeoutInMillis) {
         this.awaitHandshake();
-        return this.client.awaitPacket(timeoutInMillis);
+        return this.client.read(timeoutInMillis);
     }
 
     @Override

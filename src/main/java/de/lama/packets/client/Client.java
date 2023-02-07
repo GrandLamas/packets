@@ -34,8 +34,21 @@ import de.lama.packets.util.exception.ExceptionHandlerContainer;
 
 public interface Client extends NetworkAdapter, EventHandlerContainer, ExceptionHandlerContainer, RegistryContainer {
 
+    /**
+     * Sends a packet to the server.
+     *
+     * @param packet The packet to be sent
+     * @return The operation, which can be queued or executed directly
+     */
     Operation send(Packet packet);
 
+    /**
+     * Performs a read of the next packet.
+     * Will terminate after given timeout.
+     *
+     * @param timeoutInMillis timeout after which the process will be terminated
+     * @return the packet received event
+     */
     PacketReceiveEvent read(long timeoutInMillis);
 
 }

@@ -29,6 +29,7 @@ import de.lama.packets.client.AbstractClient;
 import de.lama.packets.client.Client;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.stream.CachedIoPacket;
 import de.lama.packets.stream.IoPacket;
 import de.lama.packets.stream.transceiver.receiver.PacketReceiver;
 import de.lama.packets.stream.transceiver.transmitter.PacketTransmitter;
@@ -39,12 +40,15 @@ import java.io.IOException;
 
 public abstract class AbstractStreamClient extends AbstractClient implements Client {
 
+    private final PacketWrapper wrapper;
     private final PacketTransmitter transmitter;
     private final PacketReceiver receiver;
 
     public AbstractStreamClient(PacketRegistry registry, PacketWrapper wrapper, PacketTransmitter transmitter,
                                 PacketReceiver receiver, ExceptionHandler exceptionHandler) {
-        super(exceptionHandler, registry, wrapper);
+        super(exceptionHandler, registry);
+
+        this.wrapper = wrapper;
         this.transmitter = transmitter;
         this.receiver = receiver;
 
@@ -53,6 +57,18 @@ public abstract class AbstractStreamClient extends AbstractClient implements Cli
     }
 
     protected abstract void shutdownConnection() throws IOException;
+
+    protected PacketReceiveEvent packetReceived(IoPacket ioPacket) {
+        return super.packetReceived(ioPacket.id(), this.parsePacket(ioPacket));
+    }
+
+    protected Packet parsePacket(IoPacket packet) {
+        return this.wrapper.unwrap(packet.id(), packet.data());
+    }
+
+    protected IoPacket parsePacket(long packetId, Packet packet) {
+        return new CachedIoPacket(packetId, this.wrapper.wrap(packetId, packet));
+    }
 
     @Override
     protected void executeShutdown() {
@@ -93,6 +109,6 @@ public abstract class AbstractStreamClient extends AbstractClient implements Cli
             throw new IllegalArgumentException("Timeout may not be lower than 0");
         }
 
-        return this.wrapEvent(this.receiver.read(timeoutInMillis));
+        return this.packetReceived(this.receiver.read(timeoutInMillis));
     }
 }

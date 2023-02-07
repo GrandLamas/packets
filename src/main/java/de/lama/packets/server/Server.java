@@ -33,8 +33,19 @@ import java.util.stream.Stream;
 
 public interface Server extends NetworkAdapter {
 
+    /**
+     * Sends the given packet to every connected client.
+     *
+     * @param packet the packet to be sent
+     * @return the operation of sending
+     */
     Operation broadcast(Packet packet);
 
+    /**
+     * Returns every connected client.
+     *
+     * @return the stream of connected clients
+     */
     Stream<Client> getClients();
 
 }
