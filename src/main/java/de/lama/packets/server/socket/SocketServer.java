@@ -26,13 +26,14 @@ package de.lama.packets.server.socket;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.client.stream.socket.SocketClientBuilder;
+import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.RepeatingOperation;
+import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.AbstractServer;
 import de.lama.packets.server.Server;
 import de.lama.packets.util.exception.ExceptionHandler;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -64,18 +65,18 @@ class SocketServer extends AbstractServer implements Server {
     }
 
     @Override
-    protected void executeOpen() {
-        this.clientAcceptor.start();
+    protected Operation executeOpen() {
+        return new SimpleOperation(this.clientAcceptor::start);
     }
 
     @Override
-    protected void executeClose() {
-        this.clientAcceptor.stop();
+    protected Operation executeClose() {
+        return new SimpleOperation(this.clientAcceptor::stop);
     }
 
     @Override
-    protected void shutdownConnection() throws IOException {
-        this.socket.close();
+    protected Operation shutdownConnection() {
+        return new SimpleOperation(() -> this.getExceptionHandler().operate(this.socket::close, "Failed to close socket"));
     }
 
     @Override

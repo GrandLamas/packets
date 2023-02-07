@@ -26,13 +26,14 @@ package de.lama.packets.client.stream.socket;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.client.stream.AbstractStreamClient;
+import de.lama.packets.operation.Operation;
+import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.stream.transceiver.receiver.PacketReceiver;
 import de.lama.packets.stream.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.util.exception.ExceptionHandler;
 import de.lama.packets.wrapper.PacketWrapper;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -47,8 +48,8 @@ class SocketClient extends AbstractStreamClient implements Client {
     }
 
     @Override
-    protected void shutdownConnection() throws IOException {
-        this.socket.close();
+    protected Operation shutdownConnection() {
+        return new SimpleOperation(() -> this.getExceptionHandler().operate(this.socket::close, "Could not close socket"));
     }
 
     @Override

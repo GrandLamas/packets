@@ -30,7 +30,7 @@ import de.lama.packets.event.events.AdapterCloseEvent;
 import de.lama.packets.event.events.AdapterOpenEvent;
 import de.lama.packets.event.events.AdapterShutdownEvent;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.SimpleOperation;
+import de.lama.packets.operation.ParentOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
 
@@ -46,49 +46,47 @@ public abstract class AbstractNetworkAdapter implements NetworkAdapter {
         this.getExceptionHandler().accept(exception);
     }
 
-    protected abstract void executeClose();
+    protected abstract Operation executeClose();
 
-    protected abstract void executeOpen();
+    protected abstract Operation executeOpen();
 
-    protected abstract void executeShutdown();
+    protected abstract Operation executeShutdown();
 
     @Override
     public Operation open() {
-        return new SimpleOperation((async) -> {
+        return new ParentOperation(this.executeOpen(), () -> {
             if (!this.isClosed()) {
                 this.handle(new IllegalStateException("Adapter already open"));
-                return;
+                return false;
             }
 
-            if (this.getEventHandler().isCancelled(new AdapterOpenEvent(this))) return;
-            this.executeOpen();
+            return !this.getEventHandler().isCancelled(new AdapterOpenEvent(this));
         });
     }
 
     @Override
     public Operation close() {
-        return new SimpleOperation((async) -> {
+        return new ParentOperation(this.executeClose(), () -> {
             if (this.isClosed()) {
                 this.handle(new IllegalStateException("Adapter already closed"));
-                return;
+                return false;
             }
 
-            if (this.getEventHandler().isCancelled(new AdapterCloseEvent(this))) return;
-            this.executeClose();
+            return !this.getEventHandler().isCancelled(new AdapterCloseEvent(this));
         });
     }
 
     @Override
     public Operation shutdown() {
-        return new SimpleOperation((async) -> {
+        return new ParentOperation(this.executeShutdown(), () -> {
             if (this.hasShutdown()) {
                 this.handle(new IllegalStateException("Adapter already shutdown"));
-                return;
+                return false;
             }
 
             this.data.eventHandler().notify(new AdapterShutdownEvent(this));
             if (!this.isClosed()) this.close().complete();
-            this.executeShutdown();
+            return true;
         });
     }
 

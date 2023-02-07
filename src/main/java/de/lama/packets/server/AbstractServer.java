@@ -30,11 +30,11 @@ import de.lama.packets.client.Client;
 import de.lama.packets.event.events.AdapterShutdownEvent;
 import de.lama.packets.event.events.ClientConnectEvent;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.SimpleOperation;
+import de.lama.packets.operation.ParentOperation;
+import de.lama.packets.operation.AsyncOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -54,7 +54,7 @@ public abstract class AbstractServer extends AbstractNetworkAdapter implements S
         this.clients.remove(client);
     }
 
-    protected abstract void shutdownConnection() throws IOException;
+    protected abstract Operation shutdownConnection();
 
     protected boolean register(Client client) {
         if (this.getEventHandler().isCancelled(new ClientConnectEvent(this, client))) {
@@ -68,15 +68,17 @@ public abstract class AbstractServer extends AbstractNetworkAdapter implements S
     }
 
     @Override
-    protected void executeShutdown() {
-        this.clients.forEach(client -> client.shutdown().complete());
-        this.getExceptionHandler().operate(this::shutdownConnection, "Could not close connection");
+    protected Operation executeShutdown() {
+        return new ParentOperation(this.shutdownConnection(), () -> {
+            this.clients.forEach(client -> client.shutdown().complete());
+            return true;
+        });
     }
 
     @Override
     public Operation broadcast(Packet packet) {
         Objects.requireNonNull(packet);
-        return new SimpleOperation((async) -> this.clients.forEach(client -> {
+        return new AsyncOperation((async) -> this.clients.forEach(client -> {
             Operation send = client.send(packet);
             if (async) send.queue();
             else send.complete();

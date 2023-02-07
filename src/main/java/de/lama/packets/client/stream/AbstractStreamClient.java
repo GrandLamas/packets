@@ -28,6 +28,10 @@ import de.lama.packets.Packet;
 import de.lama.packets.client.AbstractClient;
 import de.lama.packets.client.Client;
 import de.lama.packets.event.events.PacketReceiveEvent;
+import de.lama.packets.operation.AsyncOperation;
+import de.lama.packets.operation.Operation;
+import de.lama.packets.operation.ParentOperation;
+import de.lama.packets.operation.SimpleOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.stream.CachedIoPacket;
 import de.lama.packets.stream.IoPacket;
@@ -35,8 +39,6 @@ import de.lama.packets.stream.transceiver.receiver.PacketReceiver;
 import de.lama.packets.stream.transceiver.transmitter.PacketTransmitter;
 import de.lama.packets.util.exception.ExceptionHandler;
 import de.lama.packets.wrapper.PacketWrapper;
-
-import java.io.IOException;
 
 public abstract class AbstractStreamClient extends AbstractClient implements Client {
 
@@ -56,7 +58,7 @@ public abstract class AbstractStreamClient extends AbstractClient implements Cli
         this.transmitter.start();
     }
 
-    protected abstract void shutdownConnection() throws IOException;
+    protected abstract Operation shutdownConnection();
 
     protected PacketReceiveEvent packetReceived(IoPacket ioPacket) {
         return super.packetReceived(ioPacket.id(), this.parsePacket(ioPacket));
@@ -71,26 +73,30 @@ public abstract class AbstractStreamClient extends AbstractClient implements Cli
     }
 
     @Override
-    protected void executeShutdown() {
-        this.transmitter.stop();
-        this.getExceptionHandler().operate(this::shutdownConnection, "Failed to close connection");
+    protected Operation executeShutdown() {
+        return new ParentOperation(this.shutdownConnection(), () -> {
+            this.transmitter.stop();
+            return true;
+        });
     }
 
     @Override
-    protected void executeOpen() {
-        this.receiver.start();
+    protected Operation executeOpen() {
+        return new SimpleOperation(this.receiver::start);
     }
 
     @Override
-    protected void executeClose() {
-        this.receiver.stop();
+    protected Operation executeClose() {
+        return new SimpleOperation(this.receiver::stop);
     }
 
     @Override
-    protected void executeSend(boolean async, long packetId, Packet packet) {
-        IoPacket ioPacket = this.parsePacket(packetId, packet);
-        if (async) this.transmitter.queue(ioPacket);
-        else this.transmitter.complete(ioPacket);
+    protected Operation executeSend(long packetId, Packet packet) {
+        return new AsyncOperation((async) -> {
+            IoPacket ioPacket = this.parsePacket(packetId, packet);
+            if (async) this.transmitter.queue(ioPacket);
+            else this.transmitter.complete(ioPacket);
+        });
     }
 
     @Override

@@ -28,7 +28,7 @@ import de.lama.packets.Packet;
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.SimpleOperation;
+import de.lama.packets.operation.AsyncOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
 
@@ -53,7 +53,7 @@ public class HandshakeClient implements Client {
     }
 
     private Operation waitOperation(Operation operation) {
-        return new SimpleOperation((async) -> {
+        return new AsyncOperation((async) -> {
             this.awaitHandshake();
             if (async) operation.queue();
             else operation.complete();
@@ -88,13 +88,14 @@ public class HandshakeClient implements Client {
     }
 
     @Override
-    public InetAddress getAddress() {
-        return this.client.getAddress();
+    public Operation send(Packet packet) {
+        return this.waitOperation(this.client.send(packet));
     }
 
     @Override
-    public int getPort() {
-        return this.client.getPort();
+    public PacketReceiveEvent read(long timeoutInMillis) {
+        this.awaitHandshake();
+        return this.client.read(timeoutInMillis);
     }
 
     @Override
@@ -123,14 +124,13 @@ public class HandshakeClient implements Client {
     }
 
     @Override
-    public Operation send(Packet packet) {
-        return this.waitOperation(this.client.send(packet));
+    public InetAddress getAddress() {
+        return this.client.getAddress();
     }
 
     @Override
-    public PacketReceiveEvent read(long timeoutInMillis) {
-        this.awaitHandshake();
-        return this.client.read(timeoutInMillis);
+    public int getPort() {
+        return this.client.getPort();
     }
 
     @Override

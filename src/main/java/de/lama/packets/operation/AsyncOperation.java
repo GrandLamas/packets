@@ -26,25 +26,26 @@ package de.lama.packets.operation;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
-public class SimpleOperation implements Operation {
+public class AsyncOperation implements Operation {
 
     private final ExecutorService service = Executors.newSingleThreadExecutor();
-    private final Runnable runable;
+    private final Consumer<Boolean> async;
 
-    public SimpleOperation(Runnable runnable) {
-        this.runable = runnable;
-    }
-
-    @Override
-    public Operation queue() {
-        this.service.submit(this.runable);
-        return this;
+    public AsyncOperation(Consumer<Boolean> async) {
+        this.async = async;
     }
 
     @Override
     public Operation complete() {
-        this.runable.run();
+        this.async.accept(false);
+        return this;
+    }
+
+    @Override
+    public Operation queue() {
+        this.service.submit(() -> this.async.accept(true));
         return this;
     }
 }

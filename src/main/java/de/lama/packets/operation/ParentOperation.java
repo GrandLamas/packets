@@ -24,27 +24,30 @@
 
 package de.lama.packets.operation;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
-public class SimpleOperation implements Operation {
+public class ParentOperation implements Operation {
 
-    private final ExecutorService service = Executors.newSingleThreadExecutor();
-    private final Runnable runable;
+    private final Operation child;
+    private final Supplier<Boolean> run;
 
-    public SimpleOperation(Runnable runnable) {
-        this.runable = runnable;
+    public ParentOperation(Operation child, Supplier<Boolean> run) {
+        this.child = child;
+        this.run = run;
+    }
+
+    private Operation execute(Runnable todo) {
+        if (this.run.get()) todo.run();
+        return this;
     }
 
     @Override
     public Operation queue() {
-        this.service.submit(this.runable);
-        return this;
+        return this.execute(this.child::queue);
     }
 
     @Override
     public Operation complete() {
-        this.runable.run();
-        return this;
+        return this.execute(this.child::complete);
     }
 }

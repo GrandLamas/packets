@@ -29,7 +29,7 @@ import de.lama.packets.Packet;
 import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.event.events.PacketSendEvent;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.SimpleOperation;
+import de.lama.packets.operation.ParentOperation;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
 
@@ -47,20 +47,22 @@ public abstract class AbstractClient extends AbstractNetworkAdapter implements C
         return event;
     }
 
-    protected abstract void executeSend(boolean async, long packedId, Packet packet);
+    protected abstract Operation executeSend(long packedId, Packet packet);
 
     @Override
     public Operation send(Packet packet) {
         Objects.requireNonNull(packet);
-        return new SimpleOperation((async) -> {
+        final long packetId = this.getRegistry().parseId(packet.getClass());
+        if (packetId == PacketRegistry.PACKET_NOT_FOUND)
+            throw new IllegalArgumentException("No such packet");
+
+        return new ParentOperation(this.executeSend(packetId, packet), () -> {
             if (this.hasShutdown()) {
                 this.handle(new IllegalStateException("Client already closed"));
-                return;
+                return false;
             }
 
-            long packetId = this.getRegistry().parseId(packet.getClass());
-            if (this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet))) return;
-            this.executeSend(async, packetId, packet);
+            return !this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet));
         });
     }
 
