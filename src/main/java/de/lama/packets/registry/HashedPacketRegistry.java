@@ -53,11 +53,11 @@ public class HashedPacketRegistry implements PacketRegistry {
 
     @Override
     public Class<? extends Packet> parseClass(long id) {
-        return this.registry.get(id);
+        return this.registry.getOrDefault(id, null);
     }
 
     @Override
     public long parseId(Class<? extends Packet> clazz) {
-        return this.reverseRegistry.get(clazz);
+        return this.reverseRegistry.getOrDefault(clazz, PACKET_NOT_FOUND);
     }
 }

@@ -28,6 +28,8 @@ import de.lama.packets.Packet;
 
 public interface PacketRegistry {
 
+    long PACKET_NOT_FOUND = Long.MIN_VALUE;
+
     /**
      * Registers a packet.
      *
@@ -37,8 +39,20 @@ public interface PacketRegistry {
      */
     <T extends Packet> boolean registerPacket(long id, Class<T> clazz);
 
+    /**
+     * Returns the class of the packet id
+     *
+     * @param id the id of the packet class
+     * @return the class of the packet id, else null
+     */
     Class<? extends Packet> parseClass(long id);
 
+    /**
+     * Returns the id of the packet class.
+     *
+     * @param clazz the class of the packet id
+     * @return the id of the packet class, else PACKET_NOT_FOUND
+     */
     long parseId(Class<? extends Packet> clazz);
 
 }
