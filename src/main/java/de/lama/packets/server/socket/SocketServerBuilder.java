@@ -78,6 +78,6 @@ public class SocketServerBuilder {
         ExceptionHandler exceptionHandler = this.buildExceptionHandler();
         PacketRegistry registry = this.buildRegistry();
         SocketClientBuilder socketClientBuilder = this.buildClientBuilder().exceptionHandler(exceptionHandler).registry(registry);
-        return new UniqueSocketServer(this.createSocket(port), socketClientBuilder, registry, exceptionHandler);
+        return new SocketServer(this.createSocket(port), socketClientBuilder, registry, exceptionHandler);
     }
 }

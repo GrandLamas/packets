@@ -37,13 +37,13 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-class UniqueSocketServer extends AbstractServer implements Server {
+class SocketServer extends AbstractServer implements Server {
 
     private final ServerSocket socket;
     private final SocketClientBuilder clientFactory;
     private final RepeatingOperation clientAcceptor;
 
-    UniqueSocketServer(ServerSocket socket, SocketClientBuilder builder, PacketRegistry registry, ExceptionHandler exceptionHandler) {
+    SocketServer(ServerSocket socket, SocketClientBuilder builder, PacketRegistry registry, ExceptionHandler exceptionHandler) {
         super(exceptionHandler, registry);
         this.socket = socket;
 
