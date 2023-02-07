@@ -59,6 +59,11 @@ class SocketServer extends AbstractServer implements Server {
     }
 
     @Override
+    public int hashCode() {
+        return this.socket.hashCode();
+    }
+
+    @Override
     protected void executeOpen() {
         this.clientAcceptor.start();
     }
