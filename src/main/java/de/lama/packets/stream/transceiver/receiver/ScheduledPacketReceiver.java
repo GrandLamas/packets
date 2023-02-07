@@ -67,7 +67,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     }
 
     @Override
-    public IoPacket awaitPacket(long timeoutInMillis) {
+    public IoPacket read(long timeoutInMillis) {
         synchronized (this) {this.exceptionHandler.operate(() -> this.wait(timeoutInMillis), "Could not wait");}
         return this.last;
     }

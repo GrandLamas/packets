@@ -85,4 +85,5 @@ public abstract class AbstractClient extends AbstractNetworkAdapter implements C
     public boolean isClosed() {
         return this.hasShutdown();
     }
+
 }

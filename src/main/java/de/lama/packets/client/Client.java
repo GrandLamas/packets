@@ -27,6 +27,7 @@ package de.lama.packets.client;
 import de.lama.packets.NetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.event.EventHandlerContainer;
+import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.RegistryContainer;
 import de.lama.packets.util.exception.ExceptionHandlerContainer;
@@ -34,5 +35,7 @@ import de.lama.packets.util.exception.ExceptionHandlerContainer;
 public interface Client extends NetworkAdapter, EventHandlerContainer, ExceptionHandlerContainer, RegistryContainer {
 
     Operation send(Packet packet);
+
+    PacketReceiveEvent read(long timeoutInMillis);
 
 }

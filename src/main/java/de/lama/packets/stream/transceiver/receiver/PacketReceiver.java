@@ -31,7 +31,7 @@ import java.util.UUID;
 
 public interface PacketReceiver extends PacketTransceiver {
 
-    IoPacket awaitPacket(long timeoutInMillis);
+    IoPacket read(long timeoutInMillis);
 
     UUID subscribe(PacketConsumer consumer);
 

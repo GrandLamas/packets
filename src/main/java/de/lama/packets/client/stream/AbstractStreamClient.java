@@ -27,6 +27,7 @@ package de.lama.packets.client.stream;
 import de.lama.packets.Packet;
 import de.lama.packets.client.AbstractClient;
 import de.lama.packets.client.Client;
+import de.lama.packets.event.events.PacketReceiveEvent;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.stream.IoPacket;
 import de.lama.packets.stream.transceiver.receiver.PacketReceiver;
@@ -84,5 +85,14 @@ public abstract class AbstractStreamClient extends AbstractClient implements Cli
     @Override
     public boolean hasShutdown() {
         return !this.transmitter.isRunning();
+    }
+
+    @Override
+    public PacketReceiveEvent read(long timeoutInMillis) {
+        if (timeoutInMillis < 0) {
+            throw new IllegalArgumentException("Timeout may not be lower than 0");
+        }
+
+        return this.wrapEvent(this.receiver.read(timeoutInMillis));
     }
 }
