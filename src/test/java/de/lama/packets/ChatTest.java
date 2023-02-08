@@ -56,14 +56,11 @@ public class ChatTest {
 
             connectEvent.client().getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> server.broadcast(event.packet()).queue());
         });
-
-        server.open().queue();
     }
 
     private static void connectClient(PacketRegistry registry) {
         try {
             Client client = new SocketClientBuilder().registry(registry).build("localhost", 4999);
-            client.open().queue();
 
             client.getEventHandler().subscribe(PacketReceiveEvent.class, (event -> {
                 if (event.packetId() != MessagePacket.ID) return;
