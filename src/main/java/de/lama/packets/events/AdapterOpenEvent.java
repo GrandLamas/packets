@@ -22,18 +22,17 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.event.events;
+package de.lama.packets.events;
 
-import de.lama.packets.Packet;
-import de.lama.packets.client.Client;
+import de.lama.packets.NetworkAdapter;
 import de.lama.packets.event.CancelEventBehaviour;
 import de.lama.packets.event.Cancellable;
+import de.lama.packets.event.Event;
 import de.lama.packets.event.EventBehaviour;
-import de.lama.packets.event.PacketEvent;
 
-public record PacketSendEvent(Client target, long packetId, Packet packet, EventBehaviour behaviour) implements PacketEvent, Cancellable {
+public record AdapterOpenEvent(NetworkAdapter adapter, EventBehaviour behaviour) implements Event, Cancellable {
 
-    public PacketSendEvent(Client target, long packetId, Packet packet) {
-        this(target, packetId, packet, new CancelEventBehaviour());
+    public AdapterOpenEvent(NetworkAdapter adapter) {
+        this(adapter, new CancelEventBehaviour());
     }
 }

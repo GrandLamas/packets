@@ -26,7 +26,7 @@ package de.lama.packets;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.client.stream.socket.SocketClientBuilder;
-import de.lama.packets.event.events.PacketReceiveEvent;
+import de.lama.packets.client.events.PacketReceiveEvent;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.Server;

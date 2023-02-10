@@ -27,7 +27,7 @@ package de.lama.packets.client.stream;
 import de.lama.packets.Packet;
 import de.lama.packets.client.AbstractClient;
 import de.lama.packets.client.Client;
-import de.lama.packets.event.events.PacketReceiveEvent;
+import de.lama.packets.client.events.PacketReceiveEvent;
 import de.lama.packets.operation.AsyncOperation;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.ParentOperation;

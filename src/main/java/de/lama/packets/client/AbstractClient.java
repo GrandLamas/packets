@@ -26,8 +26,8 @@ package de.lama.packets.client;
 
 import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
-import de.lama.packets.event.events.PacketReceiveEvent;
-import de.lama.packets.event.events.PacketSendEvent;
+import de.lama.packets.client.events.PacketReceiveEvent;
+import de.lama.packets.client.events.PacketSendEvent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.ParentOperation;
 import de.lama.packets.registry.PacketRegistry;

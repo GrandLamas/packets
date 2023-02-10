@@ -26,9 +26,9 @@ package de.lama.packets;
 
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.event.OrderedEventExecutor;
-import de.lama.packets.event.events.AdapterCloseEvent;
-import de.lama.packets.event.events.AdapterOpenEvent;
-import de.lama.packets.event.events.AdapterShutdownEvent;
+import de.lama.packets.events.AdapterCloseEvent;
+import de.lama.packets.events.AdapterOpenEvent;
+import de.lama.packets.events.AdapterShutdownEvent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.ParentOperation;
 import de.lama.packets.registry.PacketRegistry;
