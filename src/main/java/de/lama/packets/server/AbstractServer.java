@@ -28,6 +28,7 @@ import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
 import de.lama.packets.events.AdapterShutdownEvent;
+import de.lama.packets.operation.Operations;
 import de.lama.packets.server.events.ClientConnectEvent;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.ParentOperation;
@@ -78,11 +79,7 @@ public abstract class AbstractServer extends AbstractNetworkAdapter implements S
     @Override
     public Operation broadcast(Packet packet) {
         Objects.requireNonNull(packet);
-        return new AsyncOperation((async) -> this.clients.forEach(client -> {
-            Operation send = client.send(packet);
-            if (async) send.queue();
-            else send.complete();
-        }));
+        return new AsyncOperation((async) -> this.clients.forEach(client -> Operations.execute(async, client.send(packet))));
     }
 
     @Override
