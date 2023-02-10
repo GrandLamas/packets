@@ -23,6 +23,9 @@ The first interaction between the server and the client will always be handshake
 Furthermore, the client and the server are both implementing [NetworkAdapter](https://github.com/GrandLamas/packets/blob/master/src/main/java/de/lama/packets/NetworkAdapter.java).
 
 There is also an event system. You can find more details <a href='#Events'>here</a>.
+<br>
+Currently there is also an implementation for sending large files.
+For that, use the [FileClient](https://github.com/GrandLamas/packets/blob/master/src/main/java/de/lama/packets/client/file/FileClient.java).
 
 ATM there is just an java.net.Socket implementation of server and client.<br>
 The API design supports more implementations, so I hope for more to come!
@@ -79,8 +82,12 @@ In addition to that, all events are records.
 
 ## Packet-IDs
 Following IDs for packets are already used any **may not be used** by the user again:<br>
+The following IDs are completely random.
 
-* 69420: Handshake-Packet
+* 69420: HandshakePacket
+* 69421: FileHeaderPacket
+* 69422: FileDataPacket
+* 69423: FileTransferredPacket
 
 ## Technical Stuff
 The via de.lama.packets.stream transmitted packets have fixed structure:
@@ -98,4 +105,3 @@ CachedGsonWrapper</a> (default) will use a cache, which will significantly impro
 - More events
 - PacketCompression?
 - Better builder
-- FileTransfers more than 75MB default
