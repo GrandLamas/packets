@@ -24,11 +24,11 @@
 
 package de.lama.packets.large;
 
-import de.lama.packets.ConnectionTest;
+import de.lama.packets.DefaultConnection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class SendLargePacketTest extends ConnectionTest {
+public class SendLargePacketTest extends DefaultConnection {
 
     @BeforeAll
     public static void initPacket() {
