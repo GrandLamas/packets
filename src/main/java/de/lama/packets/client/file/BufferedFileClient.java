@@ -33,6 +33,8 @@ import de.lama.packets.operation.AsyncOperation;
 import de.lama.packets.operation.Operation;
 import de.lama.packets.operation.Operations;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.stream.transceiver.receiver.BufferedFileReceiver;
+import de.lama.packets.stream.transceiver.receiver.FileReceiver;
 import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.io.BufferedInputStream;

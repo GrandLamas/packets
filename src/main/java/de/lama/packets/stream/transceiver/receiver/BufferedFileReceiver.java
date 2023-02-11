@@ -22,16 +22,34 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.file;
+package de.lama.packets.stream.transceiver.receiver;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
-public interface FileReceiver {
+public class BufferedFileReceiver implements FileReceiver {
 
-    void write(byte[] data) throws IOException;
+    private final File file;
+    private final BufferedOutputStream stream;
 
-    void finish() throws IOException;
+    public BufferedFileReceiver(File file) throws IOException {
+        if (!file.exists() && !file.createNewFile()) throw new IOException("Could not create file");
+        this.file = file;
+        this.stream = new BufferedOutputStream(new FileOutputStream(file));
+    }
 
-    File getFile();
+    @Override
+    public void write(byte[] data) throws IOException {
+        this.stream.write(data);
+    }
+
+    @Override
+    public void finish() throws IOException {
+        this.stream.flush();
+        this.stream.close();
+    }
+
+    @Override
+    public File getFile() {
+        return this.file;
+    }
 }
