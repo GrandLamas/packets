@@ -5,6 +5,12 @@ plugins {
 group 'de.lama.packets'
 version '0.1.7-SNAPSHOT'
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 repositories {
     mavenCentral()
 }
