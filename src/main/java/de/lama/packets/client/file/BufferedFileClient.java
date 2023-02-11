@@ -47,7 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BufferedFileClient implements FileClient {
 
-    private static final int DEFAULT_PACKET_LENGTH = (int) Math.pow(2, 12);
+    private static final int DEFAULT_PACKET_LENGTH = (int) Math.pow(2, 14);
 
     private final Client child;
     private final FileMapper fileMapper;
