@@ -38,7 +38,7 @@ import java.nio.file.Files;
 
 public class SendFileTest extends DefaultConnection {
 
-    private static final File SOURCE = new File("/home/cuuky/Documents/Coding/Java/Lama/Packets/src/test/resources/TestFile.txt");
+    private static final File SOURCE = new File("100MB.bin");
     private static final File DEST = new File("received.txt");
 
     private FileClient fileClient;
