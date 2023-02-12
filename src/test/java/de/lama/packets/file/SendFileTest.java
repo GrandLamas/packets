@@ -38,7 +38,7 @@ import java.nio.file.Files;
 
 public class SendFileTest extends DefaultConnection {
 
-    private static final File SOURCE = new File("100MB.bin");
+    private static final File SOURCE = new File("100MB");
     private static final File DEST = new File("received.txt");
 
     private FileClient fileClient;
@@ -57,7 +57,7 @@ public class SendFileTest extends DefaultConnection {
         this.server.getClients().forEach(client -> client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) ->
                 event.source().send(event.packet()).complete()));
         this.fileClient.send(SOURCE).complete();
-        Thread.sleep(100);
+        Thread.sleep(1000);
         Assertions.assertEquals(-1L, Files.mismatch(SOURCE.toPath(), DEST.toPath()));
     }
 }
