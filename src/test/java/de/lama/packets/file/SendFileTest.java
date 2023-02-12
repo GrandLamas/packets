@@ -57,7 +57,7 @@ public class SendFileTest extends DefaultConnection {
         this.server.getClients().forEach(client -> client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) ->
                 event.source().send(event.packet()).complete()));
         this.fileClient.send(SOURCE).complete();
-        Thread.sleep(1000);
+        Thread.sleep(100);
         Assertions.assertEquals(-1L, Files.mismatch(SOURCE.toPath(), DEST.toPath()));
     }
 }
