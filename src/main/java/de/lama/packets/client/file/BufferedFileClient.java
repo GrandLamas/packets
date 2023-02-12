@@ -47,19 +47,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BufferedFileClient implements FileClient {
 
-    private static final double ONE_MB = Math.pow(2, 20);
-    private static final int DEFAULT_PACKET_LENGTH_MB = 16; // 16 MB
+    private static final int DEFAULT_PACKET_LENGTH_MB = 60000; // This seems as the most performant for java.net.Socket
 
     private final Client child;
     private final FileMapper fileMapper;
-    private final int packetLengthMb;
+    private final int packetLength;
 
     private final Map<UUID, FileReceiver> receiverMap;
 
-    public BufferedFileClient(Client child, FileMapper fileMapper, int packetLengthMb) {
+    public BufferedFileClient(Client child, FileMapper fileMapper, int packetLengthBytes) {
         this.child = child;
         this.fileMapper = fileMapper;
-        this.packetLengthMb = (int) (packetLengthMb * ONE_MB);
+        this.packetLength = packetLengthBytes;
         this.receiverMap = new ConcurrentHashMap<>();
 
         this.getRegistry().registerPacket(FileHeaderPacket.ID, FileHeaderPacket.class);
@@ -108,8 +107,8 @@ public class BufferedFileClient implements FileClient {
 
         // Data
         BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-        for (int i = 0; i < file.length(); i += this.packetLengthMb) {
-            FileDataPacket packet = new FileDataPacket(uuid, inputStream.readNBytes(this.packetLengthMb));
+        for (int i = 0; i < file.length(); i += this.packetLength) {
+            FileDataPacket packet = new FileDataPacket(uuid, inputStream.readNBytes(this.packetLength));
             Operations.execute(async, this.send(packet));
         }
 
