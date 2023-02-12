@@ -38,7 +38,7 @@ import java.io.IOException;
 
 public class DefaultConnection {
 
-    protected static PacketRegistry registry;
+    protected static PacketRegistry registry = new HashedPacketRegistry();
     protected static SocketServerBuilder socketServerBuilder;
     protected static SocketClientBuilder clientBuilder;
 
@@ -47,7 +47,6 @@ public class DefaultConnection {
 
     @BeforeAll
     public static void initBuilder() {
-        PacketRegistry registry = new HashedPacketRegistry();
         registry.registerPacket(MessagePacket.ID, MessagePacket.class);
         socketServerBuilder = new SocketServerBuilder().registry(registry);
         clientBuilder = new SocketClientBuilder().registry(registry);

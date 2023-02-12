@@ -38,6 +38,5 @@ public class SendLargePacketTest extends DefaultConnection {
     @Test
     public void sendLargePacket() {
         this.client.send(new LargePacket(50)).complete();
-        this.server.shutdown().complete();
     }
 }
