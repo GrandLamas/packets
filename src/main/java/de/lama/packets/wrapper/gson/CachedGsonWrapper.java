@@ -22,11 +22,13 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper;
+package de.lama.packets.wrapper.gson;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.lama.packets.Packet;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.wrapper.PacketStringWrapper;
 import de.lama.packets.wrapper.cache.PacketCache;
 import de.lama.packets.wrapper.cache.ScheduledPacketCache;
 
@@ -36,10 +38,10 @@ public class CachedGsonWrapper implements PacketStringWrapper {
     private final PacketCache cache;
     private final Gson gson;
 
-    public CachedGsonWrapper(PacketRegistry registry) {
+    public CachedGsonWrapper(GsonBuilder builder, PacketRegistry registry) {
         this.registry = registry;
         this.cache = new ScheduledPacketCache();
-        this.gson = new Gson();
+        this.gson = builder.create();
     }
 
     @Override

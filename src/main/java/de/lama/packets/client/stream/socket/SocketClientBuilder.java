@@ -33,7 +33,7 @@ import de.lama.packets.stream.transceiver.transmitter.PacketTransmitterBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.util.exception.ExceptionHandler;
-import de.lama.packets.wrapper.GsonFactory;
+import de.lama.packets.wrapper.gson.GsonFactory;
 import de.lama.packets.wrapper.PacketWrapper;
 import de.lama.packets.wrapper.WrapperFactory;
 

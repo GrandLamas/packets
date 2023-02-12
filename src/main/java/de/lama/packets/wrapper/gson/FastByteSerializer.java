@@ -22,14 +22,23 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.client.file;
+package de.lama.packets.wrapper.gson;
 
-import de.lama.packets.Packet;
+import com.google.gson.*;
 
-import java.util.UUID;
+import java.lang.reflect.Type;
+import java.util.Base64;
 
-public record FileDataPacket(UUID uuid, byte[] data) implements Packet {
+public class FastByteSerializer implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
 
-    public static final long ID = 69422;
+    private static final Base64.Decoder DECODER = Base64.getDecoder();
+    private static final Base64.Encoder ENCODER = Base64.getEncoder();
 
+    public byte[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        return DECODER.decode(json.getAsString());
+    }
+
+    public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
+        return new JsonPrimitive(ENCODER.encodeToString(src));
+    }
 }

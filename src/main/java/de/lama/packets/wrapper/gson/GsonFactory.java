@@ -22,14 +22,19 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper;
+package de.lama.packets.wrapper.gson;
 
+import com.google.gson.GsonBuilder;
 import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.wrapper.PacketWrapper;
+import de.lama.packets.wrapper.WrapperFactory;
 
 public class GsonFactory implements WrapperFactory {
 
     @Override
     public PacketWrapper create(PacketRegistry registry) {
-        return new CachedGsonWrapper(registry);
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeHierarchyAdapter(byte[].class, new FastByteSerializer());
+        return new CachedGsonWrapper(builder, registry);
     }
 }
