@@ -60,7 +60,7 @@ public class ScheduledPacketReceiver extends AbstractScheduledTransceiver implem
     @Override
     protected void tick() {
         this.exceptionHandler.operate(() -> {
-            while (this.in.available() > 0) {
+            while (this.isRunning() && this.in.available() > 0) {
                 this.packetReceived(this.in.readPacket());
             }
         }, "Failed to read packet");
