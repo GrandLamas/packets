@@ -31,7 +31,6 @@ import de.lama.packets.client.file.events.FileReceivedEvent;
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.operation.AsyncOperation;
 import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.Operations;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.stream.transceiver.receiver.BufferedFileReceiver;
 import de.lama.packets.stream.transceiver.receiver.FileReceiver;
@@ -42,7 +41,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BufferedFileClient implements FileClient {
@@ -100,20 +101,20 @@ public class BufferedFileClient implements FileClient {
             this.getEventHandler().notify(new FileReceivedEvent(receiver.getFile()));
     }
 
-    private void sendFile(boolean async, File file) throws IOException {
+    private void sendFile(File file) throws IOException {
         UUID uuid = UUID.randomUUID();
         // Header
-        Operations.execute(async, this.send(new FileHeaderPacket(uuid, file.getName(), file.length())));
+        this.send(new FileHeaderPacket(uuid, file.getName(), file.length())).complete();
 
         // Data
         BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
         for (int i = 0; i < file.length(); i += this.packetLength) {
             FileDataPacket packet = new FileDataPacket(uuid, inputStream.readNBytes(this.packetLength));
-            Operations.execute(async, this.send(packet));
+            this.send(packet).complete();
         }
 
         // Finalize
-        Operations.execute(async, this.send(new FileTransferredPacket(uuid)));
+        this.send(new FileTransferredPacket(uuid)).complete();
     }
 
     @Override
@@ -168,7 +169,7 @@ public class BufferedFileClient implements FileClient {
         }
 
         return new AsyncOperation((async) -> this.getExceptionHandler().operate(() ->
-                this.sendFile(async, file), "Could not transfer file"));
+                this.sendFile(file), "Could not transfer file"));
     }
 
     @Override
