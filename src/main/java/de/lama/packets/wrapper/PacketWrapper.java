@@ -32,4 +32,6 @@ public interface PacketWrapper {
 
     Packet unwrap(long packetId, byte[] bytes);
 
+    boolean ignore(long packetId);
+
 }

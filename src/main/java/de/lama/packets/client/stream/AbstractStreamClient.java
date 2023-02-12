@@ -117,4 +117,9 @@ public abstract class AbstractStreamClient extends AbstractClient implements Cli
 
         return this.packetReceived(this.receiver.read(timeoutInMillis));
     }
+
+    @Override
+    public boolean ignoreFromCache(long packedId) {
+        return this.wrapper.ignore(packedId);
+    }
 }

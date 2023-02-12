@@ -51,4 +51,5 @@ public interface Client extends NetworkAdapter, EventHandlerContainer, Exception
      */
     PacketReceiveEvent read(long timeoutInMillis);
 
+    boolean ignoreFromCache(long packedId);
 }

@@ -99,6 +99,11 @@ public class HandshakeClient implements Client {
     }
 
     @Override
+    public boolean ignoreFromCache(long packedId) {
+        return this.client.ignoreFromCache(packedId);
+    }
+
+    @Override
     public Operation open() {
         return this.waitOperation(this.client.open());
     }

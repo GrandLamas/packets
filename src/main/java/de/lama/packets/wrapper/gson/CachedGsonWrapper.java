@@ -32,20 +32,31 @@ import de.lama.packets.wrapper.PacketStringWrapper;
 import de.lama.packets.wrapper.cache.PacketCache;
 import de.lama.packets.wrapper.cache.ScheduledPacketCache;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 public class CachedGsonWrapper implements PacketStringWrapper {
 
     private final PacketRegistry registry;
     private final PacketCache cache;
+    private final Collection<Long> ignore;
     private final Gson gson;
 
     public CachedGsonWrapper(GsonBuilder builder, PacketRegistry registry) {
         this.registry = registry;
         this.cache = new ScheduledPacketCache();
+        this.ignore = new HashSet<>();
         this.gson = builder.create();
     }
 
     @Override
+    public boolean ignore(long packetId) {
+        return this.ignore.add(packetId);
+    }
+
+    @Override
     public byte[] wrap(long packetId, Packet packet) {
+        if (this.ignore.contains(packetId)) return PacketStringWrapper.super.wrap(packetId, packet);
         byte[] bytes = this.cache.load(packetId, packet);
         if (bytes == null) {
             bytes = PacketStringWrapper.super.wrap(packetId, packet);
@@ -56,6 +67,7 @@ public class CachedGsonWrapper implements PacketStringWrapper {
 
     @Override
     public Packet unwrap(long packetId, byte[] bytes) {
+        if (this.ignore.contains(packetId)) return PacketStringWrapper.super.unwrap(packetId, bytes);
         Packet packet = this.cache.load(packetId, bytes);
         if (packet == null) {
             packet = PacketStringWrapper.super.unwrap(packetId, bytes);

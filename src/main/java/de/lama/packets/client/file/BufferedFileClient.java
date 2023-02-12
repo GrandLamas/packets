@@ -62,6 +62,8 @@ public class BufferedFileClient implements FileClient {
         this.packetLength = packetLengthBytes;
         this.receiverMap = new ConcurrentHashMap<>();
 
+        this.ignoreFromCache(FileDataPacket.ID);
+
         this.getRegistry().registerPacket(FileHeaderPacket.ID, FileHeaderPacket.class);
         this.getRegistry().registerPacket(FileDataPacket.ID, FileDataPacket.class);
         this.getRegistry().registerPacket(FileTransferredPacket.ID, FileTransferredPacket.class);
@@ -160,6 +162,11 @@ public class BufferedFileClient implements FileClient {
     @Override
     public PacketReceiveEvent read(long timeoutInMillis) {
         return this.child.read(timeoutInMillis);
+    }
+
+    @Override
+    public boolean ignoreFromCache(long packedId) {
+        return this.child.ignoreFromCache(packedId);
     }
 
     @Override
