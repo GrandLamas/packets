@@ -47,18 +47,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BufferedFileClient implements FileClient {
 
-    private static final int DEFAULT_PACKET_LENGTH = (int) Math.pow(2, 14);
+    private static final double ONE_MB = Math.pow(2, 20);
+    private static final int DEFAULT_PACKET_LENGTH_MB = 16; // 16 MB
 
     private final Client child;
     private final FileMapper fileMapper;
-    private final int packetLength;
+    private final int packetLengthMb;
 
     private final Map<UUID, FileReceiver> receiverMap;
 
-    public BufferedFileClient(Client child, FileMapper fileMapper, int packetLength) {
+    public BufferedFileClient(Client child, FileMapper fileMapper, int packetLengthMb) {
         this.child = child;
         this.fileMapper = fileMapper;
-        this.packetLength = packetLength;
+        this.packetLengthMb = (int) (packetLengthMb * ONE_MB);
         this.receiverMap = new ConcurrentHashMap<>();
 
         this.getRegistry().registerPacket(FileHeaderPacket.ID, FileHeaderPacket.class);
@@ -69,7 +70,7 @@ public class BufferedFileClient implements FileClient {
     }
 
     public BufferedFileClient(Client child, FileMapper fileMapper) {
-        this(child, fileMapper, DEFAULT_PACKET_LENGTH);
+        this(child, fileMapper, DEFAULT_PACKET_LENGTH_MB);
     }
 
     private void onEvent(PacketReceiveEvent event) {
@@ -107,8 +108,8 @@ public class BufferedFileClient implements FileClient {
 
         // Data
         BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-        for (int i = 0; i < file.length(); i += this.packetLength) {
-            FileDataPacket packet = new FileDataPacket(uuid, inputStream.readNBytes(this.packetLength));
+        for (int i = 0; i < file.length(); i += this.packetLengthMb) {
+            FileDataPacket packet = new FileDataPacket(uuid, inputStream.readNBytes(this.packetLengthMb));
             Operations.execute(async, this.send(packet));
         }
 
