@@ -29,22 +29,22 @@ import java.util.concurrent.Executors;
 
 public class SimpleOperation implements Operation {
 
-    private final ExecutorService service = Executors.newSingleThreadExecutor();
-    private final Runnable runable;
+    private final ExecutorService service = Executors.newCachedThreadPool();
+    private final Runnable runnable;
 
     public SimpleOperation(Runnable runnable) {
-        this.runable = runnable;
+        this.runnable = runnable;
     }
 
     @Override
     public Operation queue() {
-        this.service.submit(this.runable);
+        this.service.submit(this.runnable);
         return this;
     }
 
     @Override
     public Operation complete() {
-        this.runable.run();
+        this.runnable.run();
         return this;
     }
 }

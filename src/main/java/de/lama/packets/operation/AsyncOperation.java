@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 
 public class AsyncOperation implements Operation {
 
-    private final ExecutorService service = Executors.newSingleThreadExecutor();
+    private final ExecutorService service = Executors.newCachedThreadPool();
     private final Consumer<Boolean> async;
 
     public AsyncOperation(Consumer<Boolean> async) {
