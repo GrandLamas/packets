@@ -34,7 +34,7 @@ public class GsonFactory implements WrapperFactory {
     @Override
     public PacketWrapper create(PacketRegistry registry) {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeHierarchyAdapter(byte[].class, new FastByteSerializer());
+        builder.registerTypeHierarchyAdapter(byte[].class, new Base64ByteSerializer());
         return new CachedGsonWrapper(builder, registry);
     }
 }

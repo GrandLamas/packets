@@ -29,7 +29,7 @@ import com.google.gson.*;
 import java.lang.reflect.Type;
 import java.util.Base64;
 
-public class FastByteSerializer implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
+public class Base64ByteSerializer implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
 
     private static final Base64.Decoder DECODER = Base64.getDecoder();
     private static final Base64.Encoder ENCODER = Base64.getEncoder();
