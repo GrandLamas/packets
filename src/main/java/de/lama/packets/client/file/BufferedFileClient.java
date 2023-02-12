@@ -42,9 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BufferedFileClient implements FileClient {
@@ -90,7 +88,8 @@ public class BufferedFileClient implements FileClient {
     private void acceptData(FileDataPacket packet) {
         FileReceiver receiver = this.receiverMap.get(packet.uuid());
         if (receiver == null) return;
-        if (!this.getExceptionHandler().operate(() -> receiver.write(packet.data()), "Could not write bytes")) {
+        if (!this.getExceptionHandler().operate(() -> receiver.write(Base64.getDecoder().decode(packet.dataAsBase64())),
+                "Could not write bytes")) {
             this.receiverMap.remove(packet.uuid());
         }
     }
@@ -109,7 +108,8 @@ public class BufferedFileClient implements FileClient {
         // Data
         BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
         for (int i = 0; i < file.length(); i += this.packetLength) {
-            FileDataPacket packet = new FileDataPacket(uuid, inputStream.readNBytes(this.packetLength));
+            FileDataPacket packet = new FileDataPacket(uuid,
+                    Base64.getEncoder().encodeToString(inputStream.readNBytes(this.packetLength)));
             Operations.execute(async, this.send(packet));
         }
 

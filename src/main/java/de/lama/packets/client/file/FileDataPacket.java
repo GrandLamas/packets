@@ -28,7 +28,7 @@ import de.lama.packets.Packet;
 
 import java.util.UUID;
 
-public record FileDataPacket(UUID uuid, byte[] data) implements Packet {
+public record FileDataPacket(UUID uuid, String dataAsBase64) implements Packet {
 
     public static final long ID = 69422;
 
