@@ -26,7 +26,7 @@ package de.lama.packets.wrapper.cache;
 
 import de.lama.packets.Packet;
 
-import java.util.Arrays;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -35,16 +35,17 @@ import java.util.concurrent.TimeUnit;
 
 public class ScheduledPacketCache implements PacketCache {
 
-    private static final ScheduledExecutorService POOL = Executors.newScheduledThreadPool(10);
     private static final long COLLECT_DELAY_SECS = 30;
     private static final long REMOVE_TIME_SECS = COLLECT_DELAY_SECS;
 
-    private final Map<Long, Map<Integer, CachedObject<byte[]>>> byteCache;
+    private final Map<Long, Map<Integer, CachedObject<ByteBuffer>>> byteCache;
     private final Map<Long, Map<Integer, CachedObject<Packet>>> packetCache;
+    private final ScheduledExecutorService pool;
 
     public ScheduledPacketCache() {
         this.byteCache = new ConcurrentHashMap<>();
         this.packetCache = new ConcurrentHashMap<>();
+        this.pool = Executors.newScheduledThreadPool(1);
 
         this.startTimer();
     }
@@ -80,29 +81,32 @@ public class ScheduledPacketCache implements PacketCache {
     }
 
     private void startTimer() {
-        POOL.scheduleWithFixedDelay(this::collectGarbage, COLLECT_DELAY_SECS, COLLECT_DELAY_SECS, TimeUnit.SECONDS);
+        pool.scheduleWithFixedDelay(this::collectGarbage, COLLECT_DELAY_SECS, COLLECT_DELAY_SECS, TimeUnit.SECONDS);
     }
 
     @Override
-    public void cache(long id, byte[] data, Packet packet) {
+    public void cacheBytes(long id, int hashCode, ByteBuffer data) {
         this.byteCache.putIfAbsent(id, new ConcurrentHashMap<>());
-        this.byteCache.get(id).put(packet.hashCode(), new CachedObject<>(data, System.currentTimeMillis()));
-
-        this.packetCache.putIfAbsent(id, new ConcurrentHashMap<>());
-        this.packetCache.get(id).put(Arrays.hashCode(data), new CachedObject<>(packet, System.currentTimeMillis()));
+        this.byteCache.get(id).put(hashCode, new CachedObject<>(data, System.currentTimeMillis()));
     }
 
     @Override
-    public Packet load(long id, byte[] data) {
+    public void cachePacket(long id, int hashCode, Packet packet) {
+        this.packetCache.putIfAbsent(id, new ConcurrentHashMap<>());
+        this.packetCache.get(id).put(hashCode, new CachedObject<>(packet, System.currentTimeMillis()));
+    }
+
+    @Override
+    public Packet loadPacket(long id, int hashCode) {
         var cache = this.packetCache.get(id);
-        var cachedData = cache != null ? cache.get(Arrays.hashCode(data)) : null;
+        var cachedData = cache != null ? cache.get(hashCode) : null;
         return cachedData == null ? null : cachedData.object();
     }
 
     @Override
-    public byte[] load(long id, Packet packet) {
+    public ByteBuffer loadBytes(long id, int hashCode) {
         var cache = this.byteCache.get(id);
-        var cachedData = cache != null ? cache.get(packet.hashCode()) : null;
+        var cachedData = cache != null ? cache.get(hashCode) : null;
         return cachedData == null ? null : cachedData.object();
     }
 }

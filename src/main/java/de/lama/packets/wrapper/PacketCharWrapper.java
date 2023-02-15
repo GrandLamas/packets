@@ -22,20 +22,31 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.wrapper;
 
 import de.lama.packets.Packet;
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-public interface PacketCache {
+public interface PacketCharWrapper extends PacketWrapper {
 
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
+    Charset CHARSET = StandardCharsets.UTF_8;
 
-    void cachePacket(long id, int hashCode, Packet packet);
+    @Override
+    default Packet unwrap(long packetId, ByteBuffer in) {
+        return this.unwrapString(packetId, CHARSET.decode(in));
+    }
 
-    Packet loadPacket(long id, int hashCode);
+    @Override
+    default ByteBuffer wrap(long packetId, Packet packet, int offsetInChars, int minLen) {
+        return CHARSET.encode(this.wrapString(packetId, packet, offsetInChars, minLen));
+    }
 
-    ByteBuffer loadBytes(long id, int hashCode);
+    CharBuffer wrapString(long packetId, Packet packet, int offsetInChars, int len);
+
+    Packet unwrapString(long packetId, CharBuffer from);
 
 }

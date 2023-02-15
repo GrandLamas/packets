@@ -22,35 +22,38 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.server.socket;
+package de.lama.packets.wrapper.gson;
 
-import de.lama.packets.NetworkAdapter;
-import de.lama.packets.client.nio.channel.SocketChannelClientBuilder;
-import de.lama.packets.registry.HashedPacketRegistry;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import de.lama.packets.Packet;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.server.Server;
+import de.lama.packets.wrapper.PacketCharWrapper;
 
-import java.util.Objects;
-import java.util.function.Supplier;
+import java.io.CharArrayReader;
+import java.nio.CharBuffer;
 
-public class SocketServerBuilder {
+public class GsonWrapper implements PacketCharWrapper {
 
-    private static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
+    private final PacketRegistry registry;
+    private final Gson gson;
 
-    private SocketChannelClientBuilder socketClientBuilder;
-    private int tickrate = NetworkAdapter.DEFAULT_TICKRATE;
-
-    private SocketChannelClientBuilder buildClientBuilder() {
-        return Objects.requireNonNullElseGet(this.socketClientBuilder, SocketChannelClientBuilder::new).clone();
+    public GsonWrapper(GsonBuilder builder, PacketRegistry registry) {
+        this.registry = registry;
+        this.gson = builder.create();
     }
 
-    public SocketServerBuilder clients(SocketChannelClientBuilder clientFactory) {
-        this.socketClientBuilder = clientFactory;
-        return this;
+    @Override
+    public CharBuffer wrapString(long packetId, Packet packet, int offsetInChars, int len) {
+        CharArrayOffsetWriter writer = new CharArrayOffsetWriter(Math.max(0, len), offsetInChars);
+        this.gson.toJson(packet, writer);
+        return CharBuffer.wrap(writer.toCharArray());
     }
 
-    public Server build(int port) {
-        SocketChannelClientBuilder socketClientBuilder = this.buildClientBuilder();
-        return new SocketChannelServer(port, this.tickrate, socketClientBuilder);
+    @Override
+    public Packet unwrapString(long packetId, CharBuffer from) {
+        Class<? extends Packet> parsed = this.registry.parseClass(packetId);
+        if (parsed == null) throw new NullPointerException("Invalid packet id");
+        return this.gson.fromJson(new CharArrayReader(from.array()), parsed);
     }
 }

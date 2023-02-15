@@ -25,7 +25,9 @@
 package de.lama.packets;
 
 import de.lama.packets.client.Client;
-import de.lama.packets.client.stream.socket.SocketClientBuilder;
+import de.lama.packets.client.events.PacketReceiveEvent;
+import de.lama.packets.client.nio.channel.SocketChannelClientBuilder;
+import de.lama.packets.event.EventHandler;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.Server;
@@ -34,36 +36,51 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class DefaultConnection {
 
     protected static PacketRegistry registry = new HashedPacketRegistry();
     protected static SocketServerBuilder socketServerBuilder;
-    protected static SocketClientBuilder clientBuilder;
+    protected static SocketChannelClientBuilder clientBuilder;
 
     protected Server server;
     protected Client client;
 
+    private Set<Long> waitFor;
+
+    protected void listen(EventHandler handler) {
+        handler.subscribe(PacketReceiveEvent.class, (event) -> this.waitFor.add(event.packetId()));
+    }
+
+    protected void waitForPacket(long packetId) throws InterruptedException {
+        do {
+            Thread.sleep(10);
+        } while (!this.waitFor.remove(packetId));
+    }
+
     @BeforeAll
     public static void initBuilder() {
         registry.registerPacket(MessagePacket.ID, MessagePacket.class);
-        socketServerBuilder = new SocketServerBuilder().registry(registry);
-        clientBuilder = new SocketClientBuilder().registry(registry);
+        clientBuilder = new SocketChannelClientBuilder().registry(registry);
+        socketServerBuilder = new SocketServerBuilder().clients(clientBuilder);
     }
 
     @BeforeEach
-    public void initConnection() throws IOException, InterruptedException {
+    public void initConnection() throws InterruptedException, ExecutionException {
+        this.waitFor = Collections.synchronizedSet(new HashSet<>());
         this.server = socketServerBuilder.build(3999);
-        Thread.sleep(10);
+        this.server.connect().get();
         this.client = clientBuilder.build("localhost", 3999);
+        this.client.connect().get();
     }
 
     @AfterEach
-    public void shutdownConnection() throws InterruptedException {
-        Thread.sleep(100);
-        this.client.shutdown().complete();
-        this.server.shutdown().complete();
-        Thread.sleep(100);
+    public void shutdownConnection() throws InterruptedException, ExecutionException {
+        this.client.disconnect().get();
+        this.server.disconnect().get();
     }
 }

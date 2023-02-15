@@ -22,20 +22,36 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.client.nio.channel;
 
-import de.lama.packets.Packet;
+import de.lama.packets.registry.PacketRegistry;
+import de.lama.packets.util.CompletableFutureUtil;
+import de.lama.packets.wrapper.PacketWrapper;
 
-import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.util.concurrent.CompletableFuture;
 
-public interface PacketCache {
+public class SocketChannelOpenClient extends SocketChannelClient {
 
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
+    public SocketChannelOpenClient(AsynchronousSocketChannel channel, String host, int port, PacketRegistry registry, PacketWrapper wrapper, int tickrate) {
+        super(host, port, registry, wrapper, tickrate);
 
-    void cachePacket(long id, int hashCode, Packet packet);
+        this.channel = channel;
+    }
 
-    Packet loadPacket(long id, int hashCode);
+    @Override
+    public CompletableFuture<Void> implConnect() {
+        return this.channel != null ? CompletableFutureUtil.supplyAsync(() -> {
+            this.read();
+            return null;
+        }) : super.implConnect();
+    }
 
-    ByteBuffer loadBytes(long id, int hashCode);
-
+    @Override
+    protected CompletableFuture<Void> implDisconnect() {
+        return super.implDisconnect().thenApply(unused -> {
+            this.channel = null;
+            return null;
+        });
+    }
 }

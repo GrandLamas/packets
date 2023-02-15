@@ -31,4 +31,12 @@ public interface Packet extends Cloneable {
 
     String VERSION = "0.1.3";
     char TYPE = 'p';
+    int NO_LENGTH = -1;
+    int ID_LOC = 2;
+    int RESERVED = 2 + 4 + 8;
+    long MAX_PACKET_LENGTH = 60000;
+
+    default int length() {
+        return NO_LENGTH;
+    }
 }

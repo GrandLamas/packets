@@ -26,13 +26,11 @@ package de.lama.packets.client;
 
 import de.lama.packets.NetworkAdapter;
 import de.lama.packets.Packet;
-import de.lama.packets.client.events.PacketReceiveEvent;
-import de.lama.packets.event.EventHandlerContainer;
-import de.lama.packets.operation.Operation;
 import de.lama.packets.registry.RegistryContainer;
-import de.lama.packets.util.exception.ExceptionHandlerContainer;
 
-public interface Client extends NetworkAdapter, EventHandlerContainer, ExceptionHandlerContainer, RegistryContainer {
+import java.util.concurrent.CompletableFuture;
+
+public interface Client extends NetworkAdapter, RegistryContainer {
 
     /**
      * Sends a packet to the server.
@@ -40,16 +38,6 @@ public interface Client extends NetworkAdapter, EventHandlerContainer, Exception
      * @param packet The packet to be sent
      * @return The operation, which can be queued or executed directly
      */
-    Operation send(Packet packet);
+    CompletableFuture<Void> send(Packet packet);
 
-    /**
-     * Performs a read of the next packet.
-     * Will terminate after given timeout.
-     *
-     * @param timeoutInMillis timeout after which the process will be terminated
-     * @return the packet received event
-     */
-    PacketReceiveEvent read(long timeoutInMillis);
-
-    boolean ignoreFromCache(long packedId);
 }

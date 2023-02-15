@@ -22,20 +22,26 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.wrapper.gson;
 
-import de.lama.packets.Packet;
+import com.google.gson.*;
 
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
+import java.util.Base64;
 
-public interface PacketCache {
+public class Base64ByteBufferSerializer implements JsonSerializer<ByteBuffer>, JsonDeserializer<ByteBuffer> {
 
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
+    private static final Base64.Decoder DECODER = Base64.getDecoder();
+    private static final Base64.Encoder ENCODER = Base64.getEncoder();
 
-    void cachePacket(long id, int hashCode, Packet packet);
+    @Override
+    public ByteBuffer deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        return ByteBuffer.wrap(DECODER.decode(json.getAsString()));
+    }
 
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
-
+    @Override
+    public JsonElement serialize(ByteBuffer src, Type typeOfSrc, JsonSerializationContext context) {
+        return new JsonPrimitive(ENCODER.encodeToString(src.array()));
+    }
 }

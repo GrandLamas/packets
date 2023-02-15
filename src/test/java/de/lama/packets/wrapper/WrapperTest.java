@@ -22,35 +22,43 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.server.socket;
+package de.lama.packets.wrapper;
 
-import de.lama.packets.NetworkAdapter;
-import de.lama.packets.client.nio.channel.SocketChannelClientBuilder;
+import de.lama.packets.MessagePacket;
+import de.lama.packets.Packet;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.server.Server;
+import de.lama.packets.wrapper.gson.GsonFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.util.Objects;
-import java.util.function.Supplier;
+import java.nio.ByteBuffer;
 
-public class SocketServerBuilder {
+public class WrapperTest {
 
-    private static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
+    private PacketWrapper toTest;
 
-    private SocketChannelClientBuilder socketClientBuilder;
-    private int tickrate = NetworkAdapter.DEFAULT_TICKRATE;
-
-    private SocketChannelClientBuilder buildClientBuilder() {
-        return Objects.requireNonNullElseGet(this.socketClientBuilder, SocketChannelClientBuilder::new).clone();
+    @BeforeEach
+    public void initWrapper() {
+        PacketRegistry registry = new HashedPacketRegistry();
+        registry.registerPacket(MessagePacket.ID, MessagePacket.class);
+        this.toTest = new GsonFactory().create(registry);
     }
 
-    public SocketServerBuilder clients(SocketChannelClientBuilder clientFactory) {
-        this.socketClientBuilder = clientFactory;
-        return this;
+    @Test
+    public void testWrap() {
+        ByteBuffer byteBuffer = this.toTest.wrap(MessagePacket.ID, new MessagePacket("Test"), Packet.RESERVED, -1);
+        byteBuffer.position(Packet.RESERVED);
+        Assertions.assertTrue(new String(byteBuffer.array()).contains("Test"));
     }
 
-    public Server build(int port) {
-        SocketChannelClientBuilder socketClientBuilder = this.buildClientBuilder();
-        return new SocketChannelServer(port, this.tickrate, socketClientBuilder);
+    @Test
+    public void test() {
+        MessagePacket packet = new MessagePacket("Test");
+        ByteBuffer byteBuffer = this.toTest.wrap(MessagePacket.ID, packet, Packet.RESERVED, -1);
+        byteBuffer.position(Packet.RESERVED);
+        Packet unwrapped = this.toTest.unwrap(MessagePacket.ID, byteBuffer);
+        Assertions.assertEquals(packet, unwrapped);
     }
 }

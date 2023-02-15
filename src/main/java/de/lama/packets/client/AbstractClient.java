@@ -26,47 +26,45 @@ package de.lama.packets.client;
 
 import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
-import de.lama.packets.client.events.PacketReceiveEvent;
 import de.lama.packets.client.events.PacketSendEvent;
-import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.ParentOperation;
+import de.lama.packets.client.io.IdPacket;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractClient extends AbstractNetworkAdapter implements Client {
+public abstract class AbstractClient<C> extends AbstractNetworkAdapter<C> implements Client {
 
-    public AbstractClient(ExceptionHandler exceptionHandler, PacketRegistry registry) {
-        super(exceptionHandler, registry);
+    private final PacketRegistry registry;
+
+    public AbstractClient(PacketRegistry registry, int tickrate) {
+        super(tickrate);
+        this.registry = registry;
     }
 
-    protected PacketReceiveEvent packetReceived(long packetId, Packet packet) {
-        PacketReceiveEvent event = new PacketReceiveEvent(this, packetId, packet);
-        this.getEventHandler().notify(event);
-        return event;
+    public AbstractClient(PacketRegistry registry) {
+        this(registry, DEFAULT_TICKRATE);
     }
 
-    protected abstract Operation executeSend(long packedId, Packet packet);
+    protected abstract CompletableFuture<Void> implSend(IdPacket packet);
 
     @Override
-    public Operation send(Packet packet) {
+    public CompletableFuture<Void> send(Packet packet) {
         final long packetId = this.getRegistry().parseId(Objects.requireNonNull(packet).getClass());
         if (packetId == PacketRegistry.PACKET_NOT_FOUND)
             throw new IllegalArgumentException("No such packet");
 
-        return new ParentOperation(this.executeSend(packetId, packet), () -> {
-            if (this.hasShutdown()) {
-                this.handle(new IllegalStateException("Client already closed"));
-                return false;
-            }
+        if (!this.isConnected()) {
+            throw new IllegalStateException("Cannot send packet while closed");
+        } else if (this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet))) {
+            return null;
+        }
 
-            return !this.getEventHandler().isCancelled(new PacketSendEvent(this, packetId, packet));
-        });
+        return this.implSend(new IdPacket(packetId, packet));
     }
 
     @Override
-    public boolean isClosed() {
-        return this.hasShutdown();
+    public PacketRegistry getRegistry() {
+        return this.registry;
     }
 }

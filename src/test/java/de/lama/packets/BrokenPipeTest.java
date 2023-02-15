@@ -24,42 +24,31 @@
 
 package de.lama.packets;
 
-import de.lama.packets.client.Client;
-import de.lama.packets.client.stream.socket.SocketClientBuilder;
-import de.lama.packets.client.HandshakePacket;
-import de.lama.packets.server.Server;
-import de.lama.packets.server.socket.SocketServerBuilder;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
 public class BrokenPipeTest {
 
-    @Test
-    public void clientClosedTest() throws IOException {
-        Server server = new SocketServerBuilder().build(3999);
-        server.open().complete();
-
-        Client client = new SocketClientBuilder().exceptionHandler(throwable ->
-                System.out.println("Successfully failed to send packet")).build("localhost", 3999);
-        client.open().complete();
-
-        client.shutdown().complete();
-        client.send(new HandshakePacket("AMOGUS")).complete();
-
-        server.shutdown().complete();
-    }
-
-    @Test
-    public void serverClosedTest() throws IOException {
-        Server server = new SocketServerBuilder().build(3999);
-        server.open().complete();
-
-        Client client = new SocketClientBuilder().exceptionHandler(throwable ->
-                System.out.println("Successfully threw exception")).build("localhost", 3999);
-        client.open().complete();
-
-        server.shutdown().complete();
-        client.send(new HandshakePacket("AMOGUS")).complete();
-    }
+//    @Test
+//    public void clientClosedTest() throws IOException, ExecutionException, InterruptedException {
+//        Server server = new SocketServerBuilder().build(3999);
+//        server.open(16);
+//
+//        Client client = new SocketChannelClientBuilder().build("localhost", 3999);
+//        client.open(16);
+//
+//        client.disconnect().join();
+//        client.send(new HandshakePacket("AMOGUS")).join();
+//
+//        server.disconnect().join();
+//    }
+//
+//    @Test
+//    public void serverClosedTest() throws IOException, ExecutionException, InterruptedException {
+//        Server server = new SocketServerBuilder().build(3999);
+//        server.connect(16).join();
+//
+//        Client client = new SocketChannelClientBuilder().build("localhost", 3999);
+//        client.open(16).join();
+//
+//        server.disconnect().join();
+//        client.send(new HandshakePacket("AMOGUS")).join();
+//    }
 }

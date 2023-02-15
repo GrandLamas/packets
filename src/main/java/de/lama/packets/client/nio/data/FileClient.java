@@ -22,20 +22,19 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.client.nio.data;
 
-import de.lama.packets.Packet;
+import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
-import java.nio.ByteBuffer;
+public interface FileClient extends DataClient {
 
-public interface PacketCache {
-
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
-
-    void cachePacket(long id, int hashCode, Packet packet);
-
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
+    /**
+     * Sends a given file.
+     *
+     * @param file The file to be sent
+     * @return The operation, which can be queued or executed directly
+     */
+    CompletableFuture<Boolean> send(File file);
 
 }

@@ -29,12 +29,15 @@ import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.wrapper.PacketWrapper;
 import de.lama.packets.wrapper.WrapperFactory;
 
+import java.nio.ByteBuffer;
+
 public class GsonFactory implements WrapperFactory {
 
     @Override
     public PacketWrapper create(PacketRegistry registry) {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeHierarchyAdapter(byte[].class, new Base64ByteSerializer());
-        return new CachedGsonWrapper(builder, registry);
+        builder.registerTypeHierarchyAdapter(byte[].class, new Base64ByteArraySerializer());
+        builder.registerTypeAdapter(ByteBuffer.class, new Base64ByteBufferSerializer());
+        return new GsonWrapper(builder, registry);
     }
 }

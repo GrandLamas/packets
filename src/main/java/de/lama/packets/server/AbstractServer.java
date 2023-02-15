@@ -27,68 +27,56 @@ package de.lama.packets.server;
 import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
-import de.lama.packets.events.AdapterShutdownEvent;
-import de.lama.packets.operation.Operations;
+import de.lama.packets.events.AdapterDisconnectEvent;
 import de.lama.packets.server.events.ClientConnectEvent;
-import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.ParentOperation;
-import de.lama.packets.operation.AsyncOperation;
-import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.util.exception.ExceptionHandler;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
-public abstract class AbstractServer extends AbstractNetworkAdapter implements Server {
+public abstract class AbstractServer<C extends Client> extends AbstractNetworkAdapter<C> implements Server {
 
-    private final Collection<Client> clients;
+    private final Collection<C> clients;
 
-    public AbstractServer(ExceptionHandler exceptionHandler, PacketRegistry registry) {
-        super(exceptionHandler, registry);
+    public AbstractServer(int tickrate) {
+        super(tickrate);
 
         this.clients = new ConcurrentLinkedQueue<>();
     }
 
-    private void unregister(Client client) {
+    private void unregister(C client) {
         this.clients.remove(client);
     }
 
-    protected abstract Operation shutdownConnection();
-
-    protected boolean register(Client client) {
-        if (this.getEventHandler().isCancelled(new ClientConnectEvent(this, client))) {
-            client.shutdown().complete();
-            return false;
-        }
-
-        client.getEventHandler().subscribe(AdapterShutdownEvent.class, event -> this.unregister(client));
-        this.clients.add(client);
-        return true;
-    }
-
     @Override
-    protected Operation executeShutdown() {
-        return new ParentOperation(this.shutdownConnection(), () -> {
-            this.clients.forEach(client -> client.shutdown().complete());
+    protected Future<Boolean> process(C client) {
+        return CompletableFuture.supplyAsync(() -> {
+            if (this.getEventHandler().isCancelled(new ClientConnectEvent(this, client))) {
+                client.disconnect().join();
+                return false;
+            }
+
+            client.getEventHandler().subscribe(AdapterDisconnectEvent.class, event -> this.unregister(client));
+            this.clients.add(client);
+            client.connect().join(); // TODO: HANDLE EXCP
             return true;
         });
     }
 
     @Override
-    public Operation broadcast(Packet packet) {
+    public CompletableFuture<Void> broadcast(Packet packet) {
         Objects.requireNonNull(packet);
-        return new AsyncOperation((async) -> this.clients.forEach(client -> Operations.execute(async, client.send(packet))));
-    }
-
-    @Override
-    public boolean isClosed() {
-        return this.hasShutdown();
+        return CompletableFuture.supplyAsync(() -> {
+            this.clients.stream().map(client -> client.send(packet)).forEach(CompletableFuture::join);
+            return null;
+        });
     }
 
     @Override
     public Stream<Client> getClients() {
-        return this.clients.stream();
+        return this.clients.stream().map(c -> c);
     }
 }

@@ -26,12 +26,12 @@ package de.lama.packets.wrapper;
 
 import de.lama.packets.Packet;
 
+import java.nio.ByteBuffer;
+
 public interface PacketWrapper {
 
-    byte[] wrap(long packetId, Packet packet);
+    ByteBuffer wrap(long packetId, Packet packet, int offset, int minLen);
 
-    Packet unwrap(long packetId, byte[] bytes);
-
-    boolean ignore(long packetId);
+    Packet unwrap(long packetId, ByteBuffer bytes);
 
 }

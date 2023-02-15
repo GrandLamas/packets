@@ -22,20 +22,11 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.client.nio.file;
 
-import de.lama.packets.Packet;
+import java.io.File;
+import java.util.function.Function;
 
-import java.nio.ByteBuffer;
-
-public interface PacketCache {
-
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
-
-    void cachePacket(long id, int hashCode, Packet packet);
-
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
+public interface FileMapper extends Function<String, File> {
 
 }

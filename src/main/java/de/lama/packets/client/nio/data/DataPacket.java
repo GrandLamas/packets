@@ -22,20 +22,12 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.client.nio.data;
 
 import de.lama.packets.Packet;
 
-import java.nio.ByteBuffer;
+public record DataPacket(String uuid, long position, byte[] data) implements Packet {
 
-public interface PacketCache {
-
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
-
-    void cachePacket(long id, int hashCode, Packet packet);
-
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
+    public static final long ID = 69422;
 
 }

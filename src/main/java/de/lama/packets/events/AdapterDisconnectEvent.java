@@ -22,20 +22,17 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.events;
 
-import de.lama.packets.Packet;
+import de.lama.packets.NetworkAdapter;
+import de.lama.packets.event.CancelEventBehaviour;
+import de.lama.packets.event.Cancellable;
+import de.lama.packets.event.Event;
+import de.lama.packets.event.EventBehaviour;
 
-import java.nio.ByteBuffer;
+public record AdapterDisconnectEvent(NetworkAdapter adapter, EventBehaviour behaviour) implements Event, Cancellable {
 
-public interface PacketCache {
-
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
-
-    void cachePacket(long id, int hashCode, Packet packet);
-
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
-
+    public AdapterDisconnectEvent(NetworkAdapter adapter) {
+        this(adapter, new CancelEventBehaviour());
+    }
 }

@@ -25,27 +25,15 @@
 package de.lama.packets;
 
 import de.lama.packets.event.EventHandlerContainer;
-import de.lama.packets.operation.Operation;
-import de.lama.packets.registry.RegistryContainer;
-import de.lama.packets.util.exception.ExceptionHandlerContainer;
 
 import java.net.InetAddress;
+import java.util.concurrent.CompletableFuture;
 
-public interface NetworkAdapter extends EventHandlerContainer, RegistryContainer, ExceptionHandlerContainer {
+public interface NetworkAdapter extends EventHandlerContainer {
 
-    /**
-     * Opens the adapter.
-     *
-     * @return the operation of opening
-     */
-    Operation open();
+    int DEFAULT_TICKRATE = 0;
 
-    /**
-     * Closes the adapter.
-     *
-     * @return the operation of closing
-     */
-    Operation close();
+    CompletableFuture<Void> connect();
 
     /**
      * Shuts the adapter down indefinitely.
@@ -53,21 +41,14 @@ public interface NetworkAdapter extends EventHandlerContainer, RegistryContainer
      *
      * @return the operation of the shutdown
      */
-    Operation shutdown();
-
-    /**
-     * Returns whether the adapter is closed or not
-     *
-     * @return if the adapter is closed
-     */
-    boolean isClosed();
+    CompletableFuture<Void> disconnect();
 
     /**
      * Returns whether the adapter has been shutdown or not.
      *
      * @return if the adapter has been shutdown
      */
-    boolean hasShutdown();
+    boolean isConnected();
 
     /**
      * Returns the address of the server.

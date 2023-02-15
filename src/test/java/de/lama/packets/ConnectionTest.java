@@ -24,21 +24,23 @@
 
 package de.lama.packets;
 
-import de.lama.packets.client.events.PacketReceiveEvent;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.ExecutionException;
 
 public class ConnectionTest extends DefaultConnection {
 
     @Test
-    public void sendToClientTest() {
-        this.client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Packet from server received!"));
-        this.server.broadcast(new MessagePacket("Server message")).complete();
+    public void sendToClientTest() throws InterruptedException, ExecutionException {
+        this.listen(this.client.getEventHandler());
+        this.server.broadcast(new MessagePacket("Server message")).get();
+        this.waitForPacket(MessagePacket.ID);
     }
 
     @Test
-    public void sendToServerTest() {
-        this.server.getClients().forEach(client ->
-                client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) -> System.out.println("Packet from client received!")));
-        this.client.send(new MessagePacket("Client message")).complete();
+    public void sendToServerTest() throws InterruptedException, ExecutionException {
+        this.server.getClients().forEach(client -> this.listen(client.getEventHandler()));
+        this.client.send(new MessagePacket("Client message")).get();
+        this.waitForPacket(MessagePacket.ID);
     }
 }

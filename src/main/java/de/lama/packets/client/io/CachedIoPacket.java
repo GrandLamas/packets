@@ -22,20 +22,15 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.client.io;
 
 import de.lama.packets.Packet;
 
 import java.nio.ByteBuffer;
 
-public interface PacketCache {
+public record CachedIoPacket(char type, long id, int size, ByteBuffer data) implements IoPacket {
 
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
-
-    void cachePacket(long id, int hashCode, Packet packet);
-
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
-
+    public CachedIoPacket(long id, java.nio.ByteBuffer data) {
+        this(Packet.TYPE, id, data.limit(), data);
+    }
 }

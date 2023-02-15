@@ -22,20 +22,34 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.util;
 
-import de.lama.packets.Packet;
+import de.lama.packets.util.exception.ThrowingRunnable;
+import de.lama.packets.util.exception.ThrowingSupplier;
 
-import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
-public interface PacketCache {
+public class CompletableFutureUtil {
 
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
+    public static <T> CompletableFuture<T> supplyAsync(ThrowingRunnable runnable, T value) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                runnable.run();
+                return value;
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
 
-    void cachePacket(long id, int hashCode, Packet packet);
-
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
-
+    public static <T> CompletableFuture<T> supplyAsync(ThrowingSupplier<T> runnable) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return runnable.get();
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
 }

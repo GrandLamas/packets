@@ -26,8 +26,9 @@ package de.lama.packets.file;
 
 import de.lama.packets.DefaultConnection;
 import de.lama.packets.client.events.PacketReceiveEvent;
-import de.lama.packets.client.file.BufferedFileClient;
-import de.lama.packets.client.file.FileClient;
+import de.lama.packets.client.nio.data.DataTransferredPacket;
+import de.lama.packets.client.nio.data.FileClient;
+import de.lama.packets.client.nio.file.BufferedFileClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,29 +36,30 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.ExecutionException;
 
 public class SendFileTest extends DefaultConnection {
 
     private static final File SOURCE = new File("1GB");
-    private static final File DEST = new File("received.txt");
+    private static final File DEST = new File("received");
 
     private FileClient fileClient;
 
     @BeforeEach
     public void initFileClient() throws IOException {
-        this.fileClient = new BufferedFileClient(this.client, s -> DEST);
-
         if (DEST.exists() && !DEST.delete()) {
             throw new IOException("Could not delete old file");
         }
     }
 
     @Test
-    public void sendFileTest() throws IOException, InterruptedException {
+    public void sendFileTest() throws IOException, InterruptedException, ExecutionException {
+        this.fileClient = new BufferedFileClient(this.client, s -> DEST);
+        this.listen(this.fileClient.getEventHandler());
         this.server.getClients().forEach(client -> client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) ->
-                event.source().send(event.packet()).complete()));
-        this.fileClient.send(SOURCE).complete();
-        Thread.sleep(10);
+                event.source().send(event.packet())));
+        this.fileClient.send(SOURCE).get();
+        this.waitForPacket(DataTransferredPacket.ID);
         Assertions.assertEquals(-1L, Files.mismatch(SOURCE.toPath(), DEST.toPath()));
     }
 }

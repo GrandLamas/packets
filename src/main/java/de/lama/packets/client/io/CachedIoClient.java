@@ -22,20 +22,11 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.client.io;
 
-import de.lama.packets.Packet;
+import de.lama.packets.client.Client;
 
-import java.nio.ByteBuffer;
+public interface CachedIoClient extends Client {
 
-public interface PacketCache {
-
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
-
-    void cachePacket(long id, int hashCode, Packet packet);
-
-    Packet loadPacket(long id, int hashCode);
-
-    ByteBuffer loadBytes(long id, int hashCode);
-
+    boolean ignoreFromCache(long packedId);
 }

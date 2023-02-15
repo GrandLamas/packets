@@ -26,82 +26,91 @@ package de.lama.packets;
 
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.event.OrderedEventExecutor;
-import de.lama.packets.events.AdapterCloseEvent;
-import de.lama.packets.events.AdapterOpenEvent;
-import de.lama.packets.events.AdapterShutdownEvent;
-import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.ParentOperation;
-import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.util.exception.ExceptionHandler;
 
-public abstract class AbstractNetworkAdapter implements NetworkAdapter {
+import java.util.Queue;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-    private final NetworkAdapterData data;
+public abstract class AbstractNetworkAdapter<C> implements NetworkAdapter {
 
-    public AbstractNetworkAdapter(ExceptionHandler exceptionHandler, PacketRegistry registry) {
-        this.data = new NetworkAdapterData(exceptionHandler, new OrderedEventExecutor(), registry);
+    private final EventHandler eventHandler;
+    private final ScheduledExecutorService scheduler;
+    private final AtomicBoolean connected;
+    private final Queue<C> queue;
+    private final long schedule;
+    private ScheduledFuture<?> task;
+
+    public AbstractNetworkAdapter(int tickrate) {
+        if (tickrate < 0 || tickrate > 1000) throw new IllegalArgumentException("Illegal tickrate");
+
+        this.eventHandler = new OrderedEventExecutor();
+        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.connected = new AtomicBoolean();
+        this.queue = new ConcurrentLinkedQueue<>();
+        this.schedule = tickrate == 0 ? 0 : 1000L / tickrate;
     }
 
-    protected void handle(Exception exception) {
-        this.getExceptionHandler().accept(exception);
+    public AbstractNetworkAdapter() {
+        this(DEFAULT_TICKRATE);
     }
 
-    protected abstract Operation executeClose();
+    protected abstract Future<Boolean> process(C cached);
 
-    protected abstract Operation executeOpen();
+    protected abstract CompletableFuture<Void> implConnect();
 
-    protected abstract Operation executeShutdown();
+    protected abstract CompletableFuture<Void> implDisconnect();
+
+    protected void found(C cache) {
+        if (!this.connected.get()) throw new IllegalStateException("Cannot cache right now");
+        if (this.schedule == 0) {
+            this.process(cache);
+        } else {
+            this.queue.add(cache);
+        }
+    }
+
+    protected void processAll() {
+        C polled;
+        while ((polled = this.queue.poll()) != null) {
+            this.process(polled);
+        }
+    }
+
+    protected Void startTick(Void v) {
+        this.queue.clear();
+        if (this.schedule > 0)
+            this.task = this.scheduler.scheduleAtFixedRate(this::processAll, 0, this.schedule, TimeUnit.MILLISECONDS);
+        return null;
+    }
 
     @Override
-    public Operation open() {
-        return new ParentOperation(this.executeOpen(), () -> {
-            if (!this.isClosed()) {
-                this.handle(new IllegalStateException("Adapter already open"));
-                return false;
-            }
+    public CompletableFuture<Void> connect() {
+        if (this.connected.compareAndExchange(false, true))
+            throw new IllegalStateException("Adapter already connected!");
 
-            return !this.getEventHandler().isCancelled(new AdapterOpenEvent(this));
+        return this.implConnect().thenApply(this::startTick);
+    }
+
+    @Override
+    public CompletableFuture<Void> disconnect() {
+        if (!this.connected.compareAndExchange(true, false)) {
+            throw new IllegalStateException("Adapter not connected!");
+        }
+
+        return this.implDisconnect().thenApply(unused -> {
+            if (this.task != null) this.task.cancel(true);
+            this.scheduler.shutdown();
+            return null;
         });
     }
 
     @Override
-    public Operation close() {
-        return new ParentOperation(this.executeClose(), () -> {
-            if (this.isClosed()) {
-                this.handle(new IllegalStateException("Adapter already closed"));
-                return false;
-            }
-
-            return !this.getEventHandler().isCancelled(new AdapterCloseEvent(this));
-        });
-    }
-
-    @Override
-    public Operation shutdown() {
-        return new ParentOperation(this.executeShutdown(), () -> {
-            if (this.hasShutdown()) {
-                this.handle(new IllegalStateException("Adapter already shutdown"));
-                return false;
-            }
-
-            this.data.eventHandler().notify(new AdapterShutdownEvent(this));
-            if (!this.isClosed()) this.close().complete();
-            return true;
-        });
-    }
-
-    @Override
-    public ExceptionHandler getExceptionHandler() {
-        return this.data.exceptionHandler();
+    public boolean isConnected() {
+        return this.connected.get();
     }
 
     @Override
     public EventHandler getEventHandler() {
-        return this.data.eventHandler();
-    }
-
-    @Override
-    public PacketRegistry getRegistry() {
-        return this.data.registry();
+        return this.eventHandler;
     }
 }

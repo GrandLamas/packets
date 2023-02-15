@@ -27,8 +27,8 @@ package de.lama.packets.server;
 import de.lama.packets.NetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
-import de.lama.packets.operation.Operation;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public interface Server extends NetworkAdapter {
@@ -39,7 +39,7 @@ public interface Server extends NetworkAdapter {
      * @param packet the packet to be sent
      * @return the operation of sending
      */
-    Operation broadcast(Packet packet);
+    CompletableFuture<Void> broadcast(Packet packet);
 
     /**
      * Returns every connected client.

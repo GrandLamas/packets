@@ -27,44 +27,58 @@ package de.lama.packets.client;
 import de.lama.packets.Packet;
 import de.lama.packets.client.events.PacketReceiveEvent;
 import de.lama.packets.event.EventHandler;
-import de.lama.packets.operation.Operation;
-import de.lama.packets.operation.AsyncOperation;
 import de.lama.packets.registry.PacketRegistry;
-import de.lama.packets.util.exception.ExceptionHandler;
+import de.lama.packets.util.CompletableFutureUtil;
 
 import java.net.InetAddress;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HandshakeClient implements Client {
 
     private final Client client;
     private final UUID handshakeUuid;
     private final HandshakePacket sent;
-    private volatile boolean handshake;
+    private final AtomicBoolean handshake;
+    private final boolean initiator;
 
-    public HandshakeClient(Client client) {
+    public HandshakeClient(Client client, boolean initiator) {
         this.client = client;
+        this.initiator = initiator;
         this.sent = this.buildPacket();
+        this.handshake = new AtomicBoolean();
 
         this.getRegistry().registerPacket(HandshakePacket.ID, HandshakePacket.class);
         this.handshakeUuid = this.client.getEventHandler().subscribe(PacketReceiveEvent.class, this::onEvent);
-        this.client.open().complete();
-        this.client.send(this.sent).complete();
     }
 
-    private Operation waitOperation(Operation operation) {
-        return new AsyncOperation((async) -> {
-            this.awaitHandshake();
-            if (async) operation.queue();
-            else operation.complete();
-        });
+    private CompletableFuture<Void> sendHandshake() {
+        return this.client.send(this.sent);
     }
 
-    private void awaitHandshake() {
-        if (this.handshake) return;
-        synchronized (this) {
-            this.getExceptionHandler().operate(() -> this.wait(), "Could not wait");
+    private CompletableFuture<Void> awaitHandshake(Void v) {
+        if (this.initiator) {
+            return this.sendHandshake().thenApply(n -> this.awaitHandshake());
         }
+        return CompletableFutureUtil.supplyAsync(this::awaitHandshake);
+    }
+
+    private Void awaitHandshake() {
+        if (this.handshake.get()) return null;
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                this.awaitHandshake();
+            }
+        }
+        return null;
+    }
+
+    private <T> T waitOperation(T operation) {
+        this.awaitHandshake();
+        return operation;
     }
 
     protected HandshakePacket buildPacket() {
@@ -77,10 +91,13 @@ public class HandshakeClient implements Client {
 
     protected void onEvent(PacketReceiveEvent event) {
         this.client.getEventHandler().unsubscribe(this.handshakeUuid);
-        this.handshake = event.packetId() == HandshakePacket.ID && this.validateHandshakePacket((HandshakePacket) event.packet());
-        if (!this.handshake) {
-            this.client.shutdown().complete();
+        this.handshake.set(event.packetId() == HandshakePacket.ID && this.validateHandshakePacket((HandshakePacket) event.packet()));
+        if (!this.handshake.get()) {
+            this.client.disconnect().join();
         } else {
+            if (!this.initiator) {
+                this.sendHandshake().join();
+            }
             synchronized (this) {
                 this.notifyAll();
             }
@@ -88,44 +105,23 @@ public class HandshakeClient implements Client {
     }
 
     @Override
-    public Operation send(Packet packet) {
+    public CompletableFuture<Void> send(Packet packet) {
         return this.waitOperation(this.client.send(packet));
     }
 
     @Override
-    public PacketReceiveEvent read(long timeoutInMillis) {
-        this.awaitHandshake();
-        return this.client.read(timeoutInMillis);
+    public CompletableFuture<Void> connect() {
+        return this.client.connect().thenCompose(this::awaitHandshake);
     }
 
     @Override
-    public boolean ignoreFromCache(long packedId) {
-        return this.client.ignoreFromCache(packedId);
+    public CompletableFuture<Void> disconnect() {
+        return this.waitOperation(this.client.disconnect());
     }
 
     @Override
-    public Operation open() {
-        return this.waitOperation(this.client.open());
-    }
-
-    @Override
-    public Operation close() {
-        return this.waitOperation(this.client.close());
-    }
-
-    @Override
-    public Operation shutdown() {
-        return this.waitOperation(this.client.shutdown());
-    }
-
-    @Override
-    public boolean isClosed() {
-        return this.client.isClosed();
-    }
-
-    @Override
-    public boolean hasShutdown() {
-        return this.client.hasShutdown();
+    public boolean isConnected() {
+        return this.client.isConnected();
     }
 
     @Override
@@ -146,10 +142,5 @@ public class HandshakeClient implements Client {
     @Override
     public PacketRegistry getRegistry() {
         return this.client.getRegistry();
-    }
-
-    @Override
-    public ExceptionHandler getExceptionHandler() {
-        return this.client.getExceptionHandler();
     }
 }

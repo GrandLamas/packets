@@ -22,20 +22,36 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.wrapper.cache;
+package de.lama.packets.wrapper.gson;
 
-import de.lama.packets.Packet;
+import java.io.CharArrayWriter;
+import java.io.Writer;
 
-import java.nio.ByteBuffer;
+public class CharArrayOffsetWriter extends Writer {
 
-public interface PacketCache {
+    private final CharArrayWriter writer;
 
-    void cacheBytes(long id, int hashCode, ByteBuffer data);
+    public CharArrayOffsetWriter(int capacity, int offset) {
+        this.writer = new CharArrayWriter(capacity + offset);
+        this.writer.write(new char[offset], 0, offset);
+    }
 
-    void cachePacket(long id, int hashCode, Packet packet);
+    @Override
+    public void write(char[] cbuf, int off, int len) {
+        this.writer.write(cbuf, off, len);
+    }
 
-    Packet loadPacket(long id, int hashCode);
+    @Override
+    public void flush() {
+        this.writer.flush();
+    }
 
-    ByteBuffer loadBytes(long id, int hashCode);
+    @Override
+    public void close() {
+        this.writer.close();
+    }
 
+    public char[] toCharArray() {
+        return this.writer.toCharArray();
+    }
 }
