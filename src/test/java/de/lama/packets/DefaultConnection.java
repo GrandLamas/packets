@@ -80,7 +80,7 @@ public class DefaultConnection {
 
     @AfterEach
     public void shutdownConnection() throws InterruptedException, ExecutionException {
-        this.client.disconnect().get();
-        this.server.disconnect().get();
+        if (this.client.isConnected()) this.client.disconnect().get();
+        if (this.server.isConnected()) this.server.disconnect().get();
     }
 }

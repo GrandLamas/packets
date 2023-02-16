@@ -35,10 +35,8 @@ import de.lama.packets.wrapper.PacketWrapper;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.channels.Selector;
 import java.util.concurrent.CompletableFuture;
 
 class SocketChannelClient extends AbstractCachedIoClient implements Client {
@@ -46,7 +44,6 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
     private final InetSocketAddress destination;
     protected AsynchronousSocketChannel channel;
     private ByteBuffer headerCache;
-    private Selector selector;
 
     public SocketChannelClient(String destination, int port, PacketRegistry registry, PacketWrapper wrapper, int tickrate) {
         super(registry, wrapper);
@@ -70,7 +67,6 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
 
     protected void read() {
         this.headerCache = ByteBuffer.allocate(Packet.RESERVED);
-        this.headerCache.position(0);
         this.channel.read(this.headerCache, null, this.buildHeaderHandler());
     }
 
@@ -78,7 +74,9 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
         return new CompletionHandler<>() {
             @Override
             public void completed(Integer result, Object attachment) {
+                // Receive and handle packet body
                 if (result != length) return;
+                allocated.position(0);
                 found(new CachedIoPacket(packetId, allocated));
                 read();
             }
@@ -94,17 +92,15 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
         return new CompletionHandler<>() {
             @Override
             public void completed(Integer result, Object attachment) {
+                // Receive and handle packet
+                if (result != Packet.RESERVED) return;
                 headerCache.position(0);
-                char type = headerCache.getChar();
-                if (type == Packet.TYPE) {
-                    long packetId = headerCache.getLong();
-                    int length = headerCache.getInt();
-                    ByteBuffer data = ByteBuffer.allocate(headerCache.limit() + length);
-                    headerCache.position(0);
-                    data.put(headerCache);
-                    channel.read(data, null, buildBodyHandler(packetId, length, data));
-                    // TODO: Handle invalid packet
-                }
+                final char type = headerCache.getChar();
+                final long packetId = headerCache.getLong();
+                final int length = headerCache.getInt();
+                if (type != Packet.TYPE) return;
+                final ByteBuffer allocated = ByteBuffer.allocate(length);
+                channel.read(allocated, null, buildBodyHandler(packetId, length, allocated));
             }
 
             @Override
@@ -116,6 +112,7 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
 
     @Override
     protected CompletableFuture<Void> implConnect() {
+        // Connect client to server
         return CompletableFutureUtil.supplyAsync(() -> {
             this.channel = AsynchronousSocketChannel.open();
             this.channel.connect(this.destination).get();
@@ -126,13 +123,11 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
 
     @Override
     protected CompletableFuture<Void> implDisconnect() {
+        // disconnect this client from the server
         return CompletableFutureUtil.supplyAsync(() -> {
-            this.channel.shutdownInput();
-            this.channel.shutdownOutput();
-            try {
-                this.channel.close();
-            } catch (AsynchronousCloseException ignored) {}
+            this.channel.close();
             this.channel = null;
+            this.headerCache = null;
             return null;
         });
     }

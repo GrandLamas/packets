@@ -22,23 +22,38 @@
  * SOFTWARE.
  */
 
-package de.lama.packets.large;
+package de.lama.packets;
 
-import de.lama.packets.DefaultConnection;
+import de.lama.packets.client.events.PacketReceiveEvent;
+import de.lama.packets.client.nio.data.DataPacket;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class SendLargePacketTest extends DefaultConnection {
+import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutionException;
+
+public class HashCodeTransferTest extends DefaultConnection {
 
     @BeforeAll
-    public static void initPacket() {
-        registry.registerPacket(LargePacket.ID, LargePacket.class);
+    public static void registerPackets() {
+        registry.registerPacket(DataPacket.ID, DataPacket.class);
     }
 
     @Test
-    public void sendLargePacket() throws InterruptedException {
-        this.listen(this.client.getEventHandler());
-        this.client.send(new LargePacket(20)).join();
-        this.waitForPacket(LargePacket.ID);
+    public void sendAndTestHashCode() throws ExecutionException, InterruptedException {
+        ByteBuffer random = ByteBuffer.allocate(1000000);
+        // put random bytes into random buffer
+        for (int i = 0; i < random.capacity(); i++) {
+            random.put((byte) (Math.random() * 255));
+        }
+        random.flip();
+        int hashCode = random.hashCode();
+        this.server.getEventHandler().subscribe(PacketReceiveEvent.class, event -> {
+            if (event.packetId() == DataPacket.ID) {
+                Assertions.assertEquals(hashCode, event.packet().hashCode());
+            }
+        });
+        this.client.send(new DataPacket(null, 0, random.array())).get();
     }
 }

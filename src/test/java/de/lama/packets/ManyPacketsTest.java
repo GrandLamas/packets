@@ -54,7 +54,9 @@ public class ManyPacketsTest extends DefaultConnection {
         for (int i = 0; i < AMOUNT; i++) {
             this.client.send(PACKET).get();
         }
-        Thread.sleep(10); // Solution
+        while (this.received.get() != AMOUNT) {
+            Thread.sleep(1);
+        }
         Assertions.assertEquals(this.received.get(), AMOUNT);
     }
 
@@ -67,7 +69,9 @@ public class ManyPacketsTest extends DefaultConnection {
         for (int i = 0; i < AMOUNT; i++) {
             this.server.broadcast(PACKET).get();
         }
-        Thread.sleep(10); // Solution
+        while (this.received.get() != AMOUNT) {
+            Thread.sleep(1);
+        }
         Assertions.assertEquals(this.received.get(), AMOUNT);
     }
 }

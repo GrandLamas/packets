@@ -62,7 +62,6 @@ public abstract class AbstractCachedIoClient extends AbstractClient<IoPacket> im
 
     @Override
     protected Future<Boolean> process(IoPacket cached) {
-        cached.data().position(0);
         return this.unwrap(cached).thenApply((idPacket) -> {
             if (idPacket == null)
                 return false;
@@ -77,7 +76,6 @@ public abstract class AbstractCachedIoClient extends AbstractClient<IoPacket> im
             int hashCode = packet.data().hashCode();
             Packet unwrapped = this.ignored.contains(packet.id()) ? null : this.cache.loadPacket(packet.id(), hashCode);
             if (unwrapped == null) {
-                packet.data().position(Packet.RESERVED);
                 unwrapped = this.wrapper.unwrap(packet.id(), packet.data());
                 this.cache.cachePacket(packet.id(), hashCode, unwrapped);
             }

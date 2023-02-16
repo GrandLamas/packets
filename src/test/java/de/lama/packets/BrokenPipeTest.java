@@ -24,31 +24,22 @@
 
 package de.lama.packets;
 
-public class BrokenPipeTest {
+import de.lama.packets.client.HandshakePacket;
+import org.junit.jupiter.api.Test;
 
-//    @Test
-//    public void clientClosedTest() throws IOException, ExecutionException, InterruptedException {
-//        Server server = new SocketServerBuilder().build(3999);
-//        server.open(16);
-//
-//        Client client = new SocketChannelClientBuilder().build("localhost", 3999);
-//        client.open(16);
-//
-//        client.disconnect().join();
-//        client.send(new HandshakePacket("AMOGUS")).join();
-//
-//        server.disconnect().join();
-//    }
-//
-//    @Test
-//    public void serverClosedTest() throws IOException, ExecutionException, InterruptedException {
-//        Server server = new SocketServerBuilder().build(3999);
-//        server.connect(16).join();
-//
-//        Client client = new SocketChannelClientBuilder().build("localhost", 3999);
-//        client.open(16).join();
-//
-//        server.disconnect().join();
-//        client.send(new HandshakePacket("AMOGUS")).join();
-//    }
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class BrokenPipeTest extends DefaultConnection {
+
+    @Test
+    public void clientClosedTest() {
+        this.server.disconnect().join();
+        assertThrows(IllegalStateException.class, () -> this.server.broadcast(new HandshakePacket("AMOGUS")).join());
+    }
+
+    @Test
+    public void serverClosedTest() {
+        this.client.disconnect().join();
+        assertThrows(IllegalStateException.class, () -> this.client.send(new HandshakePacket("AMOGUS")).join());
+    }
 }
