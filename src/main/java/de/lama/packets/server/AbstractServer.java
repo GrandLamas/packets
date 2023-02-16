@@ -27,6 +27,7 @@ package de.lama.packets.server;
 import de.lama.packets.AbstractNetworkAdapter;
 import de.lama.packets.Packet;
 import de.lama.packets.client.Client;
+import de.lama.packets.client.events.PacketReceiveEvent;
 import de.lama.packets.events.AdapterDisconnectEvent;
 import de.lama.packets.server.events.ClientConnectEvent;
 
@@ -60,6 +61,7 @@ public abstract class AbstractServer<C extends Client> extends AbstractNetworkAd
             }
 
             client.getEventHandler().subscribe(AdapterDisconnectEvent.class, event -> this.unregister(client));
+            client.getEventHandler().subscribe(PacketReceiveEvent.class, event -> this.getEventHandler().notify(event));
             this.clients.add(client);
             client.connect().join(); // TODO: HANDLE EXCP
             return true;
