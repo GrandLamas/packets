@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class OrderedEventExecutor implements EventHandler {
@@ -42,7 +42,7 @@ public class OrderedEventExecutor implements EventHandler {
     @Override
     @SuppressWarnings("unchecked")
     public <R extends Event> UUID subscribe(Class<R> type, Consumer<R> eventConsumer) {
-        this.events.putIfAbsent(type, new CopyOnWriteArraySet<>());
+        this.events.putIfAbsent(type, new ConcurrentLinkedQueue<>());
         RegisteredListener<R> listener = new RegisteredListener<>(UUID.randomUUID(), eventConsumer);
         this.events.get(type).add((RegisteredListener<Event>) listener);
         return listener.id();

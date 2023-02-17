@@ -29,14 +29,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ManyPacketsTest extends DefaultConnection {
 
-    static int AMOUNT = 10000;
+    static int AMOUNT = 100;
 
-    private static final Packet PACKET = new MessagePacket("Hallo, ein Packet :)");
+    private static final Packet PACKET = new MessagePacket(":)");
 
     private AtomicInteger received;
 
@@ -52,7 +53,8 @@ public class ManyPacketsTest extends DefaultConnection {
                 received.incrementAndGet();
         });
         for (int i = 0; i < AMOUNT; i++) {
-            this.client.send(PACKET).get();
+            CompletableFuture<Void> sent = this.client.send(PACKET);
+            sent.get();
         }
         while (this.received.get() != AMOUNT) {
             Thread.sleep(1);

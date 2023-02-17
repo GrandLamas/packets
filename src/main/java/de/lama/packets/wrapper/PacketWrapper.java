@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 
 public interface PacketWrapper {
 
-    ByteBuffer wrap(long packetId, Packet packet, int offset, int minLen);
+    ByteBuffer wrap(long packetId, Packet packet, int offsetInBytes, int minLenInBytes);
 
     Packet unwrap(long packetId, ByteBuffer bytes);
 

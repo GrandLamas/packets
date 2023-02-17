@@ -37,15 +37,17 @@ public interface PacketCharWrapper extends PacketWrapper {
 
     @Override
     default Packet unwrap(long packetId, ByteBuffer in) {
-        return this.unwrapString(packetId, CHARSET.decode(in));
+        CharBuffer buffer = CHARSET.decode(in);
+        buffer.position(0);
+        return this.unwrapString(packetId, buffer);
     }
 
     @Override
-    default ByteBuffer wrap(long packetId, Packet packet, int offsetInChars, int minLen) {
-        return CHARSET.encode(this.wrapString(packetId, packet, offsetInChars, minLen));
+    default ByteBuffer wrap(long packetId, Packet packet, int offsetInBytes, int minLenInBytes) {
+        return CHARSET.encode(this.wrapString(packetId, packet, offsetInBytes, minLenInBytes));
     }
 
-    CharBuffer wrapString(long packetId, Packet packet, int offsetInChars, int len);
+    CharBuffer wrapString(long packetId, Packet packet, int offsetInBytes, int len);
 
     Packet unwrapString(long packetId, CharBuffer from);
 

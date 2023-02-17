@@ -25,7 +25,7 @@
 package de.lama.packets.server.socket;
 
 import de.lama.packets.NetworkAdapter;
-import de.lama.packets.client.nio.channel.SocketChannelClientBuilder;
+import de.lama.packets.client.nio.channel.AsyncSocketChannelClientBuilder;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.server.Server;
@@ -37,20 +37,20 @@ public class SocketServerBuilder {
 
     private static final Supplier<PacketRegistry> DEFAULT_REGISTRY = HashedPacketRegistry::new;
 
-    private SocketChannelClientBuilder socketClientBuilder;
+    private AsyncSocketChannelClientBuilder socketClientBuilder;
     private int tickrate = NetworkAdapter.DEFAULT_TICKRATE;
 
-    private SocketChannelClientBuilder buildClientBuilder() {
-        return Objects.requireNonNullElseGet(this.socketClientBuilder, SocketChannelClientBuilder::new).clone();
+    private AsyncSocketChannelClientBuilder buildClientBuilder() {
+        return Objects.requireNonNullElseGet(this.socketClientBuilder, AsyncSocketChannelClientBuilder::new).clone();
     }
 
-    public SocketServerBuilder clients(SocketChannelClientBuilder clientFactory) {
+    public SocketServerBuilder clients(AsyncSocketChannelClientBuilder clientFactory) {
         this.socketClientBuilder = clientFactory;
         return this;
     }
 
     public Server build(int port) {
-        SocketChannelClientBuilder socketClientBuilder = this.buildClientBuilder();
+        AsyncSocketChannelClientBuilder socketClientBuilder = this.buildClientBuilder();
         return new SocketChannelServer(port, this.tickrate, socketClientBuilder);
     }
 }

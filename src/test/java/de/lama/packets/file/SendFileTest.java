@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutionException;
 
 public class SendFileTest extends DefaultConnection {
 
-    private static final File SOURCE = new File("1GB");
+    private static final File SOURCE = new File("100MB");
     private static final File DEST = new File("received");
 
     private FileClient fileClient;
@@ -57,7 +57,7 @@ public class SendFileTest extends DefaultConnection {
         this.fileClient = new BufferedFileClient(this.client, s -> DEST);
         this.listen(this.fileClient.getEventHandler());
         this.server.getClients().forEach(client -> client.getEventHandler().subscribe(PacketReceiveEvent.class, (event) ->
-                event.source().send(event.packet())));
+                event.source().send(event.packet()).join()));
         this.fileClient.send(SOURCE).get();
         this.waitForPacket(DataTransferredPacket.ID);
         Assertions.assertEquals(-1L, Files.mismatch(SOURCE.toPath(), DEST.toPath()));

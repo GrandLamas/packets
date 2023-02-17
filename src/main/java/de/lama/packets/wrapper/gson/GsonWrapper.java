@@ -30,7 +30,6 @@ import de.lama.packets.Packet;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.wrapper.PacketCharWrapper;
 
-import java.io.CharArrayReader;
 import java.nio.CharBuffer;
 
 public class GsonWrapper implements PacketCharWrapper {
@@ -44,8 +43,8 @@ public class GsonWrapper implements PacketCharWrapper {
     }
 
     @Override
-    public CharBuffer wrapString(long packetId, Packet packet, int offsetInChars, int len) {
-        CharArrayOffsetWriter writer = new CharArrayOffsetWriter(Math.max(0, len), offsetInChars);
+    public CharBuffer wrapString(long packetId, Packet packet, int offsetInBytes, int lenInBytes) {
+        CharArrayOffsetWriter writer = new CharArrayOffsetWriter(Math.max(0, lenInBytes), offsetInBytes);
         this.gson.toJson(packet, writer);
         return CharBuffer.wrap(writer.toCharArray());
     }
@@ -54,6 +53,6 @@ public class GsonWrapper implements PacketCharWrapper {
     public Packet unwrapString(long packetId, CharBuffer from) {
         Class<? extends Packet> parsed = this.registry.parseClass(packetId);
         if (parsed == null) throw new NullPointerException("Invalid packet id");
-        return this.gson.fromJson(new CharArrayReader(from.array()), parsed);
+        return this.gson.fromJson(new String(from.array()), parsed);
     }
 }

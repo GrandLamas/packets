@@ -94,7 +94,7 @@ public abstract class BufferedDataClient implements DataClient {
         SeekableByteChannel out = this.channelMap.get(packet.uuid());
         if (out == null) return;
         try {
-            out.position(packet.position());
+//            out.position(packet.position());
             out.write(ByteBuffer.wrap(packet.data()));
         } catch (IOException e) {
             this.channelMap.remove(packet.uuid());

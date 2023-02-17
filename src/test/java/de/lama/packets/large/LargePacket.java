@@ -33,4 +33,9 @@ public record LargePacket(byte[] bytes) implements Packet {
     public LargePacket(int sizeInMb) {
         this(new byte[1000000 * sizeInMb]); // 100 MB
     }
+
+    @Override
+    public int length() {
+        return this.bytes.length;
+    }
 }

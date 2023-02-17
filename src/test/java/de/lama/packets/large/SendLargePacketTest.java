@@ -37,7 +37,7 @@ public class SendLargePacketTest extends DefaultConnection {
 
     @Test
     public void sendLargePacket() throws InterruptedException {
-        this.listen(this.client.getEventHandler());
+        this.listen(this.server.getEventHandler());
         this.client.send(new LargePacket(20)).join();
         this.waitForPacket(LargePacket.ID);
     }

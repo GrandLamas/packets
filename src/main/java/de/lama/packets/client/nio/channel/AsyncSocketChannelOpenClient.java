@@ -31,9 +31,9 @@ import de.lama.packets.wrapper.PacketWrapper;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.CompletableFuture;
 
-public class SocketChannelOpenClient extends SocketChannelClient {
+public class AsyncSocketChannelOpenClient extends AsyncSocketChannelClient {
 
-    public SocketChannelOpenClient(AsynchronousSocketChannel channel, String host, int port, PacketRegistry registry, PacketWrapper wrapper, int tickrate) {
+    public AsyncSocketChannelOpenClient(AsynchronousSocketChannel channel, String host, int port, PacketRegistry registry, PacketWrapper wrapper, int tickrate) {
         super(host, port, registry, wrapper, tickrate);
 
         this.channel = channel;
@@ -42,7 +42,7 @@ public class SocketChannelOpenClient extends SocketChannelClient {
     @Override
     public CompletableFuture<Void> implConnect() {
         return this.channel != null ? CompletableFutureUtil.supplyAsync(() -> {
-            this.read();
+            this.readHeader();
             return null;
         }) : super.implConnect();
     }

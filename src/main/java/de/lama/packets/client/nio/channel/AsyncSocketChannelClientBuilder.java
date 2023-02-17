@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
-public class SocketChannelClientBuilder implements Cloneable {
+public class AsyncSocketChannelClientBuilder implements Cloneable {
 
     private static final ScheduledExecutorService TRANSCEIVER_POOL = Executors.newScheduledThreadPool(10);
 
@@ -59,30 +59,30 @@ public class SocketChannelClientBuilder implements Cloneable {
         return Objects.requireNonNullElseGet(this.wrapperFactory, DEFAULT_WRAPPER).create(registry);
     }
 
-    public SocketChannelClientBuilder registry(PacketRegistry registry) {
+    public AsyncSocketChannelClientBuilder registry(PacketRegistry registry) {
         this.registry = Objects.requireNonNull(registry);
         return this;
     }
 
-    public SocketChannelClientBuilder wrapper(WrapperFactory wrapperFactory) {
+    public AsyncSocketChannelClientBuilder wrapper(WrapperFactory wrapperFactory) {
         this.wrapperFactory = wrapperFactory;
         return this;
     }
 
     public Client build(AsynchronousSocketChannel socket, String host, int port) throws IOException {
         PacketRegistry registry = this.buildRegistry();
-        return new HandshakeClient(new SocketChannelOpenClient(socket, host, port, registry, this.buildWrapper(registry), this.tickrate), true);
+        return new HandshakeClient(new AsyncSocketChannelOpenClient(socket, host, port, registry, this.buildWrapper(registry), this.tickrate), true);
     }
 
     public Client build(String address, int port) {
         PacketRegistry registry = this.buildRegistry();
-        return new HandshakeClient(new SocketChannelClient(address, port, registry, this.buildWrapper(registry), this.tickrate), false);
+        return new HandshakeClient(new AsyncSocketChannelClient(address, port, registry, this.buildWrapper(registry), this.tickrate), false);
     }
 
     @Override
-    public SocketChannelClientBuilder clone() {
+    public AsyncSocketChannelClientBuilder clone() {
         try {
-            SocketChannelClientBuilder clone = (SocketChannelClientBuilder) super.clone();
+            AsyncSocketChannelClientBuilder clone = (AsyncSocketChannelClientBuilder) super.clone();
             clone.registry = this.registry;
             clone.wrapperFactory = this.wrapperFactory;
             return clone;

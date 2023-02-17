@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public abstract class AbstractCachedIoClient extends AbstractClient<IoPacket> implements CachedIoClient {
@@ -58,13 +59,13 @@ public abstract class AbstractCachedIoClient extends AbstractClient<IoPacket> im
         this(registry, wrapper, DEFAULT_TICKRATE);
     }
 
-    protected abstract CompletableFuture<Void> sendData(long packetId, ByteBuffer packet);
+    protected abstract Future<Void> sendData(long packetId, ByteBuffer packet);
 
     @Override
     protected Future<Boolean> process(IoPacket cached) {
         return this.unwrap(cached).thenApply((idPacket) -> {
-            if (idPacket == null)
-                return false;
+            if (idPacket.packet() == null)
+                throw new IllegalArgumentException("Could not unwrap packet with id " + idPacket.id() + "!");
 
             this.getEventHandler().notify(new PacketReceiveEvent(this, idPacket.id(), idPacket.packet()));
             return true;
@@ -99,7 +100,14 @@ public abstract class AbstractCachedIoClient extends AbstractClient<IoPacket> im
 
     @Override
     protected CompletableFuture<Void> implSend(IdPacket packet) {
-        return this.wrap(packet.id(), packet.packet()).thenCompose((buffer) ->  this.sendData(packet.id(), buffer)); // TODO: Wrapping async from send?
+        return this.wrap(packet.id(), packet.packet()).thenApply((buffer) ->  {
+            try {
+                this.sendData(packet.id(), buffer).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        });
     }
 
     @Override

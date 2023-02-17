@@ -26,7 +26,7 @@ package de.lama.packets;
 
 import de.lama.packets.client.Client;
 import de.lama.packets.client.events.PacketReceiveEvent;
-import de.lama.packets.client.nio.channel.SocketChannelClientBuilder;
+import de.lama.packets.client.nio.channel.AsyncSocketChannelClientBuilder;
 import de.lama.packets.event.EventHandler;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
@@ -45,7 +45,7 @@ public class DefaultConnection {
 
     protected static PacketRegistry registry = new HashedPacketRegistry();
     protected static SocketServerBuilder socketServerBuilder;
-    protected static SocketChannelClientBuilder clientBuilder;
+    protected static AsyncSocketChannelClientBuilder clientBuilder;
 
     protected Server server;
     protected Client client;
@@ -65,7 +65,7 @@ public class DefaultConnection {
     @BeforeAll
     public static void initBuilder() {
         registry.registerPacket(MessagePacket.ID, MessagePacket.class);
-        clientBuilder = new SocketChannelClientBuilder().registry(registry);
+        clientBuilder = new AsyncSocketChannelClientBuilder().registry(registry);
         socketServerBuilder = new SocketServerBuilder().clients(clientBuilder);
     }
 

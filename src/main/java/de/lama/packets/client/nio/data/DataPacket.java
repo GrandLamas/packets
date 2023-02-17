@@ -30,4 +30,8 @@ public record DataPacket(String uuid, long position, byte[] data) implements Pac
 
     public static final long ID = 69422;
 
+    @Override
+    public int length() {
+        return data.length;
+    }
 }

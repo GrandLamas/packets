@@ -25,7 +25,7 @@
 package de.lama.packets.server.socket;
 
 import de.lama.packets.client.Client;
-import de.lama.packets.client.nio.channel.SocketChannelClientBuilder;
+import de.lama.packets.client.nio.channel.AsyncSocketChannelClientBuilder;
 import de.lama.packets.server.AbstractServer;
 import de.lama.packets.server.Server;
 import de.lama.packets.util.CompletableFutureUtil;
@@ -38,12 +38,12 @@ import java.util.concurrent.CompletableFuture;
 
 class SocketChannelServer extends AbstractServer<Client> implements Server {
 
-    private final SocketChannelClientBuilder clientFactory;
+    private final AsyncSocketChannelClientBuilder clientFactory;
     private final InetSocketAddress address;
     private AsynchronousServerSocketChannel channel;
     private AsynchronousServerSocketChannel listener;
 
-    SocketChannelServer(int port, int tickrate, SocketChannelClientBuilder builder) {
+    SocketChannelServer(int port, int tickrate, AsyncSocketChannelClientBuilder builder) {
         super(tickrate);
         this.address = new InetSocketAddress(port);
         this.clientFactory = builder;

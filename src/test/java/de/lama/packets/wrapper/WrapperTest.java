@@ -26,6 +26,7 @@ package de.lama.packets.wrapper;
 
 import de.lama.packets.MessagePacket;
 import de.lama.packets.Packet;
+import de.lama.packets.large.LargePacket;
 import de.lama.packets.registry.HashedPacketRegistry;
 import de.lama.packets.registry.PacketRegistry;
 import de.lama.packets.wrapper.gson.GsonFactory;
@@ -37,12 +38,15 @@ import java.nio.ByteBuffer;
 
 public class WrapperTest {
 
+    static LargePacket LARGE_PACKET = new LargePacket(19);
+
     private PacketWrapper toTest;
 
     @BeforeEach
     public void initWrapper() {
         PacketRegistry registry = new HashedPacketRegistry();
         registry.registerPacket(MessagePacket.ID, MessagePacket.class);
+        registry.registerPacket(LargePacket.ID, LargePacket.class);
         this.toTest = new GsonFactory().create(registry);
     }
 
@@ -56,9 +60,17 @@ public class WrapperTest {
     @Test
     public void test() {
         MessagePacket packet = new MessagePacket("Test");
-        ByteBuffer byteBuffer = this.toTest.wrap(MessagePacket.ID, packet, Packet.RESERVED, -1);
+        ByteBuffer byteBuffer = this.toTest.wrap(MessagePacket.ID, packet, Packet.RESERVED, packet.length());
         byteBuffer.position(Packet.RESERVED);
         Packet unwrapped = this.toTest.unwrap(MessagePacket.ID, byteBuffer);
         Assertions.assertEquals(packet, unwrapped);
+    }
+
+    @Test
+    public void testLarge() {
+        ByteBuffer byteBuffer = this.toTest.wrap(LargePacket.ID, LARGE_PACKET, Packet.RESERVED, LARGE_PACKET.length());
+        byteBuffer.position(Packet.RESERVED);
+        LargePacket unwrapped = (LargePacket) this.toTest.unwrap(LargePacket.ID, byteBuffer);
+        Assertions.assertArrayEquals(LARGE_PACKET.bytes(), unwrapped.bytes());
     }
 }

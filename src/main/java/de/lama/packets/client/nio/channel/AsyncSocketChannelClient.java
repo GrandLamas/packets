@@ -37,48 +37,67 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
-class SocketChannelClient extends AbstractCachedIoClient implements Client {
+class AsyncSocketChannelClient extends AbstractCachedIoClient implements Client {
 
     private final InetSocketAddress destination;
+    private final ExecutorService singleThreadPool;
     protected AsynchronousSocketChannel channel;
     private ByteBuffer headerCache;
 
-    public SocketChannelClient(String destination, int port, PacketRegistry registry, PacketWrapper wrapper, int tickrate) {
+    public AsyncSocketChannelClient(String destination, int port, PacketRegistry registry, PacketWrapper wrapper, int tickrate) {
         super(registry, wrapper);
 
+        this.singleThreadPool = Executors.newSingleThreadExecutor();
         this.destination = new InetSocketAddress(destination, port);
     }
 
-    @Override
-    protected CompletableFuture<Void> sendData(long packetId, ByteBuffer packet) {
-        return CompletableFutureUtil.supplyAsync(() -> {
-            packet.putChar(Packet.TYPE);
-            packet.putLong(packetId);
-            packet.putInt(packet.limit() - Packet.RESERVED);
-            packet.position(0);
-            final int toWrite = packet.remaining();
-            int written = this.channel.write(packet).get();
-//            if (written != toWrite) throw new IOException("Could not write data");
-            return null;
-        });
+    private int write(ByteBuffer buffer) throws ExecutionException, InterruptedException {
+        return this.channel.write(buffer).get();
     }
 
-    protected void read() {
+    @Override
+    protected Future<Void> sendData(long packetId, ByteBuffer packet) {
+        int limit = packet.limit();
+        packet.putChar(Packet.TYPE);
+        packet.putLong(packetId);
+        packet.putInt(limit - Packet.RESERVED);
+        packet.position(0);
+        int toWrite = packet.limit();
+        return this.singleThreadPool.submit(() -> { // Check if even reqiured
+            int written = 0;
+            while (written < toWrite) {
+                try {
+                    written += this.write(packet);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, null);
+    }
+
+    protected void readHeader() {
         this.headerCache = ByteBuffer.allocate(Packet.RESERVED);
         this.channel.read(this.headerCache, null, this.buildHeaderHandler());
     }
 
     private CompletionHandler<Integer, Object> buildBodyHandler(long packetId, int length, ByteBuffer allocated) {
         return new CompletionHandler<>() {
+
+            int read = 0;
+
             @Override
             public void completed(Integer result, Object attachment) {
                 // Receive and handle packet body
-                if (result != length) return;
-                allocated.position(0);
-                found(new CachedIoPacket(packetId, allocated));
-                read();
+                read += result;
+                if (allocated.remaining() > 0) {
+                    channel.read(allocated, null, this);
+                } else {
+                    allocated.position(0);
+                    found(new CachedIoPacket(packetId, allocated));
+                    readHeader();
+                }
             }
 
             @Override
@@ -116,7 +135,7 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
         return CompletableFutureUtil.supplyAsync(() -> {
             this.channel = AsynchronousSocketChannel.open();
             this.channel.connect(this.destination).get();
-            this.read();
+            this.readHeader();
             return null;
         });
     }
@@ -125,6 +144,7 @@ class SocketChannelClient extends AbstractCachedIoClient implements Client {
     protected CompletableFuture<Void> implDisconnect() {
         // disconnect this client from the server
         return CompletableFutureUtil.supplyAsync(() -> {
+            this.singleThreadPool.shutdownNow();
             this.channel.close();
             this.channel = null;
             this.headerCache = null;

@@ -33,20 +33,21 @@ import de.lama.packets.util.CompletableFutureUtil;
 import java.net.InetAddress;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HandshakeClient implements Client {
 
     private final Client client;
     private final UUID handshakeUuid;
-    private final HandshakePacket sent;
+    private final HandshakePacket handshakePacket;
     private final AtomicBoolean handshake;
     private final boolean initiator;
 
     public HandshakeClient(Client client, boolean initiator) {
         this.client = client;
         this.initiator = initiator;
-        this.sent = this.buildPacket();
+        this.handshakePacket = this.buildPacket();
         this.handshake = new AtomicBoolean();
 
         this.getRegistry().registerPacket(HandshakePacket.ID, HandshakePacket.class);
@@ -54,7 +55,7 @@ public class HandshakeClient implements Client {
     }
 
     private CompletableFuture<Void> sendHandshake() {
-        return this.client.send(this.sent);
+        return this.client.send(this.handshakePacket);
     }
 
     private CompletableFuture<Void> awaitHandshake(Void v) {
@@ -86,7 +87,7 @@ public class HandshakeClient implements Client {
     }
 
     protected boolean validateHandshakePacket(HandshakePacket packet) {
-        return packet.version().equals(this.sent.version());
+        return packet.version().equals(this.handshakePacket.version());
     }
 
     protected void onEvent(PacketReceiveEvent event) {
@@ -96,7 +97,11 @@ public class HandshakeClient implements Client {
             this.client.disconnect().join();
         } else {
             if (!this.initiator) {
-                this.sendHandshake().join();
+                try {
+                    this.sendHandshake().get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
             }
             synchronized (this) {
                 this.notifyAll();
